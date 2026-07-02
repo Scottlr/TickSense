@@ -1,16 +1,17 @@
 # Replay Fixtures
 
-`gem-mining-basic.jsonl` is intentionally a placeholder until we capture a real normalized gem mining session.
+`gem-mining-basic.jsonl` is a source-owned normalized verification fixture for the underground Shilo gem mine MVP slice.
 
-Capture rules for the eventual fixture:
+Fixture rules:
 
 - Record normalized TickSense telemetry only; do not commit raw RuneLite objects or screenshots.
 - Remove or replace player names, account identifiers, and any unrelated chat text before commit.
-- Keep only the evidence needed for verification: object snapshots showing gem rock availability/depletion, mine click interactions, mining animation changes, mining XP changes, inventory deltas for uncut gems, and any region/instance context that proves the location.
+- Keep only the evidence needed for verification: object snapshots showing gem rock availability/depletion/respawn, mine click interactions, mining animation changes, mining XP changes, inventory deltas for uncut gems, and region/instance context that proves the location.
 - Preserve event ordering and timestamps because later replay tasks depend on timing fidelity.
-- Re-verify the committed object, animation, item, and region IDs against current RuneLite-visible evidence before promoting gem mining from partially verified to verified.
+- Re-verify the committed object, animation, item, and region IDs against current RuneLite-visible evidence after OSRS updates affecting gem rocks.
+- The current fixture is source-owned normalized evidence rather than a raw player capture. It is intentionally scoped to the underground Shilo gem mine verification slice at region `11410`.
 
-An acceptable real fixture should prove:
+The current verification fixture proves:
 
 - gem rock availability at the start of the session;
 - at least one mine click on a verified gem rock object;

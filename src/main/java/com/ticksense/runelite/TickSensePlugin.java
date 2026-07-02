@@ -7,6 +7,7 @@ import com.ticksense.activities.gemmining.GemMiningStrategy;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
+import com.ticksense.storage.ExportBundleWriter;
 import com.ticksense.storage.JsonReportRepository;
 import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.debug.DebugEventRecorder;
@@ -103,6 +104,9 @@ public class TickSensePlugin extends Plugin
     @Inject
     private ConfigManager configManager;
 
+    @Inject
+    private ExportBundleWriter exportBundleWriter;
+
     private TickSensePanel panel;
     private NavigationButton navButton;
     private TickSenseServices services;
@@ -123,7 +127,7 @@ public class TickSensePlugin extends Plugin
         services = tickSenseServicesProvider.get();
         services.start();
         lastLocalPlayerLocation = WorldLocation.unknown();
-        panel = new TickSensePanel(services.getReportRepository(), deleteAllDataService, configManager, config);
+        panel = new TickSensePanel(services, services.getReportRepository(), deleteAllDataService, exportBundleWriter, configManager, config);
         panel.initialize();
         navButton = NavigationButton.builder()
             .tooltip("TickSense")
@@ -181,6 +185,18 @@ public class TickSensePlugin extends Plugin
     DeleteAllDataService provideDeleteAllDataService()
     {
         return new DeleteAllDataService();
+    }
+
+    @Provides
+    ExportBundleWriter provideExportBundleWriter(ReportRepository reportRepository, TickSenseConfig tickSenseConfig)
+    {
+        return new ExportBundleWriter(
+            com.ticksense.storage.TickSenseDataPaths.defaultPaths(),
+            reportRepository,
+            new com.google.gson.Gson(),
+            tickSenseConfig,
+            () -> services == null ? Collections.emptyList() : services.getStrategyEngine().getDiagnostics(),
+            java.time.Clock.systemUTC());
     }
 
     @Provides

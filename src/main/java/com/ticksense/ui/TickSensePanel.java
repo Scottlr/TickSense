@@ -2,9 +2,13 @@ package com.ticksense.ui;
 
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ReportSummary;
+import com.ticksense.runelite.TickSenseServices;
 import com.ticksense.runelite.TickSenseConfig;
 import com.ticksense.storage.DeleteAllDataService;
+import com.ticksense.storage.ExportBundleWriter;
 import com.ticksense.storage.ReportRepository;
+import com.ticksense.telemetry.TelemetryEnvelope;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.IOException;
@@ -33,15 +37,20 @@ public class TickSensePanel extends PluginPanel
     private static final int RECENT_REPORT_LIMIT = 20;
     private static final double NORMAL_CONFIDENCE_THRESHOLD = 0.75D;
 
+    private final TickSenseServices services;
     private final ReportRepository reportRepository;
     private final DeleteAllDataService deleteAllDataService;
+    private final ExportBundleWriter exportBundleWriter;
     private final ConfigManager configManager;
     private final TickSenseConfig config;
     private final ReportListPanel reportListPanel;
     private final ActivityReportPanel activityReportPanel;
-    private final JTextArea developerDiagnosticsArea;
+    private final DeveloperDiagnosticsPanel developerDiagnosticsPanel;
     private final JTabbedPane tabs;
     private final Component developerDiagnosticsTab;
+    private ReportSummary selectedSummary;
+    private List<ReportSummary> lastLowConfidenceReports = new ArrayList<>();
+    private boolean diagnosticsTabVisible;
 
     public TickSensePanel(
         ReportRepository reportRepository,
@@ -49,9 +58,22 @@ public class TickSensePanel extends PluginPanel
         ConfigManager configManager,
         TickSenseConfig config)
     {
+        this(null, reportRepository, deleteAllDataService, null, configManager, config);
+    }
+
+    public TickSensePanel(
+        TickSenseServices services,
+        ReportRepository reportRepository,
+        DeleteAllDataService deleteAllDataService,
+        ExportBundleWriter exportBundleWriter,
+        ConfigManager configManager,
+        TickSenseConfig config)
+    {
         super(false);
+        this.services = services;
         this.reportRepository = reportRepository;
         this.deleteAllDataService = deleteAllDataService;
+        this.exportBundleWriter = exportBundleWriter;
         this.configManager = configManager;
         this.config = config;
 
@@ -67,21 +89,17 @@ public class TickSensePanel extends PluginPanel
         reportListPanel = new ReportListPanel();
         reportListPanel.onSelectionChanged(this::loadReport);
         activityReportPanel = new ActivityReportPanel();
-        developerDiagnosticsArea = new JTextArea();
-        developerDiagnosticsArea.setEditable(false);
-        developerDiagnosticsArea.setLineWrap(true);
-        developerDiagnosticsArea.setWrapStyleWord(true);
-        developerDiagnosticsArea.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        developerDiagnosticsArea.setForeground(ColorScheme.TEXT_COLOR);
-        developerDiagnosticsArea.setBorder(new EmptyBorder(8, 8, 8, 8));
+        developerDiagnosticsPanel = new DeveloperDiagnosticsPanel(this::buildDeveloperDiagnosticsText, this::exportSelectedBundle);
+        developerDiagnosticsPanel.setExportEnabled(false);
 
         tabs = new JTabbedPane();
         tabs.addTab("Recent Reports", createRecentReportsTab());
         tabs.addTab("Trends", createDisabledPlaceholder("Trends will stay hidden until local trend summaries land."));
         tabs.setEnabledAt(1, false);
         tabs.addTab("Settings", createSettingsTab());
-        developerDiagnosticsTab = createDeveloperDiagnosticsTab();
-        tabs.addTab("Developer Diagnostics", developerDiagnosticsTab);
+        developerDiagnosticsTab = developerDiagnosticsPanel;
+        diagnosticsTabVisible = false;
+        setDiagnosticsTabEnabled(config.debugActivityDiagnostics());
         add(tabs, BorderLayout.CENTER);
     }
 
@@ -115,19 +133,24 @@ public class TickSensePanel extends PluginPanel
 
             reportListPanel.setEmptyState("No completed reports yet.");
             reportListPanel.setReports(normalReports);
+            lastLowConfidenceReports = lowConfidenceReports;
             if (normalReports.isEmpty())
             {
+                selectedSummary = null;
                 activityReportPanel.showReport(null);
             }
-            updateDeveloperDiagnostics(lowConfidenceReports);
+            developerDiagnosticsPanel.setExportEnabled(selectedSummary != null);
+            developerDiagnosticsPanel.refresh();
             setDiagnosticsTabEnabled(config.debugActivityDiagnostics());
         }
         catch (IOException ex)
         {
             reportListPanel.setEmptyState("Report storage is unavailable.");
             reportListPanel.setReports(null);
+            selectedSummary = null;
             activityReportPanel.showReport(null);
-            developerDiagnosticsArea.setText("Developer diagnostics are unavailable while reports fail to load.");
+            lastLowConfidenceReports = new ArrayList<>();
+            developerDiagnosticsPanel.refresh();
         }
     }
 
@@ -185,11 +208,6 @@ public class TickSensePanel extends PluginPanel
         return settingsPanel;
     }
 
-    private JScrollPane createDeveloperDiagnosticsTab()
-    {
-        return new JScrollPane(developerDiagnosticsArea);
-    }
-
     private JPanel createDisabledPlaceholder(String message)
     {
         final JPanel panel = new JPanel(new BorderLayout());
@@ -213,6 +231,8 @@ public class TickSensePanel extends PluginPanel
 
     private void loadReport(ReportSummary summary)
     {
+        selectedSummary = summary;
+        developerDiagnosticsPanel.setExportEnabled(summary != null);
         if (summary == null)
         {
             activityReportPanel.showReport(null);
@@ -230,33 +250,200 @@ public class TickSensePanel extends PluginPanel
         }
     }
 
-    private void updateDeveloperDiagnostics(List<ReportSummary> lowConfidenceReports)
+    private String buildDeveloperDiagnosticsText()
     {
-        if (lowConfidenceReports == null || lowConfidenceReports.isEmpty())
-        {
-            developerDiagnosticsArea.setText("No low-confidence reports are currently hidden from the normal recent reports list.");
-            return;
-        }
-
         final StringBuilder builder = new StringBuilder();
-        builder.append("Low-confidence reports stay out of the normal panel.\n\n");
-        for (ReportSummary report : lowConfidenceReports)
+        if (services == null)
         {
-            builder.append(ReportTextFormatter.formatSummaryLine(report))
-                .append('\n')
-                .append("Evidence: ")
-                .append(report.getEvidenceSummaryText().isEmpty() ? "Unknown" : report.getEvidenceSummaryText())
+            builder.append("Developer diagnostics are unavailable without live TickSense services.");
+            return builder.toString();
+        }
+        builder.append("Active strategy\n");
+        builder.append("----------------\n");
+        if (services.getStrategyEngine().getActiveSession().isPresent())
+        {
+            builder.append(services.getStrategyEngine().getActiveSession().get().getActivityType().name())
+                .append(" / ")
+                .append(services.getStrategyEngine().getActiveSession().get().getActivityId().getValue())
                 .append("\n\n");
         }
-        developerDiagnosticsArea.setText(builder.toString().trim());
+        else
+        {
+            builder.append("No active strategy.\n\n");
+        }
+
+        builder.append("Candidate strategies / confidence\n");
+        builder.append("-------------------------------\n");
+        final List<com.ticksense.activities.ActivityDiagnostic> diagnostics = services.getStrategyEngine().getDiagnostics();
+        if (diagnostics.isEmpty())
+        {
+            builder.append("No activity diagnostics captured.\n\n");
+        }
+        else
+        {
+            for (com.ticksense.activities.ActivityDiagnostic diagnostic : diagnostics)
+            {
+                builder.append(diagnostic.getActivityType().name())
+                    .append(" ")
+                    .append(String.format("%.2f", diagnostic.getConfidence()))
+                    .append(" ")
+                    .append(diagnostic.getDecision());
+                if (!diagnostic.getReason().isEmpty())
+                {
+                    builder.append(" - ").append(diagnostic.getReason());
+                }
+                builder.append('\n');
+            }
+            builder.append('\n');
+        }
+
+        builder.append("Current region / world view\n");
+        builder.append("---------------------------\n");
+        final java.util.Optional<RegionInstanceTelemetryEvent> regionEvent = services.getLastRegionEvent();
+        if (regionEvent.isPresent())
+        {
+            builder.append("World ").append(regionEvent.get().getWorld())
+                .append(", region ").append(regionEvent.get().getRegionId())
+                .append(", view ").append(regionEvent.get().getWorldViewId())
+                .append(", state ").append(regionEvent.get().getGameState())
+                .append('\n')
+                .append('\n');
+        }
+        else
+        {
+            builder.append("No region metadata captured yet.\n\n");
+        }
+
+        builder.append("Open opportunities\n");
+        builder.append("------------------\n");
+        if (services.getOpenOpportunityMarkers().isEmpty())
+        {
+            builder.append("No open opportunities.\n\n");
+        }
+        else
+        {
+            for (com.ticksense.activities.OpportunityMarker marker : services.getOpenOpportunityMarkers())
+            {
+                builder.append(marker.getOpportunityType())
+                    .append(" / ")
+                    .append(marker.getStatus().name())
+                    .append('\n');
+            }
+            builder.append('\n');
+        }
+
+        builder.append("Last finish reason\n");
+        builder.append("------------------\n");
+        if (services.getLastFinishReason().isPresent())
+        {
+            builder.append(services.getLastFinishReason().get().getType().name())
+                .append(" - ")
+                .append(services.getLastFinishReason().get().getExplanation())
+                .append('\n')
+                .append('\n');
+        }
+        else
+        {
+            builder.append("No finished activity yet.\n\n");
+        }
+
+        builder.append("Unknown IDs\n");
+        builder.append("-----------\n");
+        builder.append("None captured.\n\n");
+
+        builder.append("Last 50 normalized events\n");
+        builder.append("-------------------------\n");
+        final List<TelemetryEnvelope> recentTelemetry = services.getRecentTelemetry();
+        if (recentTelemetry.isEmpty())
+        {
+            builder.append("No normalized events captured yet.\n\n");
+        }
+        else
+        {
+            for (TelemetryEnvelope envelope : recentTelemetry)
+            {
+                builder.append(envelope.getEvent().getType())
+                    .append(" @ tick ")
+                    .append(envelope.getEvent().getTime().getGameTick())
+                    .append('\n');
+            }
+            builder.append('\n');
+        }
+
+        builder.append("Hidden low-confidence reports\n");
+        builder.append("---------------------------\n");
+        if (lastLowConfidenceReports.isEmpty())
+        {
+            builder.append("No low-confidence reports are currently hidden from the normal recent reports list.");
+        }
+        else
+        {
+            for (ReportSummary report : lastLowConfidenceReports)
+            {
+                builder.append(ReportTextFormatter.formatSummaryLine(report))
+                    .append('\n')
+                    .append("Evidence: ")
+                    .append(report.getEvidenceSummaryText().isEmpty() ? "Unknown" : report.getEvidenceSummaryText())
+                    .append("\n\n");
+            }
+        }
+        return builder.toString().trim();
     }
 
     private void setDiagnosticsTabEnabled(boolean enabled)
     {
         final int index = tabs.indexOfComponent(developerDiagnosticsTab);
-        if (index >= 0)
+        if (enabled && index < 0)
         {
-            tabs.setEnabledAt(index, enabled);
+            tabs.addTab("Developer Diagnostics", developerDiagnosticsTab);
+            diagnosticsTabVisible = true;
+        }
+        else if (!enabled && index >= 0)
+        {
+            tabs.remove(index);
+            diagnosticsTabVisible = false;
+        }
+    }
+
+    private void exportSelectedBundle()
+    {
+        if (exportBundleWriter == null)
+        {
+            JOptionPane.showMessageDialog(
+                this,
+                "Debug bundle export is unavailable in this context.",
+                "Export debug bundle",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        if (selectedSummary == null)
+        {
+            JOptionPane.showMessageDialog(
+                this,
+                "Select a completed report before exporting a debug bundle.",
+                "Export debug bundle",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        try
+        {
+            final java.nio.file.Path bundlePath = exportBundleWriter.writeBundle(
+                selectedSummary.getReportId(),
+                exportBundleWriter.defaultExportDirectory());
+            JOptionPane.showMessageDialog(
+                this,
+                "Exported debug bundle to " + bundlePath,
+                "Export debug bundle",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(
+                this,
+                "TickSense could not export a debug bundle for the selected report.",
+                "Export debug bundle",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 

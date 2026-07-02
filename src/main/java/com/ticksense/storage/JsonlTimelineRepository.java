@@ -70,6 +70,11 @@ public final class JsonlTimelineRepository implements TimelineRepository
         return timelineFile;
     }
 
+    public TickSenseDataPaths getDataPaths()
+    {
+        return dataPaths;
+    }
+
     public int getCorruptLineCount()
     {
         return corruptLineCount;
@@ -195,6 +200,55 @@ public final class JsonlTimelineRepository implements TimelineRepository
         writer.flush();
     }
 
+    public static List<String> readActivityRecordLines(TickSenseDataPaths dataPaths, ActivityId activityId, Gson gson) throws IOException
+    {
+        final TickSenseDataPaths normalizedDataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
+        final ActivityId normalizedActivityId = Objects.requireNonNull(activityId, "activityId");
+        final Gson normalizedGson = Objects.requireNonNull(gson, "gson");
+        final List<RawTimelineLine> lines = readAllRawTimelineLines(normalizedDataPaths, normalizedGson);
+
+        final List<ActivityMarker> markers = new ArrayList<>();
+        for (RawTimelineLine line : lines)
+        {
+            if (line.record.getType() == TimelineRecordType.ACTIVITY_MARKER
+                && normalizedActivityId.equals(line.record.getActivityId()))
+            {
+                markers.add(line.record.getActivityMarker());
+            }
+        }
+        if (markers.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+
+        final long startMillis = markers.get(0).getTime().getWallTimeMillis();
+        final long endMillis = markers.get(markers.size() - 1).getTime().getWallTimeMillis();
+        final List<String> filteredLines = new ArrayList<>();
+        for (RawTimelineLine line : lines)
+        {
+            switch (line.record.getType())
+            {
+                case TELEMETRY_EVENT:
+                    final long eventMillis = line.record.getTime().getWallTimeMillis();
+                    if (eventMillis >= startMillis && eventMillis <= endMillis)
+                    {
+                        filteredLines.add(line.rawLine);
+                    }
+                    break;
+                case ACTIVITY_MARKER:
+                case OPPORTUNITY_MARKER:
+                    if (normalizedActivityId.equals(line.record.getActivityId()))
+                    {
+                        filteredLines.add(line.rawLine);
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported timeline record type: " + line.record.getType());
+            }
+        }
+        return Collections.unmodifiableList(filteredLines);
+    }
+
     private List<TimelineRecord> readAllRecords() throws IOException
     {
         corruptLineCount = 0;
@@ -236,7 +290,55 @@ public final class JsonlTimelineRepository implements TimelineRepository
         return records;
     }
 
+    private static List<RawTimelineLine> readAllRawTimelineLines(TickSenseDataPaths dataPaths, Gson gson) throws IOException
+    {
+        final List<RawTimelineLine> records = new ArrayList<>();
+        if (Files.notExists(dataPaths.getTimelinesDirectory()))
+        {
+            return records;
+        }
+        try (Stream<Path> fileStream = Files.list(dataPaths.getTimelinesDirectory()))
+        {
+            final List<Path> files = fileStream
+                .filter(path -> path.getFileName().toString().endsWith(".jsonl"))
+                .sorted(Comparator.comparing(path -> path.getFileName().toString()))
+                .collect(Collectors.toList());
+
+            for (Path file : files)
+            {
+                for (String line : Files.readAllLines(file, StandardCharsets.UTF_8))
+                {
+                    if (line.trim().isEmpty())
+                    {
+                        continue;
+                    }
+                    try
+                    {
+                        records.add(new RawTimelineLine(line, readRecord(line, gson)));
+                    }
+                    catch (IllegalArgumentException ex)
+                    {
+                        if (ex.getMessage() != null && ex.getMessage().startsWith("Unsupported telemetry schema version"))
+                        {
+                            throw ex;
+                        }
+                    }
+                    catch (JsonParseException ex)
+                    {
+                        // Skip corrupt lines to match repository tolerance.
+                    }
+                }
+            }
+        }
+        return records;
+    }
+
     private TimelineRecord readRecord(String line)
+    {
+        return readRecord(line, gson);
+    }
+
+    private static TimelineRecord readRecord(String line, Gson gson)
     {
         final PersistedTimelineRecord persisted = gson.fromJson(line, PersistedTimelineRecord.class);
         if (persisted == null)
@@ -254,6 +356,18 @@ public final class JsonlTimelineRepository implements TimelineRepository
                 return TimelineRecord.opportunityMarker(gson.fromJson(persisted.payloadJson, PersistedOpportunityMarker.class).toOpportunityMarker());
             default:
                 throw new IllegalArgumentException("Unsupported record type: " + persisted.recordType);
+        }
+    }
+
+    private static final class RawTimelineLine
+    {
+        private final String rawLine;
+        private final TimelineRecord record;
+
+        private RawTimelineLine(String rawLine, TimelineRecord record)
+        {
+            this.rawLine = rawLine;
+            this.record = record;
         }
     }
 

@@ -24,3 +24,18 @@ Reserved post-MVP Araxxor fixture names for T029:
 - `araxxor-teleport-midkill.jsonl`
 
 Do not add those Araxxor files until they are source-owned normalized fixtures with verified boss IDs, named spider IDs, attackability evidence, and sanitized timing/order fidelity.
+
+Araxxor verification review:
+
+- Review date: `2026-07-03`
+- Current decision: `BLOCKED`
+- Verified source so far: official RuneLite `NpcID` constants for Araxxor and named spider variants, recorded in `src/main/java/com/ticksense/activities/araxxor/AraxxorIds.java`.
+- Missing evidence: sanitized normalized spider spawn/availability telemetry, attack click evidence, interaction-changed evidence, damage evidence during spider windows, and teleport-mid-kill termination evidence.
+
+Araxxor capture instructions for T029/T015 follow-up:
+
+- Record normalized TickSense telemetry only; do not commit raw RuneLite objects, screenshots, or video.
+- Remove or replace player names, account identifiers, and unrelated chat before commit.
+- `araxxor-spider-basic.jsonl` should prove boss presence, named spider spawn/availability, attack click, local-player interaction change onto the spider, and at least one spider-window damage or completion signal.
+- `araxxor-teleport-midkill.jsonl` should prove boss presence plus a teleport/instance exit or equivalent mid-kill termination path in normalized telemetry.
+- Preserve event ordering and timestamps so downstream opportunity timing stays auditable.

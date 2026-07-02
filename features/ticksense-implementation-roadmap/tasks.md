@@ -131,7 +131,7 @@
 | T019 | [x] | Replay and Golden Timeline Harness | Add replay loaders, synthetic event builders, and golden report fixtures for gem mining and ambiguous detection suppression. |  | T010, T017, T031 | [`tasks/T019.md`](tasks/T019.md) |
 | T020 | [x] | MVP End-to-End Assembly and Plugin Hub Readiness | Compose capture, telemetry, strategy engine, storage, analytics, report repository, and panel into the retrospective MVP flow. |  | T018, T019 | [`tasks/T020.md`](tasks/T020.md) |
 | T014 | [x] | Araxxor ID Registry and Verification Gates | Create source-owned Araxxor ID registries and post-MVP gates for unverified mechanics. |  | T006, T007, T010, T020 | [`tasks/T014.md`](tasks/T014.md) |
-| T029 | [ ] | Araxxor Verification Capture Fixtures | Capture normalized Araxxor verification fixtures or keep Araxxor blocked from normal reports. |  | T010, T014, T020 | [`tasks/T029.md`](tasks/T029.md) |
+| T029 | [x] | Araxxor Verification Capture Fixtures | Capture normalized Araxxor verification fixtures or keep Araxxor blocked from normal reports. |  | T010, T014, T020 | [`tasks/T029.md`](tasks/T029.md) |
 | T015 | [ ] | Araxxor Strategy and Spider Opportunities | Add post-MVP Araxxor spider engagement, re-engagement, damage, and finish-reason analytics. |  | T008, T011, T014, T016, T029, T020 | [`tasks/T015.md`](tasks/T015.md) |
 | T021 | [ ] | Optional Developer Diagnostics and Debug Export Bundle | Add optional post-MVP developer diagnostics panel and user-requested debug bundle export. |  | T020 | [`tasks/T021.md`](tasks/T021.md) |
 | T022 | [ ] | Retention, Trends, and Report Index Maintenance | Add report retention, index rebuild/compaction, and local trend summaries for recent reports. |  | T017, T018, T020 | [`tasks/T022.md`](tasks/T022.md) |

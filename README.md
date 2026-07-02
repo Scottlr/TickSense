@@ -9,6 +9,26 @@ TickSense is not a live helper. It does not provide overlays, mechanic prompts,
 input automation, menu mutation, networking, cloud sync, or AI summaries in the
 MVP.
 
+The MVP is intentionally retrospective-only. TickSense records local telemetry,
+waits for an automatically detected activity to finish, then saves a local report
+and shows it in the panel. Ambiguous or low-confidence evidence does not prompt
+the player to pick an activity.
+
+## Local Storage
+
+TickSense stores local-only MVP data under:
+
+```text
+~/.runelite/ticksense/
+  schema-version.json
+  timelines/
+  reports/
+  indexes/
+```
+
+It does not use a database runtime, cloud sync, networking, or any non-local
+service in the MVP.
+
 ## Development
 
 TickSense starts from the official RuneLite external plugin template and targets

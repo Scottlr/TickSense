@@ -43,7 +43,7 @@ public final class JsonReportRepository implements ReportRepository
         this(TickSenseDataPaths.defaultPaths(), new Gson());
     }
 
-    JsonReportRepository(TickSenseDataPaths dataPaths, Gson gson)
+    public JsonReportRepository(TickSenseDataPaths dataPaths, Gson gson)
     {
         this.dataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
         this.gson = Objects.requireNonNull(gson, "gson");

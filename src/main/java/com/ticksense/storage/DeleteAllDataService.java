@@ -18,7 +18,7 @@ public final class DeleteAllDataService
         this(TickSenseDataPaths.defaultPaths());
     }
 
-    DeleteAllDataService(TickSenseDataPaths dataPaths)
+    public DeleteAllDataService(TickSenseDataPaths dataPaths)
     {
         this.dataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
     }

@@ -49,7 +49,12 @@ public final class TimelineReplayRunner
 
     public ReplayResult replay(String resourcePath) throws IOException
     {
-        return replay(readResource(resourcePath));
+        return replay(loadEvents(resourcePath));
+    }
+
+    public static List<TelemetryEnvelope> loadEvents(String resourcePath) throws IOException
+    {
+        return readResource(resourcePath);
     }
 
     public ReplayResult replay(List<TelemetryEnvelope> events)

@@ -146,28 +146,13 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
         {
             final List<Path> debugFiles = fileStream
                 .filter(path -> path.getFileName().toString().endsWith(".jsonl"))
-                .sorted(Comparator
-                    .comparing(this::lastModifiedTime)
-                    .reversed()
-                    .thenComparing(path -> path.getFileName().toString(), Comparator.reverseOrder()))
+                .sorted(Comparator.comparing((Path path) -> path.getFileName().toString()).reversed())
                 .collect(Collectors.toCollection(ArrayList::new));
 
             for (int i = maxSessions; i < debugFiles.size(); i++)
             {
                 Files.deleteIfExists(debugFiles.get(i));
             }
-        }
-    }
-
-    private FileTime lastModifiedTime(Path path)
-    {
-        try
-        {
-            return Files.getLastModifiedTime(path);
-        }
-        catch (IOException ex)
-        {
-            return FileTime.fromMillis(0L);
         }
     }
 

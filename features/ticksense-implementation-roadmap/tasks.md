@@ -118,7 +118,7 @@
 | T005 | [x] | Normalized Telemetry Events and Serialization | Define normalized telemetry interfaces/classes, event categories, payloads, schema versioning, and JSON serialization. |  | T004 | [`tasks/T005.md`](tasks/T005.md) |
 | T006 | [x] | Adapter Mappers and Snapshot Tests | Map MVP RuneLite events into normalized telemetry snapshots and test that no RuneLite types leak into core models. |  | T003, T005 | [`tasks/T006.md`](tasks/T006.md) |
 | T007 | [x] | Telemetry Bus, Session Clock, and Debug Recorder | Fan out normalized events, track session/tick sequencing, and write bounded opt-in debug JSONL. |  | T003, T005, T006 | [`tasks/T007.md`](tasks/T007.md) |
-| T008 | [ ] | Opportunity Model and Tracker | Add opportunity definitions, instances, evidence, terminal states, latency helpers, and lifecycle tests. |  | T004, T005 | [`tasks/T008.md`](tasks/T008.md) |
+| T008 | [x] | Opportunity Model and Tracker | Add opportunity definitions, instances, evidence, terminal states, latency helpers, and lifecycle tests. |  | T004, T005 | [`tasks/T008.md`](tasks/T008.md) |
 | T009 | [ ] | Activity Strategy Contracts and Registry | Define strategy interfaces, markers, candidate confidence, and a registry/factory for strategies. |  | T004, T005, T008 | [`tasks/T009.md`](tasks/T009.md) |
 | T010 | [ ] | JSONL Timeline Repository | Persist and read schema-versioned normalized timelines plus activity/opportunity markers with local JSONL storage. |  | T005, T007, T008, T009 | [`tasks/T010.md`](tasks/T010.md) |
 | T011 | [ ] | Activity Strategy Engine Lifecycle | Implement candidate arbitration, active-session lifecycle, termination handling, and diagnostics emission. |  | T007, T008, T009, T010 | [`tasks/T011.md`](tasks/T011.md) |

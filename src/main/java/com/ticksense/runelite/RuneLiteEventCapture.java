@@ -38,6 +38,13 @@ public final class RuneLiteEventCapture
 
     public void capture(String sourceEventType)
     {
-        sink.accept(clock.capture(sourceEventType));
+        captureEnvelope(sourceEventType);
+    }
+
+    public RuneLiteEventEnvelope captureEnvelope(String sourceEventType)
+    {
+        final RuneLiteEventEnvelope envelope = clock.capture(sourceEventType);
+        sink.accept(envelope);
+        return envelope;
     }
 }

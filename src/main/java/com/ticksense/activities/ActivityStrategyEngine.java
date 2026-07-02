@@ -52,7 +52,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
         final ActivityContext context = contextFor(normalizedEnvelope);
         final TelemetryEvent event = normalizedEnvelope.getEvent();
 
-        final List<CandidateEvaluation> evaluations = new ArrayList<>(evaluateCandidates(context, event));
+        final List<CandidateEvaluation> evaluations = new ArrayList<>(evaluateCandidates(context, event, activeStrategy));
         if (activeStrategy != null && activeSession != null)
         {
             activeStrategy.onEvent(context, activeSession, event, opportunitySink);
@@ -110,11 +110,15 @@ public final class ActivityStrategyEngine implements TelemetrySink
         return Collections.unmodifiableList(new ArrayList<>(diagnostics));
     }
 
-    private List<CandidateEvaluation> evaluateCandidates(ActivityContext context, TelemetryEvent event)
+    private List<CandidateEvaluation> evaluateCandidates(ActivityContext context, TelemetryEvent event, ActivityStrategy excludedStrategy)
     {
         final List<CandidateEvaluation> evaluations = new ArrayList<>();
         for (ActivityStrategy strategy : registry.getStrategies())
         {
+            if (strategy == excludedStrategy)
+            {
+                continue;
+            }
             final ActivityCandidate candidate = strategy.evaluateActivation(context, event);
             if (candidate != null)
             {

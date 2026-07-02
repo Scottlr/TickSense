@@ -127,7 +127,7 @@
 | T023 | [x] | Gem Mining Registry and Verification Fixtures | Verify gem mining evidence and create primitive ID registries and fixtures. |  | T006, T010 | [`tasks/T023.md`](tasks/T023.md) |
 | T030 | [ ] | Gem Mining Strategy and Opportunities | Detect gem mining activity and resource-node opportunities using verified telemetry. |  | T008, T011, T016, T023 | [`tasks/T030.md`](tasks/T030.md) |
 | T031 | [ ] | Gem Mining Metrics and Report Data | Generate gem mining metrics and report data for local report JSON. |  | T016, T017, T030 | [`tasks/T031.md`](tasks/T031.md) |
-| T018 | [ ] | RuneLite Report Panel and Detail Views | Display recent reports, activity summaries, opportunity timelines, and tick-loss breakdowns in RuneLite UI. |  | T017 | [`tasks/T018.md`](tasks/T018.md) |
+| T018 | [x] | RuneLite Report Panel and Detail Views | Display recent reports, activity summaries, opportunity timelines, and tick-loss breakdowns in RuneLite UI. |  | T017 | [`tasks/T018.md`](tasks/T018.md) |
 | T019 | [ ] | Replay and Golden Timeline Harness | Add replay loaders, synthetic event builders, and golden report fixtures for gem mining and ambiguous detection suppression. |  | T010, T017, T031 | [`tasks/T019.md`](tasks/T019.md) |
 | T020 | [ ] | MVP End-to-End Assembly and Plugin Hub Readiness | Compose capture, telemetry, strategy engine, storage, analytics, report repository, and panel into the retrospective MVP flow. |  | T018, T019 | [`tasks/T020.md`](tasks/T020.md) |
 | T014 | [ ] | Araxxor ID Registry and Verification Gates | Create source-owned Araxxor ID registries and post-MVP gates for unverified mechanics. |  | T006, T007, T010, T020 | [`tasks/T014.md`](tasks/T014.md) |

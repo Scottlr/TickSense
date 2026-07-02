@@ -6,9 +6,13 @@ import com.ticksense.activities.ActivityMarkerSink;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.OpportunitySink;
+import com.ticksense.storage.DeleteAllDataService;
+import com.ticksense.storage.JsonReportRepository;
+import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.debug.DebugEventRecorder;
 import com.ticksense.telemetry.TelemetryBus;
 import com.ticksense.telemetry.TelemetryEnvelope;
+import com.ticksense.ui.NotifyingReportRepository;
 import com.ticksense.ui.TickSensePanel;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -77,6 +81,15 @@ public class TickSensePlugin extends Plugin
     @Inject
     private ActivityStrategyEngine activityStrategyEngine;
 
+    @Inject
+    private ReportRepository reportRepository;
+
+    @Inject
+    private DeleteAllDataService deleteAllDataService;
+
+    @Inject
+    private ConfigManager configManager;
+
     private TickSensePanel panel;
     private NavigationButton navButton;
 
@@ -93,7 +106,8 @@ public class TickSensePlugin extends Plugin
             telemetryBus.addSink(debugEventRecorder);
         }
         telemetryBus.addSink(activityStrategyEngine);
-        panel = new TickSensePanel();
+        panel = new TickSensePanel(reportRepository, deleteAllDataService, configManager, config);
+        panel.initialize();
         navButton = NavigationButton.builder()
             .tooltip("TickSense")
             .icon(createNavigationIcon())
@@ -125,6 +139,18 @@ public class TickSensePlugin extends Plugin
     TickSenseConfig provideConfig(ConfigManager configManager)
     {
         return configManager.getConfig(TickSenseConfig.class);
+    }
+
+    @Provides
+    ReportRepository provideReportRepository()
+    {
+        return new NotifyingReportRepository(new JsonReportRepository());
+    }
+
+    @Provides
+    DeleteAllDataService provideDeleteAllDataService()
+    {
+        return new DeleteAllDataService();
     }
 
     @Provides

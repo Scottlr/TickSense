@@ -5,6 +5,8 @@ import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.ActivityMarkerSink;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.gemmining.GemMiningIds;
+import com.ticksense.activities.gemmining.GemMiningStrategy;
 import com.ticksense.activities.OpportunitySink;
 import com.ticksense.storage.DeleteAllDataService;
 import com.ticksense.storage.JsonReportRepository;
@@ -156,7 +158,12 @@ public class TickSensePlugin extends Plugin
     @Provides
     ActivityRegistry provideActivityRegistry()
     {
-        return ActivityRegistry.builder().build();
+        final ActivityRegistry.Builder builder = ActivityRegistry.builder();
+        if (GemMiningIds.verificationDecision().allowsStrategyEnablement())
+        {
+            builder.register(new GemMiningStrategy());
+        }
+        return builder.build();
     }
 
     @Provides

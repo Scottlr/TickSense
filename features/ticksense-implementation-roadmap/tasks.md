@@ -120,7 +120,7 @@
 | T007 | [x] | Telemetry Bus, Session Clock, and Debug Recorder | Fan out normalized events, track session/tick sequencing, and write bounded opt-in debug JSONL. |  | T003, T005, T006 | [`tasks/T007.md`](tasks/T007.md) |
 | T008 | [x] | Opportunity Model and Tracker | Add opportunity definitions, instances, evidence, terminal states, latency helpers, and lifecycle tests. |  | T004, T005 | [`tasks/T008.md`](tasks/T008.md) |
 | T009 | [x] | Activity Strategy Contracts and Registry | Define strategy interfaces, markers, candidate confidence, and a registry/factory for strategies. |  | T004, T005, T008 | [`tasks/T009.md`](tasks/T009.md) |
-| T010 | [ ] | JSONL Timeline Repository | Persist and read schema-versioned normalized timelines plus activity/opportunity markers with local JSONL storage. |  | T005, T007, T008, T009 | [`tasks/T010.md`](tasks/T010.md) |
+| T010 | [x] | JSONL Timeline Repository | Persist and read schema-versioned normalized timelines plus activity/opportunity markers with local JSONL storage. |  | T005, T007, T008, T009 | [`tasks/T010.md`](tasks/T010.md) |
 | T011 | [ ] | Activity Strategy Engine Lifecycle | Implement candidate arbitration, active-session lifecycle, termination handling, and diagnostics emission. |  | T007, T008, T009, T010 | [`tasks/T011.md`](tasks/T011.md) |
 | T016 | [ ] | Metrics Engine and Timing Calculators | Add reusable tick/ms/second calculators, percentiles, score breakdowns, and metric value models. |  | T005, T008 | [`tasks/T016.md`](tasks/T016.md) |
 | T017 | [ ] | Report Model and Repository | Define stable report models, summaries, JSON persistence, report index, and delete-all-data storage control. |  | T010, T016 | [`tasks/T017.md`](tasks/T017.md) |

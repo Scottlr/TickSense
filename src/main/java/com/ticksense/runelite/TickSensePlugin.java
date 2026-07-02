@@ -1,6 +1,11 @@
 package com.ticksense.runelite;
 
 import com.google.inject.Provides;
+import com.ticksense.activities.ActivityMarker;
+import com.ticksense.activities.ActivityMarkerSink;
+import com.ticksense.activities.ActivityRegistry;
+import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.OpportunitySink;
 import com.ticksense.storage.debug.DebugEventRecorder;
 import com.ticksense.telemetry.TelemetryBus;
 import com.ticksense.telemetry.TelemetryEnvelope;
@@ -69,6 +74,9 @@ public class TickSensePlugin extends Plugin
     @Inject
     private TickSenseConfig config;
 
+    @Inject
+    private ActivityStrategyEngine activityStrategyEngine;
+
     private TickSensePanel panel;
     private NavigationButton navButton;
 
@@ -84,6 +92,7 @@ public class TickSensePlugin extends Plugin
         {
             telemetryBus.addSink(debugEventRecorder);
         }
+        telemetryBus.addSink(activityStrategyEngine);
         panel = new TickSensePanel();
         navButton = NavigationButton.builder()
             .tooltip("TickSense")
@@ -99,6 +108,7 @@ public class TickSensePlugin extends Plugin
     protected void shutDown()
     {
         telemetryBus.removeSink(debugEventRecorder);
+        telemetryBus.removeSink(activityStrategyEngine);
         debugEventRecorder.close();
 
         if (navButton != null)
@@ -115,6 +125,40 @@ public class TickSensePlugin extends Plugin
     TickSenseConfig provideConfig(ConfigManager configManager)
     {
         return configManager.getConfig(TickSenseConfig.class);
+    }
+
+    @Provides
+    ActivityRegistry provideActivityRegistry()
+    {
+        return ActivityRegistry.builder().build();
+    }
+
+    @Provides
+    ActivityMarkerSink provideActivityMarkerSink()
+    {
+        return new ActivityMarkerSink()
+        {
+            @Override
+            public void accept(ActivityMarker marker)
+            {
+            }
+        };
+    }
+
+    @Provides
+    OpportunitySink provideOpportunitySink()
+    {
+        return marker -> { };
+    }
+
+    @Provides
+    ActivityStrategyEngine provideActivityStrategyEngine(
+        ActivityRegistry registry,
+        ActivityMarkerSink activityMarkerSink,
+        OpportunitySink opportunitySink,
+        TickSenseConfig tickSenseConfig)
+    {
+        return new ActivityStrategyEngine(registry, activityMarkerSink, opportunitySink, tickSenseConfig.debugActivityDiagnostics());
     }
 
     @Subscribe

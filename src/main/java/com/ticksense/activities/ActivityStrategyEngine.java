@@ -26,7 +26,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
     private final OpportunitySink opportunitySink;
     private final boolean diagnosticsEnabled;
     private final AtomicLong markerSequence = new AtomicLong();
-    private final List<ActivityDiagnostic> diagnostics = new ArrayList<>();
+    private final ActivityDiagnosticBuffer diagnostics = new ActivityDiagnosticBuffer(50);
     private final List<ActivitySession> completedSessions = new ArrayList<>();
     private final List<ActivityReportData> completedActivityData = new ArrayList<>();
 
@@ -107,7 +107,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
 
     public synchronized List<ActivityDiagnostic> getDiagnostics()
     {
-        return Collections.unmodifiableList(new ArrayList<>(diagnostics));
+        return diagnostics.snapshot();
     }
 
     private List<CandidateEvaluation> evaluateCandidates(ActivityContext context, TelemetryEvent event, ActivityStrategy excludedStrategy)

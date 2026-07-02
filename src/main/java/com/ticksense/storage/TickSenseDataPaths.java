@@ -10,6 +10,7 @@ public final class TickSenseDataPaths
     private final Path timelinesDirectory;
     private final Path reportsDirectory;
     private final Path indexesDirectory;
+    private final Path exportsDirectory;
     private final Path schemaVersionFile;
     private final Path reportIndexFile;
 
@@ -19,6 +20,7 @@ public final class TickSenseDataPaths
         this.timelinesDirectory = tickSenseRoot.resolve("timelines");
         this.reportsDirectory = tickSenseRoot.resolve("reports");
         this.indexesDirectory = tickSenseRoot.resolve("indexes");
+        this.exportsDirectory = tickSenseRoot.resolve("exports");
         this.schemaVersionFile = tickSenseRoot.resolve("schema-version.json");
         this.reportIndexFile = indexesDirectory.resolve("report-index.json");
     }
@@ -46,6 +48,11 @@ public final class TickSenseDataPaths
     public Path getIndexesDirectory()
     {
         return indexesDirectory;
+    }
+
+    public Path getExportsDirectory()
+    {
+        return exportsDirectory;
     }
 
     public Path getSchemaVersionFile()

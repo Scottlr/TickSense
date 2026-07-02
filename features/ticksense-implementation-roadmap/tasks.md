@@ -133,7 +133,7 @@
 | T014 | [x] | Araxxor ID Registry and Verification Gates | Create source-owned Araxxor ID registries and post-MVP gates for unverified mechanics. |  | T006, T007, T010, T020 | [`tasks/T014.md`](tasks/T014.md) |
 | T029 | [x] | Araxxor Verification Capture Fixtures | Capture normalized Araxxor verification fixtures or keep Araxxor blocked from normal reports. |  | T010, T014, T020 | [`tasks/T029.md`](tasks/T029.md) |
 | T015 | [ ] | Araxxor Strategy and Spider Opportunities | Add post-MVP Araxxor spider engagement, re-engagement, damage, and finish-reason analytics. |  | T008, T011, T014, T016, T029, T020 | [`tasks/T015.md`](tasks/T015.md) |
-| T021 | [ ] | Optional Developer Diagnostics and Debug Export Bundle | Add optional post-MVP developer diagnostics panel and user-requested debug bundle export. |  | T020 | [`tasks/T021.md`](tasks/T021.md) |
+| T021 | [x] | Optional Developer Diagnostics and Debug Export Bundle | Add optional post-MVP developer diagnostics panel and user-requested debug bundle export. |  | T020 | [`tasks/T021.md`](tasks/T021.md) |
 | T022 | [ ] | Retention, Trends, and Report Index Maintenance | Add report retention, index rebuild/compaction, and local trend summaries for recent reports. |  | T017, T018, T020 | [`tasks/T022.md`](tasks/T022.md) |
 | T024 | [ ] | Construction Registry and Verification Fixtures | Verify Construction menu/widget evidence and create primitive ID registries and fixtures. |  | T006, T010, T020 | [`tasks/T024.md`](tasks/T024.md) |
 | T032 | [ ] | Construction Strategy and Opportunities | Detect one verified Construction method and observe-only menu/cadence opportunities. |  | T008, T011, T016, T024 | [`tasks/T032.md`](tasks/T032.md) |

@@ -17,3 +17,10 @@ The current verification fixture proves:
 - at least one mine click on a verified gem rock object;
 - mining confirmation through animation, XP, or inventory gain;
 - rock depletion and respawn evidence from normalized object snapshots.
+
+Reserved post-MVP Araxxor fixture names for T029:
+
+- `araxxor-spider-basic.jsonl`
+- `araxxor-teleport-midkill.jsonl`
+
+Do not add those Araxxor files until they are source-owned normalized fixtures with verified boss IDs, named spider IDs, attackability evidence, and sanitized timing/order fidelity.

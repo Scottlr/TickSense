@@ -115,7 +115,7 @@
 | T002 | [x] | Plugin Lifecycle, Config, and Panel Shell | Add the RuneLite plugin entrypoint lifecycle, config interface, empty report panel, and nav button without analytics. |  | T001 | [`tasks/T002.md`](tasks/T002.md) |
 | T003 | [x] | RuneLite Event Capture Surface | Subscribe to MVP RuneLite events and capture ordered timestamp/context envelopes without activity interpretation. |  | T002 | [`tasks/T003.md`](tasks/T003.md) |
 | T004 | [x] | Core Domain Primitives | Add Java 11-safe immutable primitives for time, entity refs, locations, sessions, activity IDs, and finish reasons. |  | T001 | [`tasks/T004.md`](tasks/T004.md) |
-| T005 | [ ] | Normalized Telemetry Events and Serialization | Define normalized telemetry interfaces/classes, event categories, payloads, schema versioning, and JSON serialization. |  | T004 | [`tasks/T005.md`](tasks/T005.md) |
+| T005 | [x] | Normalized Telemetry Events and Serialization | Define normalized telemetry interfaces/classes, event categories, payloads, schema versioning, and JSON serialization. |  | T004 | [`tasks/T005.md`](tasks/T005.md) |
 | T006 | [ ] | Adapter Mappers and Snapshot Tests | Map MVP RuneLite events into normalized telemetry snapshots and test that no RuneLite types leak into core models. |  | T003, T005 | [`tasks/T006.md`](tasks/T006.md) |
 | T007 | [ ] | Telemetry Bus, Session Clock, and Debug Recorder | Fan out normalized events, track session/tick sequencing, and write bounded opt-in debug JSONL. |  | T003, T005, T006 | [`tasks/T007.md`](tasks/T007.md) |
 | T008 | [ ] | Opportunity Model and Tracker | Add opportunity definitions, instances, evidence, terminal states, latency helpers, and lifecycle tests. |  | T004, T005 | [`tasks/T008.md`](tasks/T008.md) |

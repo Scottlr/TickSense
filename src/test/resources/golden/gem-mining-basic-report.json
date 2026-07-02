@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "activityType": "GEM_MINING",
+  "detectedActivityName": "Gem Mining",
+  "durationTicks": 40,
+  "durationMillis": 24000,
+  "finishReason": {
+    "type": "LEFT_REGION",
+    "confidence": 0.92,
+    "explanation": "Gem mining ended because the player left the verified gem-mining region.",
+    "evidence": [
+      "Region changed from verified gem mine to 12000."
+    ],
+    "gameTick": 240
+  },
+  "confidence": 0.92,
+  "evidenceSummary": [
+    "Verified gem mining region 11410 is active.",
+    "Verified gem rock 11380 became available at 2841,9388.",
+    "Mine click targeted that verified gem rock.",
+    "Idle ticks count only verified rock-available windows; depleted-rock wait stays in the RNG caveat, not execution loss.",
+    "Verification status: VERIFIED"
+  ],
+  "metrics": {
+    "rockResponse": {
+      "displayName": "Rock response",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 1.5
+    },
+    "idleTicks": {
+      "displayName": "Idle ticks",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 3.0
+    },
+    "redundantClicks": {
+      "displayName": "Redundant clicks",
+      "unit": "COUNT",
+      "lowerValueBetter": true,
+      "value": 1.0
+    },
+    "movementLatency": {
+      "displayName": "Movement latency",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 1.0
+    },
+    "cycleConsistency": {
+      "displayName": "Cycle consistency",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 0.5
+    },
+    "executionScore": {
+      "displayName": "Execution score",
+      "unit": "SCORE",
+      "lowerValueBetter": false,
+      "value": 69.5
+    }
+  },
+  "opportunities": [
+    {
+      "type": "GEM_MINING_IDLE",
+      "label": "Idle ticks",
+      "status": "COMPLETED",
+      "gameTick": 201,
+      "latencyTicks": 1,
+      "latencyMillis": 600,
+      "evidenceSummary": [
+        "Rock stayed available before the next mine click."
+      ]
+    },
+    {
+      "type": "GEM_ROCK_RESPAWN_TO_CLICK",
+      "label": "Rock response",
+      "status": "COMPLETED",
+      "gameTick": 201,
+      "latencyTicks": 1,
+      "latencyMillis": 600,
+      "evidenceSummary": [
+        "Mine click on available gem rock."
+      ]
+    },
+    {
+      "type": "GEM_MINING_IDLE",
+      "label": "Idle ticks",
+      "status": "COMPLETED",
+      "gameTick": 233,
+      "latencyTicks": 2,
+      "latencyMillis": 1200,
+      "evidenceSummary": [
+        "Rock stayed available before the next mine click."
+      ]
+    },
+    {
+      "type": "GEM_MOVEMENT_TO_ROCK",
+      "label": "Movement latency",
+      "status": "COMPLETED",
+      "gameTick": 233,
+      "latencyTicks": 1,
+      "latencyMillis": 600,
+      "evidenceSummary": [
+        "Player moved into range before mining."
+      ]
+    },
+    {
+      "type": "GEM_ROCK_RESPAWN_TO_CLICK",
+      "label": "Rock response",
+      "status": "COMPLETED",
+      "gameTick": 233,
+      "latencyTicks": 2,
+      "latencyMillis": 1200,
+      "evidenceSummary": [
+        "Mine click on available gem rock."
+      ]
+    }
+  ],
+  "tickLossBreakdown": {
+    "totalTickLoss": 5,
+    "categories": {
+      "Idle ticks": 3,
+      "Redundant clicks": 1,
+      "Movement latency": 1
+    }
+  },
+  "summaryLines": [
+    "Best execution: Rock response 1 ticks",
+    "Worst execution: Rock response 2 ticks"
+  ]
+}

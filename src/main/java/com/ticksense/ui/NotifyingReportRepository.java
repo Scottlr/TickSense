@@ -24,6 +24,11 @@ public final class NotifyingReportRepository implements ReportRepository
         saveListeners.add(Objects.requireNonNull(listener, "listener"));
     }
 
+    public ReportRepository getDelegate()
+    {
+        return delegate;
+    }
+
     @Override
     public void save(ActivityReport report) throws IOException
     {

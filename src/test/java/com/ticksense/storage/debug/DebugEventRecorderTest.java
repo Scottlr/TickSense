@@ -75,9 +75,9 @@ public class DebugEventRecorderTest
         final String allFileNames = files.stream()
             .map(path -> path.getFileName().toString())
             .collect(Collectors.joining(","));
-        assertFalse(allFileNames.contains("session-1"));
-        assertTrue(allFileNames.contains("session-2"));
-        assertTrue(allFileNames.contains("session-3"));
+        assertFalse(allFileNames.contains("-session-1.jsonl"));
+        assertTrue(allFileNames.contains("-session-2.jsonl"));
+        assertTrue(allFileNames.contains("-session-3.jsonl"));
     }
 
     private static List<Path> jsonlFiles(Path directory) throws IOException

@@ -1,0 +1,60 @@
+package com.ticksense.core;
+
+import java.util.Objects;
+
+public final class ActivityId
+{
+    private final String value;
+
+    public ActivityId(String value)
+    {
+        final String normalized = Objects.requireNonNull(value, "value").trim();
+        if (normalized.isEmpty())
+        {
+            throw new IllegalArgumentException("ActivityId value must not be blank");
+        }
+        this.value = normalized;
+    }
+
+    public static ActivityId of(String value)
+    {
+        return new ActivityId(value);
+    }
+
+    public static ActivityId parse(String value)
+    {
+        return new ActivityId(value);
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    @Override
+    public String toString()
+    {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+        if (!(other instanceof ActivityId))
+        {
+            return false;
+        }
+        final ActivityId that = (ActivityId) other;
+        return value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return value.hashCode();
+    }
+}

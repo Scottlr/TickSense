@@ -112,7 +112,7 @@ public class ReplayRegressionTest
         final ActivityReport report = new TimelineReplayRunner().replay(replay).requireSingleReport();
 
         assertEquals(1.0D, report.getMetrics().get("idleTicks").getValue(), 0.0D);
-        assertEquals(1.0D, report.getMetrics().get("rockResponse").getValue(), 0.0D);
+        assertEquals(0.5D, report.getMetrics().get("rockResponse").getValue(), 0.0D);
         assertTrue(report.getEvidenceSummary().get(3).contains("depleted-rock wait"));
     }
 

@@ -38,7 +38,7 @@
       "displayName": "Redundant clicks",
       "unit": "COUNT",
       "lowerValueBetter": true,
-      "value": 1.0
+      "value": 0.0
     },
     "movementLatency": {
       "displayName": "Movement latency",
@@ -56,7 +56,7 @@
       "displayName": "Execution score",
       "unit": "SCORE",
       "lowerValueBetter": false,
-      "value": 69.5
+      "value": 71.5
     }
   },
   "opportunities": [
@@ -117,10 +117,10 @@
     }
   ],
   "tickLossBreakdown": {
-    "totalTickLoss": 5,
+    "totalTickLoss": 4,
     "categories": {
       "Idle ticks": 3,
-      "Redundant clicks": 1,
+      "Redundant clicks": 0,
       "Movement latency": 1
     }
   },

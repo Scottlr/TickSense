@@ -59,6 +59,18 @@ public class ActivityStrategyEngineTest
     }
 
     @Test
+    public void doesNotReevaluateActiveStrategyForActivationWhileSessionIsRunning()
+    {
+        final StubStrategy active = strategy(ActivityType.GEM_MINING, "Gem Mining", 10, 0.80D, false, false);
+        final ActivityStrategyEngine engine = engine(new ArrayList<ActivityMarker>(), true, active);
+
+        engine.accept(envelope("event-1", 1_000L, 100));
+        engine.accept(envelope("event-2", 1_100L, 101));
+
+        assertEquals(1, active.getActivationCalls());
+    }
+
+    @Test
     public void moreSpecificStrategyBeatsGenericCandidate()
     {
         final StubStrategy generic = strategy(ActivityType.GEM_MINING, "Generic Skilling", 10, 0.85D, false, false);
@@ -216,6 +228,7 @@ public class ActivityStrategyEngineTest
     {
         private final ActivityDefinition definition;
         private final boolean selectedEvidence;
+        private int activationCalls;
         private double confidence;
         private FinishReason finishReason;
 
@@ -245,6 +258,7 @@ public class ActivityStrategyEngineTest
         @Override
         public ActivityCandidate evaluateActivation(ActivityContext context, TelemetryEvent event)
         {
+            activationCalls++;
             return new ActivityCandidate(
                 ActivityId.of(definition.getActivityType().name().toLowerCase() + "-session"),
                 definition.getActivityType(),
@@ -279,6 +293,11 @@ public class ActivityStrategyEngineTest
         public ActivityReportData buildActivityData(ActivityContext context, ActivitySession session)
         {
             return new ActivityReportData(session.getActivityId(), session.getActivityType(), Collections.singletonMap("built", "true"));
+        }
+
+        private int getActivationCalls()
+        {
+            return activationCalls;
         }
     }
 }

@@ -44,7 +44,7 @@ public class ActivityStrategyEngineTest
     {
         final List<ActivityMarker> markers = new ArrayList<>();
         final StubStrategy active = strategy(ActivityType.GEM_MINING, "Gem Mining", 10, 0.80D, false, false);
-        final StubStrategy stronger = strategy(ActivityType.ARAXXOR, "Araxxor", 100, 0.95D, false, true);
+        final StubStrategy stronger = strategy(ActivityType.ARAXXOR, "Araxxor", 100, 0.70D, false, true);
         final ActivityStrategyEngine engine = engine(markers, true, active, stronger);
 
         engine.accept(envelope("event-1", 1_000L, 100));

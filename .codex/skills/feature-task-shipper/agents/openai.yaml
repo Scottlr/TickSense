@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Task Shipper"
+  short_description: "Implement and ship the next unblocked feature task"
+  default_prompt: "Use this skill to choose the next unblocked task from a feature planning bundle, implement it on a branch, open a PR, wait for CI, merge it, and delete the branch."

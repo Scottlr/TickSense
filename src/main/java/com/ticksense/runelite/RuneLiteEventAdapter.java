@@ -25,8 +25,6 @@ import com.ticksense.telemetry.events.WidgetTelemetryEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Actor;
@@ -63,19 +61,18 @@ public final class RuneLiteEventAdapter
     private static final int UNKNOWN = -1;
 
     private final RuneLiteSnapshotter snapshotter;
-    private final String sessionId;
-    private final AtomicLong eventSequence = new AtomicLong();
+    private final SessionTelemetryContext sessionTelemetryContext;
 
     @Inject
-    RuneLiteEventAdapter(RuneLiteSnapshotter snapshotter)
+    RuneLiteEventAdapter(RuneLiteSnapshotter snapshotter, SessionTelemetryContext sessionTelemetryContext)
     {
-        this(snapshotter, "runelite-" + UUID.randomUUID());
+        this.snapshotter = snapshotter;
+        this.sessionTelemetryContext = sessionTelemetryContext;
     }
 
     RuneLiteEventAdapter(RuneLiteSnapshotter snapshotter, String sessionId)
     {
-        this.snapshotter = snapshotter;
-        this.sessionId = sessionId;
+        this(snapshotter, new SessionTelemetryContext(sessionId));
     }
 
     public Optional<TelemetryEnvelope> mapGameTick(GameTick event, RuneLiteEventEnvelope envelope)
@@ -371,8 +368,8 @@ public final class RuneLiteEventAdapter
     {
         return Optional.of(new TelemetryEnvelope(
             com.ticksense.telemetry.TelemetrySchema.MVP_SCHEMA_VERSION,
-            sourceEventType + "-" + eventSequence.incrementAndGet(),
-            sessionId,
+            sessionTelemetryContext.nextEventId(sourceEventType),
+            sessionTelemetryContext.getSessionId(),
             event));
     }
 

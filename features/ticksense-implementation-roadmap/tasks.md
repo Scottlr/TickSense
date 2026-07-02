@@ -111,7 +111,7 @@
 
 | ID | Completed | Title | Description | Github Issue # | Blocked By | Task File |
 |---|---|---|---|---|---|---|
-| T001 | [ ] | Plugin Hub Gradle Skeleton | Create the Java 11 external-plugin project structure, package root, descriptor, properties, and CI baseline. |  | None | [`tasks/T001.md`](tasks/T001.md) |
+| T001 | [x] | Plugin Hub Gradle Skeleton | Create the Java 11 external-plugin project structure, package root, descriptor, properties, and CI baseline. |  | None | [`tasks/T001.md`](tasks/T001.md) |
 | T002 | [ ] | Plugin Lifecycle, Config, and Panel Shell | Add the RuneLite plugin entrypoint lifecycle, config interface, empty report panel, and nav button without analytics. |  | T001 | [`tasks/T002.md`](tasks/T002.md) |
 | T003 | [ ] | RuneLite Event Capture Surface | Subscribe to MVP RuneLite events and capture ordered timestamp/context envelopes without activity interpretation. |  | T002 | [`tasks/T003.md`](tasks/T003.md) |
 | T004 | [ ] | Core Domain Primitives | Add Java 11-safe immutable primitives for time, entity refs, locations, sessions, activity IDs, and finish reasons. |  | T001 | [`tasks/T004.md`](tasks/T004.md) |

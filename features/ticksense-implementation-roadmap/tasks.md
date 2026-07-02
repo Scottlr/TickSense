@@ -135,7 +135,7 @@
 | T015 | [ ] | Araxxor Strategy and Spider Opportunities | Add post-MVP Araxxor spider engagement, re-engagement, damage, and finish-reason analytics. |  | T008, T011, T014, T016, T029, T020 | [`tasks/T015.md`](tasks/T015.md) |
 | T021 | [x] | Optional Developer Diagnostics and Debug Export Bundle | Add optional post-MVP developer diagnostics panel and user-requested debug bundle export. |  | T020 | [`tasks/T021.md`](tasks/T021.md) |
 | T022 | [x] | Retention, Trends, and Report Index Maintenance | Add report retention, index rebuild/compaction, and local trend summaries for recent reports. |  | T017, T018, T020 | [`tasks/T022.md`](tasks/T022.md) |
-| T024 | [ ] | Construction Registry and Verification Fixtures | Verify Construction menu/widget evidence and create primitive ID registries and fixtures. |  | T006, T010, T020 | [`tasks/T024.md`](tasks/T024.md) |
+| T024 | [x] | Construction Registry and Verification Fixtures | Verify Construction menu/widget evidence and create primitive ID registries and fixtures. |  | T006, T010, T020 | [`tasks/T024.md`](tasks/T024.md) |
 | T032 | [ ] | Construction Strategy and Opportunities | Detect one verified Construction method and observe-only menu/cadence opportunities. |  | T008, T011, T016, T024 | [`tasks/T032.md`](tasks/T032.md) |
 | T033 | [ ] | Construction Metrics and Golden Report | Generate Construction reports and golden replay coverage. |  | T017, T019, T032 | [`tasks/T033.md`](tasks/T033.md) |
 | T025 | [ ] | Vardorvis Registry and Verification Fixtures | Verify Vardorvis mechanic evidence before reporting timings. |  | T006, T010, T020 | [`tasks/T025.md`](tasks/T025.md) |

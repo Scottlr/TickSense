@@ -1,0 +1,19 @@
+package com.ticksense.telemetry;
+
+public enum TelemetryCategory
+{
+    PLAYER_ACTION,
+    MENU_INTERACTION,
+    NPC_STATE,
+    OBJECT_STATE,
+    PROJECTILE,
+    ANIMATION,
+    GRAPHICS,
+    DAMAGE,
+    XP_STAT_CHANGE,
+    INVENTORY_EQUIPMENT,
+    MOVEMENT_LOCATION,
+    REGION_INSTANCE,
+    WIDGET,
+    ENVIRONMENT_PERFORMANCE
+}

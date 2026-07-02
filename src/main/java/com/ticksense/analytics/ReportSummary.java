@@ -4,7 +4,9 @@ import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ReportSummary
@@ -21,6 +23,8 @@ public final class ReportSummary
     private final double confidence;
     private final String evidenceSummaryText;
     private final List<String> summaryLines;
+    private final Map<String, Double> metricValues;
+    private final Map<String, Integer> tickLossCategories;
 
     public ReportSummary(
         int schemaVersion,
@@ -34,7 +38,9 @@ public final class ReportSummary
         String finishReason,
         double confidence,
         String evidenceSummaryText,
-        List<String> summaryLines)
+        List<String> summaryLines,
+        Map<String, Double> metricValues,
+        Map<String, Integer> tickLossCategories)
     {
         this.schemaVersion = requireSchemaVersion(schemaVersion);
         this.reportId = requireText(reportId, "reportId");
@@ -48,6 +54,8 @@ public final class ReportSummary
         this.confidence = requireConfidence(confidence);
         this.evidenceSummaryText = safeText(evidenceSummaryText);
         this.summaryLines = immutableStrings(summaryLines);
+        this.metricValues = immutableDoubleMap(metricValues, "metricValues");
+        this.tickLossCategories = immutableIntegerMap(tickLossCategories, "tickLossCategories");
     }
 
     public int getSchemaVersion()
@@ -108,6 +116,16 @@ public final class ReportSummary
     public List<String> getSummaryLines()
     {
         return summaryLines;
+    }
+
+    public Map<String, Double> getMetricValues()
+    {
+        return metricValues;
+    }
+
+    public Map<String, Integer> getTickLossCategories()
+    {
+        return tickLossCategories;
     }
 
     private static int requireSchemaVersion(int schemaVersion)
@@ -174,5 +192,33 @@ public final class ReportSummary
             copied.add(requireText(value, "summaryLines value"));
         }
         return Collections.unmodifiableList(copied);
+    }
+
+    private static Map<String, Double> immutableDoubleMap(Map<String, Double> values, String fieldName)
+    {
+        if (values == null || values.isEmpty())
+        {
+            return Collections.emptyMap();
+        }
+        final Map<String, Double> copy = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> entry : values.entrySet())
+        {
+            copy.put(requireText(entry.getKey(), fieldName + " key"), Objects.requireNonNull(entry.getValue(), fieldName + " value"));
+        }
+        return Collections.unmodifiableMap(copy);
+    }
+
+    private static Map<String, Integer> immutableIntegerMap(Map<String, Integer> values, String fieldName)
+    {
+        if (values == null || values.isEmpty())
+        {
+            return Collections.emptyMap();
+        }
+        final Map<String, Integer> copy = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : values.entrySet())
+        {
+            copy.put(requireText(entry.getKey(), fieldName + " key"), Objects.requireNonNull(entry.getValue(), fieldName + " value"));
+        }
+        return Collections.unmodifiableMap(copy);
     }
 }

@@ -2,6 +2,7 @@ package com.ticksense.runelite;
 
 import com.google.inject.Provides;
 import com.ticksense.activities.ActivityStrategyFactory;
+import com.ticksense.analytics.TrendAnalyzer;
 import com.ticksense.activities.gemmining.GemMiningIds;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
 import com.ticksense.core.EntityRef;
@@ -9,6 +10,7 @@ import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
 import com.ticksense.storage.ExportBundleWriter;
 import com.ticksense.storage.JsonReportRepository;
+import com.ticksense.storage.ReportIndexMaintenanceService;
 import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.debug.DebugEventRecorder;
 import com.ticksense.telemetry.TelemetryBus;
@@ -107,6 +109,9 @@ public class TickSensePlugin extends Plugin
     @Inject
     private ExportBundleWriter exportBundleWriter;
 
+    @Inject
+    private ReportIndexMaintenanceService reportIndexMaintenanceService;
+
     private TickSensePanel panel;
     private NavigationButton navButton;
     private TickSenseServices services;
@@ -127,7 +132,15 @@ public class TickSensePlugin extends Plugin
         services = tickSenseServicesProvider.get();
         services.start();
         lastLocalPlayerLocation = WorldLocation.unknown();
-        panel = new TickSensePanel(services, services.getReportRepository(), deleteAllDataService, exportBundleWriter, configManager, config);
+        panel = new TickSensePanel(
+            services,
+            services.getReportRepository(),
+            deleteAllDataService,
+            exportBundleWriter,
+            reportIndexMaintenanceService,
+            new TrendAnalyzer(),
+            configManager,
+            config);
         panel.initialize();
         navButton = NavigationButton.builder()
             .tooltip("TickSense")
@@ -196,6 +209,22 @@ public class TickSensePlugin extends Plugin
             new com.google.gson.Gson(),
             tickSenseConfig,
             () -> services == null ? Collections.emptyList() : services.getStrategyEngine().getDiagnostics(),
+            java.time.Clock.systemUTC());
+    }
+
+    @Provides
+    ReportIndexMaintenanceService provideReportIndexMaintenanceService(ReportRepository reportRepository)
+    {
+        final ReportRepository normalizedRepository = reportRepository instanceof NotifyingReportRepository
+            ? ((NotifyingReportRepository) reportRepository).getDelegate()
+            : reportRepository;
+        if (!(normalizedRepository instanceof JsonReportRepository))
+        {
+            throw new IllegalStateException("TickSense report index maintenance requires JsonReportRepository");
+        }
+        return new ReportIndexMaintenanceService(
+            com.ticksense.storage.TickSenseDataPaths.defaultPaths(),
+            (JsonReportRepository) normalizedRepository,
             java.time.Clock.systemUTC());
     }
 

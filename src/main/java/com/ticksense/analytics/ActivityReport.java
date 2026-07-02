@@ -141,6 +141,11 @@ public final class ActivityReport
 
     public ReportSummary toSummary()
     {
+        final Map<String, Double> summaryMetrics = new LinkedHashMap<>();
+        for (Map.Entry<String, MetricValue> entry : metrics.entrySet())
+        {
+            summaryMetrics.put(entry.getKey(), entry.getValue().getValue());
+        }
         return new ReportSummary(
             schemaVersion,
             reportId,
@@ -153,7 +158,9 @@ public final class ActivityReport
             finishReason.getType().name(),
             confidence,
             String.join(" | ", evidenceSummary),
-            summaryLines);
+            summaryLines,
+            summaryMetrics,
+            tickLossBreakdown.getCategories());
     }
 
     private static int requireSchemaVersion(int schemaVersion)

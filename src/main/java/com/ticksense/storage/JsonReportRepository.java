@@ -85,6 +85,13 @@ public final class JsonReportRepository implements ReportRepository
         return Collections.unmodifiableList(new ArrayList<>(reports.subList(0, Math.min(limit, reports.size()))));
     }
 
+    public synchronized List<ReportSummary> rebuildIndex() throws IOException
+    {
+        final List<ReportSummary> rebuilt = rebuildIndexFromReports();
+        writeIndex(rebuilt);
+        return rebuilt;
+    }
+
     private List<ReportSummary> loadIndex() throws IOException
     {
         ensureDirectories();
@@ -258,6 +265,8 @@ public final class JsonReportRepository implements ReportRepository
         private double confidence;
         private String evidenceSummaryText;
         private List<String> summaryLines;
+        private Map<String, Double> metricValues;
+        private Map<String, Integer> tickLossCategories;
 
         private static PersistedReportSummary from(ReportSummary summary)
         {
@@ -274,6 +283,8 @@ public final class JsonReportRepository implements ReportRepository
             persisted.confidence = summary.getConfidence();
             persisted.evidenceSummaryText = summary.getEvidenceSummaryText();
             persisted.summaryLines = summary.getSummaryLines();
+            persisted.metricValues = summary.getMetricValues();
+            persisted.tickLossCategories = summary.getTickLossCategories();
             return persisted;
         }
 
@@ -291,7 +302,9 @@ public final class JsonReportRepository implements ReportRepository
                 finishReason,
                 confidence,
                 evidenceSummaryText,
-                summaryLines);
+                summaryLines,
+                metricValues,
+                tickLossCategories);
         }
     }
 

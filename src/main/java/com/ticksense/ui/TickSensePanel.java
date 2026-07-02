@@ -2,11 +2,14 @@ package com.ticksense.ui;
 
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ReportSummary;
+import com.ticksense.analytics.TrendAnalyzer;
 import com.ticksense.runelite.TickSenseServices;
 import com.ticksense.runelite.TickSenseConfig;
 import com.ticksense.storage.DeleteAllDataService;
 import com.ticksense.storage.ExportBundleWriter;
+import com.ticksense.storage.ReportIndexMaintenanceService;
 import com.ticksense.storage.ReportRepository;
+import com.ticksense.storage.RetentionPolicy;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.awt.BorderLayout;
@@ -41,11 +44,14 @@ public class TickSensePanel extends PluginPanel
     private final ReportRepository reportRepository;
     private final DeleteAllDataService deleteAllDataService;
     private final ExportBundleWriter exportBundleWriter;
+    private final ReportIndexMaintenanceService reportIndexMaintenanceService;
+    private final TrendAnalyzer trendAnalyzer;
     private final ConfigManager configManager;
     private final TickSenseConfig config;
     private final ReportListPanel reportListPanel;
     private final ActivityReportPanel activityReportPanel;
     private final DeveloperDiagnosticsPanel developerDiagnosticsPanel;
+    private final TrendsPanel trendsPanel;
     private final JTabbedPane tabs;
     private final Component developerDiagnosticsTab;
     private ReportSummary selectedSummary;
@@ -58,7 +64,7 @@ public class TickSensePanel extends PluginPanel
         ConfigManager configManager,
         TickSenseConfig config)
     {
-        this(null, reportRepository, deleteAllDataService, null, configManager, config);
+        this(null, reportRepository, deleteAllDataService, null, null, new TrendAnalyzer(), configManager, config);
     }
 
     public TickSensePanel(
@@ -66,6 +72,8 @@ public class TickSensePanel extends PluginPanel
         ReportRepository reportRepository,
         DeleteAllDataService deleteAllDataService,
         ExportBundleWriter exportBundleWriter,
+        ReportIndexMaintenanceService reportIndexMaintenanceService,
+        TrendAnalyzer trendAnalyzer,
         ConfigManager configManager,
         TickSenseConfig config)
     {
@@ -74,6 +82,8 @@ public class TickSensePanel extends PluginPanel
         this.reportRepository = reportRepository;
         this.deleteAllDataService = deleteAllDataService;
         this.exportBundleWriter = exportBundleWriter;
+        this.reportIndexMaintenanceService = reportIndexMaintenanceService;
+        this.trendAnalyzer = trendAnalyzer;
         this.configManager = configManager;
         this.config = config;
 
@@ -91,11 +101,11 @@ public class TickSensePanel extends PluginPanel
         activityReportPanel = new ActivityReportPanel();
         developerDiagnosticsPanel = new DeveloperDiagnosticsPanel(this::buildDeveloperDiagnosticsText, this::exportSelectedBundle);
         developerDiagnosticsPanel.setExportEnabled(false);
+        trendsPanel = new TrendsPanel();
 
         tabs = new JTabbedPane();
         tabs.addTab("Recent Reports", createRecentReportsTab());
-        tabs.addTab("Trends", createDisabledPlaceholder("Trends will stay hidden until local trend summaries land."));
-        tabs.setEnabledAt(1, false);
+        tabs.addTab("Trends", trendsPanel);
         tabs.addTab("Settings", createSettingsTab());
         developerDiagnosticsTab = developerDiagnosticsPanel;
         diagnosticsTabVisible = false;
@@ -134,6 +144,7 @@ public class TickSensePanel extends PluginPanel
             reportListPanel.setEmptyState("No completed reports yet.");
             reportListPanel.setReports(normalReports);
             lastLowConfidenceReports = lowConfidenceReports;
+            trendsPanel.setTrendSummary(trendAnalyzer.summarize(reports));
             if (normalReports.isEmpty())
             {
                 selectedSummary = null;
@@ -150,6 +161,7 @@ public class TickSensePanel extends PluginPanel
             selectedSummary = null;
             activityReportPanel.showReport(null);
             lastLowConfidenceReports = new ArrayList<>();
+            trendsPanel.setTrendSummary(null);
             developerDiagnosticsPanel.refresh();
         }
     }
@@ -200,6 +212,14 @@ public class TickSensePanel extends PluginPanel
         final JButton refreshButton = new JButton("Refresh reports");
         refreshButton.addActionListener(event -> refreshReports());
         settingsPanel.add(refreshButton);
+
+        final JButton rebuildIndexButton = new JButton("Rebuild report index");
+        rebuildIndexButton.addActionListener(event -> rebuildReportIndex());
+        settingsPanel.add(rebuildIndexButton);
+
+        final JButton applyRetentionButton = new JButton("Apply retention");
+        applyRetentionButton.addActionListener(event -> applyRetention());
+        settingsPanel.add(applyRetentionButton);
 
         final JLabel note = new JLabel("Settings update local TickSense behavior only.");
         note.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
@@ -444,6 +464,42 @@ public class TickSensePanel extends PluginPanel
                 "TickSense could not export a debug bundle for the selected report.",
                 "Export debug bundle",
                 JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void rebuildReportIndex()
+    {
+        if (reportIndexMaintenanceService == null)
+        {
+            JOptionPane.showMessageDialog(this, "Report index maintenance is unavailable in this context.", "Rebuild report index", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        try
+        {
+            reportIndexMaintenanceService.rebuildIndex();
+            refreshReports();
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(this, "TickSense could not rebuild the report index right now.", "Rebuild report index", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void applyRetention()
+    {
+        if (reportIndexMaintenanceService == null)
+        {
+            JOptionPane.showMessageDialog(this, "Retention maintenance is unavailable in this context.", "Apply retention", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        try
+        {
+            reportIndexMaintenanceService.applyRetention(new RetentionPolicy(30, 100, false));
+            refreshReports();
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(this, "TickSense could not apply retention right now.", "Apply retention", JOptionPane.ERROR_MESSAGE);
         }
     }
 

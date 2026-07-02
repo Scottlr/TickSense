@@ -123,7 +123,7 @@
 | T010 | [x] | JSONL Timeline Repository | Persist and read schema-versioned normalized timelines plus activity/opportunity markers with local JSONL storage. |  | T005, T007, T008, T009 | [`tasks/T010.md`](tasks/T010.md) |
 | T011 | [x] | Activity Strategy Engine Lifecycle | Implement candidate arbitration, active-session lifecycle, termination handling, and diagnostics emission. |  | T007, T008, T009, T010 | [`tasks/T011.md`](tasks/T011.md) |
 | T016 | [x] | Metrics Engine and Timing Calculators | Add reusable tick/ms/second calculators, percentiles, score breakdowns, and metric value models. |  | T005, T008 | [`tasks/T016.md`](tasks/T016.md) |
-| T017 | [ ] | Report Model and Repository | Define stable report models, summaries, JSON persistence, report index, and delete-all-data storage control. |  | T010, T016 | [`tasks/T017.md`](tasks/T017.md) |
+| T017 | [x] | Report Model and Repository | Define stable report models, summaries, JSON persistence, report index, and delete-all-data storage control. |  | T010, T016 | [`tasks/T017.md`](tasks/T017.md) |
 | T023 | [ ] | Gem Mining Registry and Verification Fixtures | Verify gem mining evidence and create primitive ID registries and fixtures. |  | T006, T010 | [`tasks/T023.md`](tasks/T023.md) |
 | T030 | [ ] | Gem Mining Strategy and Opportunities | Detect gem mining activity and resource-node opportunities using verified telemetry. |  | T008, T011, T016, T023 | [`tasks/T030.md`](tasks/T030.md) |
 | T031 | [ ] | Gem Mining Metrics and Report Data | Generate gem mining metrics and report data for local report JSON. |  | T016, T017, T030 | [`tasks/T031.md`](tasks/T031.md) |

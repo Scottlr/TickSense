@@ -13,7 +13,7 @@ public final class TelemetryBus implements TelemetrySink
     private final CopyOnWriteArrayList<TelemetrySink> sinks = new CopyOnWriteArrayList<>();
 
     @Inject
-    TelemetryBus()
+    public TelemetryBus()
     {
     }
 

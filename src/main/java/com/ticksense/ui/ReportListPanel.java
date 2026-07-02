@@ -75,6 +75,11 @@ public class ReportListPanel extends JPanel
         });
     }
 
+    public int getReportCount()
+    {
+        return reportModel.getSize();
+    }
+
     private static final class ReportSummaryRenderer extends DefaultListCellRenderer
     {
         @Override

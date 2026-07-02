@@ -1,13 +1,11 @@
 package com.ticksense.runelite;
 
 import com.google.inject.Provides;
-import com.ticksense.activities.ActivityMarker;
-import com.ticksense.activities.ActivityMarkerSink;
-import com.ticksense.activities.ActivityRegistry;
-import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.ActivityStrategyFactory;
 import com.ticksense.activities.gemmining.GemMiningIds;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
-import com.ticksense.activities.OpportunitySink;
+import com.ticksense.core.EntityRef;
+import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
 import com.ticksense.storage.JsonReportRepository;
 import com.ticksense.storage.ReportRepository;
@@ -20,10 +18,17 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.GameObjectDespawned;
+import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GraphicChanged;
@@ -44,12 +49,15 @@ import net.runelite.api.events.WidgetDrag;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.events.WorldViewLoaded;
 import net.runelite.api.events.WorldViewUnloaded;
+import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.api.GameObject;
+import net.runelite.api.ObjectComposition;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -63,6 +71,9 @@ public class TickSensePlugin extends Plugin
     private ClientToolbar clientToolbar;
 
     @Inject
+    private Client client;
+
+    @Inject
     private RuneLiteEventCapture eventCapture;
 
     @Inject
@@ -70,6 +81,9 @@ public class TickSensePlugin extends Plugin
 
     @Inject
     private TelemetryBus telemetryBus;
+
+    @Inject
+    private RuneLiteSnapshotter snapshotter;
 
     @Inject
     private SessionTelemetryContext sessionTelemetryContext;
@@ -81,10 +95,7 @@ public class TickSensePlugin extends Plugin
     private TickSenseConfig config;
 
     @Inject
-    private ActivityStrategyEngine activityStrategyEngine;
-
-    @Inject
-    private ReportRepository reportRepository;
+    private Provider<TickSenseServices> tickSenseServicesProvider;
 
     @Inject
     private DeleteAllDataService deleteAllDataService;
@@ -94,6 +105,8 @@ public class TickSensePlugin extends Plugin
 
     private TickSensePanel panel;
     private NavigationButton navButton;
+    private TickSenseServices services;
+    private WorldLocation lastLocalPlayerLocation = WorldLocation.unknown();
 
     @Override
     protected void startUp()
@@ -107,8 +120,10 @@ public class TickSensePlugin extends Plugin
         {
             telemetryBus.addSink(debugEventRecorder);
         }
-        telemetryBus.addSink(activityStrategyEngine);
-        panel = new TickSensePanel(reportRepository, deleteAllDataService, configManager, config);
+        services = tickSenseServicesProvider.get();
+        services.start();
+        lastLocalPlayerLocation = WorldLocation.unknown();
+        panel = new TickSensePanel(services.getReportRepository(), deleteAllDataService, configManager, config);
         panel.initialize();
         navButton = NavigationButton.builder()
             .tooltip("TickSense")
@@ -124,8 +139,21 @@ public class TickSensePlugin extends Plugin
     protected void shutDown()
     {
         telemetryBus.removeSink(debugEventRecorder);
-        telemetryBus.removeSink(activityStrategyEngine);
         debugEventRecorder.close();
+        lastLocalPlayerLocation = WorldLocation.unknown();
+
+        if (services != null)
+        {
+            try
+            {
+                services.close();
+            }
+            catch (IOException ex)
+            {
+                log.warn("TickSense could not close services cleanly", ex);
+            }
+            services = null;
+        }
 
         if (navButton != null)
         {
@@ -156,48 +184,44 @@ public class TickSensePlugin extends Plugin
     }
 
     @Provides
-    ActivityRegistry provideActivityRegistry()
+    ActivityStrategyFactory provideActivityStrategyFactory()
     {
-        final ActivityRegistry.Builder builder = ActivityRegistry.builder();
         if (GemMiningIds.verificationDecision().allowsStrategyEnablement())
         {
-            builder.register(new GemMiningStrategy());
+            return () -> Collections.singletonList(new GemMiningStrategy());
         }
-        return builder.build();
+        return Collections::emptyList;
     }
 
     @Provides
-    ActivityMarkerSink provideActivityMarkerSink()
-    {
-        return new ActivityMarkerSink()
-        {
-            @Override
-            public void accept(ActivityMarker marker)
-            {
-            }
-        };
-    }
-
-    @Provides
-    OpportunitySink provideOpportunitySink()
-    {
-        return marker -> { };
-    }
-
-    @Provides
-    ActivityStrategyEngine provideActivityStrategyEngine(
-        ActivityRegistry registry,
-        ActivityMarkerSink activityMarkerSink,
-        OpportunitySink opportunitySink,
+    TickSenseServices provideTickSenseServices(
+        TelemetryBus telemetryBus,
+        SessionTelemetryContext sessionTelemetryContext,
+        ReportRepository reportRepository,
+        ActivityStrategyFactory strategyFactory,
         TickSenseConfig tickSenseConfig)
     {
-        return new ActivityStrategyEngine(registry, activityMarkerSink, opportunitySink, tickSenseConfig.debugActivityDiagnostics());
+        try
+        {
+            return TickSenseServices.createForSession(
+                telemetryBus,
+                sessionTelemetryContext.getSessionId(),
+                reportRepository,
+                strategyFactory,
+                tickSenseConfig.debugActivityDiagnostics());
+        }
+        catch (IOException ex)
+        {
+            throw new IllegalStateException("TickSense could not initialize local timeline storage", ex);
+        }
     }
 
     @Subscribe
     public void onGameTick(GameTick event)
     {
-        publish(eventCapture.onGameTickEnvelope(), envelope -> eventAdapter.mapGameTick(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.onGameTickEnvelope();
+        publish(envelope, captured -> eventAdapter.mapGameTick(event, captured));
+        publishMovementSnapshot(envelope);
     }
 
     @Subscribe
@@ -326,6 +350,18 @@ public class TickSensePlugin extends Plugin
         publish("GraphicChanged", envelope -> eventAdapter.mapGraphicChanged(event, envelope));
     }
 
+    @Subscribe
+    public void onGameObjectSpawned(GameObjectSpawned event)
+    {
+        publishGameObjectSnapshot("GameObjectSpawned", event.getGameObject(), "AVAILABLE");
+    }
+
+    @Subscribe
+    public void onGameObjectDespawned(GameObjectDespawned event)
+    {
+        publishGameObjectSnapshot("GameObjectDespawned", event.getGameObject(), "DEPLETED");
+    }
+
     private void publish(String sourceEventType, Function<RuneLiteEventEnvelope, Optional<TelemetryEnvelope>> mapper)
     {
         publish(eventCapture.captureEnvelope(sourceEventType), mapper);
@@ -334,6 +370,86 @@ public class TickSensePlugin extends Plugin
     private void publish(RuneLiteEventEnvelope envelope, Function<RuneLiteEventEnvelope, Optional<TelemetryEnvelope>> mapper)
     {
         mapper.apply(envelope).ifPresent(telemetryBus::accept);
+    }
+
+    private void publishMovementSnapshot(RuneLiteEventEnvelope envelope)
+    {
+        final WorldLocation currentLocation = snapshotter.localPlayerLocation(envelope);
+        if (WorldLocation.unknown().equals(currentLocation))
+        {
+            lastLocalPlayerLocation = currentLocation;
+            return;
+        }
+        if (!WorldLocation.unknown().equals(lastLocalPlayerLocation) && !lastLocalPlayerLocation.equals(currentLocation))
+        {
+            final int distanceTiles = Math.max(
+                Math.abs(lastLocalPlayerLocation.getX() - currentLocation.getX()),
+                Math.abs(lastLocalPlayerLocation.getY() - currentLocation.getY()));
+            eventAdapter.mapMovementSnapshot(
+                "MovementSnapshot",
+                EntityRef.localPlayer(),
+                lastLocalPlayerLocation,
+                currentLocation,
+                "WALK",
+                distanceTiles,
+                envelope).ifPresent(telemetryBus::accept);
+        }
+        lastLocalPlayerLocation = currentLocation;
+    }
+
+    private void publishGameObjectSnapshot(String sourceEventType, GameObject gameObject, String stateChange)
+    {
+        if (gameObject == null)
+        {
+            return;
+        }
+
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope(sourceEventType);
+        final ObjectComposition objectDefinition = objectDefinition(gameObject.getId());
+        final String objectName = objectDefinition == null ? "" : objectDefinition.getName();
+        final List<String> actions = objectDefinition == null || objectDefinition.getActions() == null
+            ? Collections.emptyList()
+            : Arrays.asList(objectDefinition.getActions());
+
+        eventAdapter.mapObjectSnapshot(
+            "ObjectSnapshot",
+            gameObject.getId(),
+            objectName,
+            snapshotter.worldLocation(gameObject.getWorldLocation(), envelope, false),
+            "GAME_OBJECT",
+            filterActions(actions),
+            stateChange,
+            envelope).ifPresent(telemetryBus::accept);
+    }
+
+    private ObjectComposition objectDefinition(int objectId)
+    {
+        try
+        {
+            return objectId < 0 ? null : client.getObjectDefinition(objectId);
+        }
+        catch (RuntimeException ex)
+        {
+            log.debug("Ignoring object definition lookup failure for {}", objectId, ex);
+            return null;
+        }
+    }
+
+    private static List<String> filterActions(List<String> actions)
+    {
+        if (actions == null || actions.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        final java.util.ArrayList<String> filtered = new java.util.ArrayList<>();
+        for (String action : actions)
+        {
+            if (action != null && !action.trim().isEmpty())
+            {
+                filtered.add(action);
+            }
+        }
+        return filtered;
     }
 
     private static BufferedImage createNavigationIcon()

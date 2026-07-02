@@ -47,7 +47,7 @@ public final class JsonlTimelineRepository implements TimelineRepository
         this(TickSenseDataPaths.defaultPaths(), sessionId, new Gson(), Clock.systemUTC());
     }
 
-    JsonlTimelineRepository(TickSenseDataPaths dataPaths, String sessionId, Gson gson, Clock clock) throws IOException
+    public JsonlTimelineRepository(TickSenseDataPaths dataPaths, String sessionId, Gson gson, Clock clock) throws IOException
     {
         this.dataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
         this.sessionId = requireText(sessionId, "sessionId");

@@ -1,6 +1,9 @@
 package com.ticksense.runelite;
 
 import com.google.inject.Provides;
+import com.ticksense.storage.debug.DebugEventRecorder;
+import com.ticksense.telemetry.TelemetryBus;
+import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.ui.TickSensePanel;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -36,6 +39,8 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import java.util.Optional;
+import java.util.function.Function;
 
 @Slf4j
 @PluginDescriptor(name = "TickSense")
@@ -49,12 +54,36 @@ public class TickSensePlugin extends Plugin
     @Inject
     private RuneLiteEventCapture eventCapture;
 
+    @Inject
+    private RuneLiteEventAdapter eventAdapter;
+
+    @Inject
+    private TelemetryBus telemetryBus;
+
+    @Inject
+    private SessionTelemetryContext sessionTelemetryContext;
+
+    @Inject
+    private DebugEventRecorder debugEventRecorder;
+
+    @Inject
+    private TickSenseConfig config;
+
     private TickSensePanel panel;
     private NavigationButton navButton;
 
     @Override
     protected void startUp()
     {
+        sessionTelemetryContext.resetSession();
+        debugEventRecorder.startSession(
+            config.debugEventRecorder(),
+            config.maxDebugFileSizeMb(),
+            config.maxDebugSessions());
+        if (debugEventRecorder.isActive())
+        {
+            telemetryBus.addSink(debugEventRecorder);
+        }
         panel = new TickSensePanel();
         navButton = NavigationButton.builder()
             .tooltip("TickSense")
@@ -69,6 +98,9 @@ public class TickSensePlugin extends Plugin
     @Override
     protected void shutDown()
     {
+        telemetryBus.removeSink(debugEventRecorder);
+        debugEventRecorder.close();
+
         if (navButton != null)
         {
             clientToolbar.removeNavigation(navButton);
@@ -88,103 +120,103 @@ public class TickSensePlugin extends Plugin
     @Subscribe
     public void onGameTick(GameTick event)
     {
-        eventCapture.onGameTick();
+        publish(eventCapture.onGameTickEnvelope(), envelope -> eventAdapter.mapGameTick(event, envelope));
     }
 
     @Subscribe
     public void onClientTick(ClientTick event)
     {
-        eventCapture.onClientTick();
+        publish(eventCapture.onClientTickEnvelope(), envelope -> eventAdapter.mapClientTick(event, envelope));
     }
 
     @Subscribe
     public void onPostClientTick(PostClientTick event)
     {
-        eventCapture.capture("PostClientTick");
+        publish("PostClientTick", envelope -> eventAdapter.mapPostClientTick(event, envelope));
     }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event)
     {
-        eventCapture.capture("GameStateChanged");
+        publish("GameStateChanged", envelope -> eventAdapter.mapGameStateChanged(event, envelope));
     }
 
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked event)
     {
-        eventCapture.capture("MenuOptionClicked");
+        publish("MenuOptionClicked", envelope -> eventAdapter.mapMenuOptionClicked(event, envelope));
     }
 
     @Subscribe
     public void onMenuEntryAdded(MenuEntryAdded event)
     {
-        eventCapture.capture("MenuEntryAdded");
+        publish("MenuEntryAdded", envelope -> eventAdapter.mapMenuEntryAdded(event, envelope));
     }
 
     @Subscribe
     public void onMenuOpened(MenuOpened event)
     {
-        eventCapture.capture("MenuOpened");
+        publish("MenuOpened", envelope -> eventAdapter.mapMenuOpened(event, envelope));
     }
 
     @Subscribe
     public void onNpcSpawned(NpcSpawned event)
     {
-        eventCapture.capture("NpcSpawned");
+        publish("NpcSpawned", envelope -> eventAdapter.mapNpcSpawned(event, envelope));
     }
 
     @Subscribe
     public void onNpcDespawned(NpcDespawned event)
     {
-        eventCapture.capture("NpcDespawned");
+        publish("NpcDespawned", envelope -> eventAdapter.mapNpcDespawned(event, envelope));
     }
 
     @Subscribe
     public void onNpcChanged(NpcChanged event)
     {
-        eventCapture.capture("NpcChanged");
+        publish("NpcChanged", envelope -> eventAdapter.mapNpcChanged(event, envelope));
     }
 
     @Subscribe
     public void onInteractingChanged(InteractingChanged event)
     {
-        eventCapture.capture("InteractingChanged");
+        publish("InteractingChanged", envelope -> eventAdapter.mapInteractingChanged(event, envelope));
     }
 
     @Subscribe
     public void onAnimationChanged(AnimationChanged event)
     {
-        eventCapture.capture("AnimationChanged");
+        publish("AnimationChanged", envelope -> eventAdapter.mapAnimationChanged(event, envelope));
     }
 
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event)
     {
-        eventCapture.capture("HitsplatApplied");
+        publish("HitsplatApplied", envelope -> eventAdapter.mapHitsplatApplied(event, envelope));
     }
 
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged event)
     {
-        eventCapture.capture("ItemContainerChanged");
+        publish("ItemContainerChanged", envelope -> eventAdapter.mapItemContainerChanged(event, envelope));
     }
 
     @Subscribe
     public void onStatChanged(StatChanged event)
     {
-        eventCapture.capture("StatChanged");
+        publish("StatChanged", envelope -> eventAdapter.mapStatChanged(event, envelope));
     }
 
     @Subscribe
     public void onWidgetLoaded(WidgetLoaded event)
     {
-        eventCapture.capture("WidgetLoaded");
+        publish("WidgetLoaded", envelope -> eventAdapter.mapWidgetLoaded(event, envelope));
     }
 
     @Subscribe
     public void onWidgetClosed(WidgetClosed event)
     {
-        eventCapture.capture("WidgetClosed");
+        publish("WidgetClosed", envelope -> eventAdapter.mapWidgetClosed(event, envelope));
     }
 
     @Subscribe
@@ -196,25 +228,35 @@ public class TickSensePlugin extends Plugin
     @Subscribe
     public void onWorldViewLoaded(WorldViewLoaded event)
     {
-        eventCapture.capture("WorldViewLoaded");
+        publish("WorldViewLoaded", envelope -> eventAdapter.mapWorldViewLoaded(event, envelope));
     }
 
     @Subscribe
     public void onWorldViewUnloaded(WorldViewUnloaded event)
     {
-        eventCapture.capture("WorldViewUnloaded");
+        publish("WorldViewUnloaded", envelope -> eventAdapter.mapWorldViewUnloaded(event, envelope));
     }
 
     @Subscribe
     public void onProjectileMoved(ProjectileMoved event)
     {
-        eventCapture.capture("ProjectileMoved");
+        publish("ProjectileMoved", envelope -> eventAdapter.mapProjectileMoved(event, envelope));
     }
 
     @Subscribe
     public void onGraphicChanged(GraphicChanged event)
     {
-        eventCapture.capture("GraphicChanged");
+        publish("GraphicChanged", envelope -> eventAdapter.mapGraphicChanged(event, envelope));
+    }
+
+    private void publish(String sourceEventType, Function<RuneLiteEventEnvelope, Optional<TelemetryEnvelope>> mapper)
+    {
+        publish(eventCapture.captureEnvelope(sourceEventType), mapper);
+    }
+
+    private void publish(RuneLiteEventEnvelope envelope, Function<RuneLiteEventEnvelope, Optional<TelemetryEnvelope>> mapper)
+    {
+        mapper.apply(envelope).ifPresent(telemetryBus::accept);
     }
 
     private static BufferedImage createNavigationIcon()

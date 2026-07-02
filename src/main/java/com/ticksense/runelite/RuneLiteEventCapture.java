@@ -26,14 +26,24 @@ public final class RuneLiteEventCapture
 
     public void onGameTick()
     {
+        onGameTickEnvelope();
+    }
+
+    public RuneLiteEventEnvelope onGameTickEnvelope()
+    {
         clock.advanceGameTick();
-        capture("GameTick");
+        return captureEnvelope("GameTick");
     }
 
     public void onClientTick()
     {
+        onClientTickEnvelope();
+    }
+
+    public RuneLiteEventEnvelope onClientTickEnvelope()
+    {
         clock.advanceClientTick();
-        capture("ClientTick");
+        return captureEnvelope("ClientTick");
     }
 
     public void capture(String sourceEventType)

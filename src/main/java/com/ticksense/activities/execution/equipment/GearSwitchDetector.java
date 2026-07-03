@@ -5,6 +5,9 @@ import java.util.Set;
 
 final class GearSwitchDetector
 {
+    private static final int MIN_VALID_ITEM_ID = 1;
+    private static final int SINGLE_ITEM_QUANTITY = 1;
+
     private GearSwitchDetector()
     {
     }
@@ -19,15 +22,30 @@ final class GearSwitchDetector
         // TODO: Verify normalized equipment-container IDs from real RuneLite fixtures.
         for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
         {
-            if (delta.getBeforeItemId() > 0
-                && delta.getAfterItemId() > 0
-                && delta.getBeforeItemId() != delta.getAfterItemId()
-                && delta.getBeforeQuantity() == 1
-                && delta.getAfterQuantity() == 1)
+            if (looksLikeEquipmentSwap(delta))
             {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean looksLikeEquipmentSwap(InventoryDeltaTelemetryEvent.ItemDelta delta)
+    {
+        return isValidItemId(delta.getBeforeItemId())
+            && isValidItemId(delta.getAfterItemId())
+            && delta.getBeforeItemId() != delta.getAfterItemId()
+            && isSingleQuantitySwap(delta);
+    }
+
+    private static boolean isValidItemId(int itemId)
+    {
+        return itemId >= MIN_VALID_ITEM_ID;
+    }
+
+    private static boolean isSingleQuantitySwap(InventoryDeltaTelemetryEvent.ItemDelta delta)
+    {
+        return delta.getBeforeQuantity() == SINGLE_ITEM_QUANTITY
+            && delta.getAfterQuantity() == SINGLE_ITEM_QUANTITY;
     }
 }

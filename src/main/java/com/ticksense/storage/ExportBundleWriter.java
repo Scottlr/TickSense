@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.ticksense.activities.ActivityDiagnostic;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.common.TextValues;
+import com.ticksense.storage.debug.DebugEventLogRepository;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -70,6 +71,8 @@ public final class ExportBundleWriter
         {
             throw new IOException("No timeline data found for activity " + report.getActivityId().getValue());
         }
+        final ActivityTimelineWindow activityWindow = JsonlTimelineRepository.readActivityWindow(dataPaths, report.getActivityId(), gson);
+        final List<String> debugLines = new DebugEventLogRepository(dataPaths, gson).readLines(activityWindow);
 
         Files.createDirectories(normalizedDestinationDirectory);
         final Path zipPath = normalizedDestinationDirectory.resolve("ticksense-bundle-" + normalizedReportId + ".zip");
@@ -84,6 +87,7 @@ public final class ExportBundleWriter
             addJsonEntry(zipOutputStream, "activity.json", activitySnapshot(report));
             addLinesEntry(zipOutputStream, "timeline.jsonl", timelineLines);
             addLinesEntry(zipOutputStream, "diagnostics.jsonl", diagnosticsLines());
+            addLinesEntry(zipOutputStream, "debug-events.jsonl", debugLines);
         }
         catch (IOException ex)
         {

@@ -250,6 +250,65 @@ public final class JsonlTimelineRepository implements TimelineRepository
         return Collections.unmodifiableList(filteredLines);
     }
 
+    public static ActivityTimelineWindow readActivityWindow(TickSenseDataPaths dataPaths, ActivityId activityId, Gson gson) throws IOException
+    {
+        final List<TimelineRecord> records = readActivityRecords(dataPaths, activityId, gson);
+        if (records.isEmpty())
+        {
+            throw new IOException("No timeline data found for activity " + activityId.getValue());
+        }
+        return new ActivityTimelineWindow(records.get(0).getTime(), records.get(records.size() - 1).getTime());
+    }
+
+    private static List<TimelineRecord> readActivityRecords(TickSenseDataPaths dataPaths, ActivityId activityId, Gson gson) throws IOException
+    {
+        final List<RawTimelineLine> lines = readAllRawTimelineLines(
+            Objects.requireNonNull(dataPaths, "dataPaths"),
+            Objects.requireNonNull(gson, "gson"));
+        final ActivityId normalizedActivityId = Objects.requireNonNull(activityId, "activityId");
+
+        final List<ActivityMarker> markers = new ArrayList<>();
+        for (RawTimelineLine line : lines)
+        {
+            if (line.record.getType() == TimelineRecordType.ACTIVITY_MARKER
+                && normalizedActivityId.equals(line.record.getActivityId()))
+            {
+                markers.add(line.record.getActivityMarker());
+            }
+        }
+        if (markers.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+
+        final long startMillis = markers.get(0).getTime().getWallTimeMillis();
+        final long endMillis = markers.get(markers.size() - 1).getTime().getWallTimeMillis();
+        final List<TimelineRecord> filtered = new ArrayList<>();
+        for (RawTimelineLine line : lines)
+        {
+            switch (line.record.getType())
+            {
+                case TELEMETRY_EVENT:
+                    final long eventMillis = line.record.getTime().getWallTimeMillis();
+                    if (eventMillis >= startMillis && eventMillis <= endMillis)
+                    {
+                        filtered.add(line.record);
+                    }
+                    break;
+                case ACTIVITY_MARKER:
+                case OPPORTUNITY_MARKER:
+                    if (normalizedActivityId.equals(line.record.getActivityId()))
+                    {
+                        filtered.add(line.record);
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported timeline record type: " + line.record.getType());
+            }
+        }
+        return Collections.unmodifiableList(filtered);
+    }
+
     private List<TimelineRecord> readAllRecords() throws IOException
     {
         corruptLineCount = 0;

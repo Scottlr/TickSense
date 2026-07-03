@@ -82,7 +82,7 @@ public final class JsonReportRepository implements ReportRepository
         }
 
         final List<ReportSummary> reports = loadIndex();
-        return Collections.unmodifiableList(new ArrayList<>(reports.subList(0, Math.min(limit, reports.size()))));
+        return StorageCollections.immutableHead(reports, limit);
     }
 
     public synchronized List<ReportSummary> rebuildIndex() throws IOException
@@ -139,7 +139,7 @@ public final class JsonReportRepository implements ReportRepository
             summaries.sort(Comparator
                 .comparingLong(ReportSummary::getCreatedAtMillis).reversed()
                 .thenComparing(ReportSummary::getReportId));
-            return Collections.unmodifiableList(summaries);
+            return StorageCollections.immutableList(summaries);
         }
     }
 
@@ -163,7 +163,7 @@ public final class JsonReportRepository implements ReportRepository
                 summaries.add(Objects.requireNonNull(summary, "report summary").toReportSummary());
             }
         }
-        return Collections.unmodifiableList(summaries);
+        return StorageCollections.immutableList(summaries);
     }
 
     private ActivityReport readReport(Path path) throws IOException

@@ -4,8 +4,6 @@ import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.core.ActivityId;
 import com.ticksense.telemetry.TelemetryEnvelope;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,9 +21,9 @@ public final class CompletedActivityTimeline
         List<OpportunityMarker> opportunityMarkers)
     {
         this.activityId = Objects.requireNonNull(activityId, "activityId");
-        this.telemetryEvents = immutableList(telemetryEvents);
-        this.activityMarkers = immutableList(activityMarkers);
-        this.opportunityMarkers = immutableList(opportunityMarkers);
+        this.telemetryEvents = StorageCollections.immutableList(telemetryEvents);
+        this.activityMarkers = StorageCollections.immutableList(activityMarkers);
+        this.opportunityMarkers = StorageCollections.immutableList(opportunityMarkers);
     }
 
     public ActivityId getActivityId()
@@ -46,14 +44,5 @@ public final class CompletedActivityTimeline
     public List<OpportunityMarker> getOpportunityMarkers()
     {
         return opportunityMarkers;
-    }
-
-    private static <T> List<T> immutableList(List<T> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(values));
     }
 }

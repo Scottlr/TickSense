@@ -39,6 +39,12 @@ public class FinishReasonTest
         reason.getEvidence().add("mutation");
     }
 
+    @Test
+    public void formatsReadableDisplayNames()
+    {
+        assertEquals("Idle Timeout", FinishReasonType.IDLE_TIMEOUT.displayName());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void rejectsConfidenceOutsideUnitRange()
     {

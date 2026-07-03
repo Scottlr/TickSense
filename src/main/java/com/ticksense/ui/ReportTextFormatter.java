@@ -15,6 +15,7 @@ import java.util.Map;
 final class ReportTextFormatter
 {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.US));
+    private static final String UNKNOWN = "Unknown";
 
     private ReportTextFormatter()
     {
@@ -33,7 +34,7 @@ final class ReportTextFormatter
     {
         if (durationMillis <= 0L && durationTicks <= 0)
         {
-            return "Unknown";
+            return UNKNOWN;
         }
 
         final long totalTenths = Math.max(0L, durationMillis / 100L);
@@ -52,28 +53,16 @@ final class ReportTextFormatter
     {
         if (finishReasonType == null)
         {
-            return "Unknown";
+            return UNKNOWN;
         }
-
-        final String[] words = finishReasonType.name().split("_");
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < words.length; i++)
-        {
-            if (i > 0)
-            {
-                builder.append(' ');
-            }
-            final String word = words[i].toLowerCase(Locale.US);
-            builder.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
-        }
-        return builder.toString();
+        return finishReasonType.displayName();
     }
 
     static String gradeForMetrics(Map<String, MetricValue> metrics)
     {
         if (metrics == null || metrics.isEmpty())
         {
-            return "Unknown";
+            return UNKNOWN;
         }
 
         for (MetricValue metric : metrics.values())
@@ -117,14 +106,14 @@ final class ReportTextFormatter
             }
         }
 
-        return "Unknown";
+        return UNKNOWN;
     }
 
     static String formatMetricValue(MetricValue metricValue)
     {
         if (metricValue == null)
         {
-            return "Unknown";
+            return UNKNOWN;
         }
 
         final double value = metricValue.getValue();
@@ -175,7 +164,7 @@ final class ReportTextFormatter
     {
         if (evidence == null || evidence.isEmpty())
         {
-            return "Unknown";
+            return UNKNOWN;
         }
         return String.join(" | ", evidence);
     }
@@ -184,7 +173,7 @@ final class ReportTextFormatter
     {
         if (report == null || report.getSummaryLines().size() <= index)
         {
-            return "Unknown";
+            return UNKNOWN;
         }
         return report.getSummaryLines().get(index);
     }

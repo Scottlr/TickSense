@@ -90,17 +90,27 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
     @Override
     public synchronized void accept(TelemetryEnvelope envelope)
     {
-        if (!active || writer == null)
-        {
-            return;
-        }
-
         final String telemetryJson = TelemetryJson.toJsonLine(envelope);
         final DebugEventRecord record = DebugEventRecord.normalizedTelemetry(
             envelope.getSessionId(),
             envelope.getEvent().getTags().getOrDefault("source", envelope.getEvent().getType()),
             envelope.getEvent().getTime(),
             telemetryJson);
+        write(record);
+    }
+
+    public synchronized void record(DebugEventKind kind, String sessionId, String sourceEventType, com.ticksense.core.EventTime time, String payloadJson)
+    {
+        write(DebugEventRecord.of(kind, sessionId, sourceEventType, time, payloadJson));
+    }
+
+    private void write(DebugEventRecord record)
+    {
+        if (!active || writer == null)
+        {
+            return;
+        }
+
         final String jsonLine = gson.toJson(record) + System.lineSeparator();
         final byte[] lineBytes = jsonLine.getBytes(StandardCharsets.UTF_8);
         if (debugLimits.exceedsMaxFileBytes(bytesWritten, lineBytes.length))

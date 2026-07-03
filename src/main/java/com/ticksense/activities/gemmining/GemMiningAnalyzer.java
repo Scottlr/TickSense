@@ -13,6 +13,7 @@ import com.ticksense.analytics.OpportunityTimelineEntry;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
@@ -182,8 +183,8 @@ public final class GemMiningAnalyzer
             worst = Math.max(worst, latency);
         }
         return java.util.Arrays.asList(
-            "Best execution: Rock response " + formatTicks(best) + " ticks",
-            "Worst execution: Rock response " + formatTicks(worst) + " ticks");
+            "Best execution: Rock response " + TickValueFormatter.formatTicks(best) + " ticks",
+            "Worst execution: Rock response " + TickValueFormatter.formatTicks(worst) + " ticks");
     }
 
     private static ExecutionScore buildExecutionScore(
@@ -303,12 +304,4 @@ public final class GemMiningAnalyzer
         return value == null ? "" : value.trim();
     }
 
-    private static String formatTicks(double value)
-    {
-        if (Math.rint(value) == value)
-        {
-            return String.valueOf((int) Math.rint(value));
-        }
-        return String.format(Locale.US, "%.1f", value);
-    }
 }

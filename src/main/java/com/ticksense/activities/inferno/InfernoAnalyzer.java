@@ -11,6 +11,7 @@ import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineEntry;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -164,7 +165,7 @@ public final class InfernoAnalyzer
         }
 
         return java.util.Arrays.asList(
-            "Best execution: Nibbler response " + formatTicks(minimum(nibblerResponses)) + " ticks",
+            "Best execution: Nibbler response " + TickValueFormatter.formatTicks(minimum(nibblerResponses)) + " ticks",
             "Death timeline captured " + deathTimelineEvents + " events");
     }
 
@@ -262,12 +263,4 @@ public final class InfernoAnalyzer
         return value == null ? "" : value.trim();
     }
 
-    private static String formatTicks(double value)
-    {
-        if (Math.rint(value) == value)
-        {
-            return String.valueOf((int) Math.rint(value));
-        }
-        return String.format(Locale.US, "%.1f", value);
-    }
 }

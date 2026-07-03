@@ -12,6 +12,7 @@ import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineEntry;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -198,7 +199,7 @@ public final class VardorvisAnalyzer
         }
 
         return java.util.Arrays.asList(
-            "Best execution: Ranged head response " + formatTicks(minimum(responseLatencies)) + " ticks",
+            "Best execution: Ranged head response " + TickValueFormatter.formatTicks(minimum(responseLatencies)) + " ticks",
             "Damage during opportunities: " + damageDuringOpportunities);
     }
 
@@ -290,12 +291,4 @@ public final class VardorvisAnalyzer
         return value == null ? "" : value.trim();
     }
 
-    private static String formatTicks(double value)
-    {
-        if (Math.rint(value) == value)
-        {
-            return String.valueOf((int) Math.rint(value));
-        }
-        return String.format(Locale.US, "%.1f", value);
-    }
 }

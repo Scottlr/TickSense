@@ -13,6 +13,7 @@ import com.ticksense.analytics.OpportunityTimelineEntry;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -201,8 +202,8 @@ public final class ConstructionAnalyzer
         final double bestMenuLatency = menuLatencies.isEmpty() ? 0.0D : minimum(menuLatencies);
         final double longestCycle = inventoryCycleLatencies.isEmpty() ? 0.0D : maximum(inventoryCycleLatencies);
         return java.util.Arrays.asList(
-            "Best execution: Menu latency " + formatTicks(bestMenuLatency) + " ticks",
-            "Longest cycle: Inventory cycle " + formatTicks(longestCycle) + " ticks");
+            "Best execution: Menu latency " + TickValueFormatter.formatTicks(bestMenuLatency) + " ticks",
+            "Longest cycle: Inventory cycle " + TickValueFormatter.formatTicks(longestCycle) + " ticks");
     }
 
     private static ExecutionScore buildExecutionScore(
@@ -319,12 +320,4 @@ public final class ConstructionAnalyzer
         return value == null ? "" : value.trim();
     }
 
-    private static String formatTicks(double value)
-    {
-        if (Math.rint(value) == value)
-        {
-            return String.valueOf((int) Math.rint(value));
-        }
-        return String.format(Locale.US, "%.1f", value);
-    }
 }

@@ -82,7 +82,7 @@
 | `com.ticksense.core` | Shared primitives such as IDs, time, entity refs, locations, finish reasons, sessions. | T004, T009, T010 |
 | `com.ticksense.telemetry` | Normalized event interfaces/classes, categories, JSON serialization, telemetry bus contracts. | T005, T006, T007 |
 | `com.ticksense.activities` | Opportunity model, execution trackers, strategy interfaces, registry, candidate arbitration, activity lifecycle. | T008, T009, T011 |
-| `com.ticksense.activities.execution` | Reusable execution tracker contracts and presets; concrete trackers are grouped under `execution.recovery`, `execution.equipment`, `execution.prayer`, and `execution.movement`. | Post-MVP tracker PRs |
+| `com.ticksense.activities.execution` | Reusable execution tracker contracts and presets; concrete trackers are grouped under `execution.recovery`, `execution.equipment`, `execution.prayer`, and `execution.movement` for food, potion, gear, gear-follow-up attack, prayer, target, and movement behaviors. | Post-MVP tracker PRs |
 | `com.ticksense.activities.gemmining` | Gem mining verification, strategy, and analyzer. | T023, T030, T031 |
 | `com.ticksense.activities.araxxor` | Post-MVP Araxxor IDs, verification gates/fixtures, strategy, spider opportunities, boss report data. | T014, T029, T015 |
 | `com.ticksense.activities.construction` | Construction verification, strategy, and analyzer. | T024, T032, T033 |

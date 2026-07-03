@@ -10,12 +10,15 @@ import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.activities.execution.recovery.FoodRecoveryTracker;
+import com.ticksense.activities.execution.recovery.PotionRecoveryTracker;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReasonType;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
+import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
@@ -63,6 +66,28 @@ public class InfernoStrategyTest
         final ActivityReportData data = harness.engine.getCompletedActivityData().get(0);
         assertEquals("1", data.getAttributes().get("nibblerResponseCount"));
         assertEquals("1", data.getAttributes().get("supplyUseCount"));
+
+        final OpportunityMarker potion = harness.terminalOpportunity(
+            PotionRecoveryTracker.ID + "." + PotionRecoveryTracker.OPPORTUNITY_POTION_RECOVERY,
+            OpportunityStatus.COMPLETED);
+        assertEquals(707, potion.getTime().getGameTick());
+    }
+
+    @Test
+    public void emitsReusableFoodRecoveryOpportunity()
+    {
+        final Harness harness = new Harness(verifiedStrategy());
+
+        harness.accept(regionEvent(700, infernoLocation(), "LOGGED_IN"));
+        harness.accept(waveNpcSpawnEvent(701, 7691));
+        harness.accept(localDamageEvent(702, 31, 55));
+        harness.accept(supplyUseEvent(703, 385));
+        harness.accept(regionEvent(720, outsideLocation(), "LOGGED_IN"));
+
+        final OpportunityMarker recovery = harness.terminalOpportunity(
+            FoodRecoveryTracker.ID + "." + FoodRecoveryTracker.OPPORTUNITY_FOOD_RECOVERY,
+            OpportunityStatus.COMPLETED);
+        assertEquals(703, recovery.getTime().getGameTick());
     }
 
     @Test
@@ -195,6 +220,20 @@ public class InfernoStrategyTest
                 Collections.singletonMap("source", "ItemContainerChanged"),
                 93,
                 Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, itemId, 2, itemId, 1))));
+    }
+
+    private static TelemetryEnvelope localDamageEvent(int tick, int amount, int healthRatio)
+    {
+        return envelope(
+            "damage-" + tick,
+            new DamageTelemetryEvent(
+                time(tick),
+                Collections.singletonMap("source", "HitsplatApplied"),
+                EntityRef.localPlayer(),
+                1,
+                amount,
+                healthRatio,
+                99));
     }
 
     private static TelemetryEnvelope envelope(String eventId, TelemetryEvent event)

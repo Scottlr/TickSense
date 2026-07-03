@@ -6,11 +6,13 @@ import static org.junit.Assert.assertTrue;
 import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.activities.execution.equipment.GearSwitchAttackTracker;
 import com.ticksense.activities.execution.equipment.GearSwitchTracker;
 import com.ticksense.activities.execution.movement.MovementResponseTracker;
 import com.ticksense.activities.execution.movement.TargetReengagementTracker;
 import com.ticksense.activities.execution.prayer.PrayerSwitchTracker;
 import com.ticksense.activities.execution.recovery.FoodRecoveryTracker;
+import com.ticksense.activities.execution.recovery.PotionRecoveryTracker;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
@@ -54,6 +56,23 @@ public class ExecutionTrackerTest
     }
 
     @Test
+    public void foodRecoveryIgnoresLethalDamage()
+    {
+        final Harness harness = new Harness(new FoodRecoveryTracker());
+
+        harness.accept(new DamageTelemetryEvent(
+            time(150),
+            tags(),
+            EntityRef.localPlayer(),
+            1,
+            32,
+            0,
+            99));
+
+        assertTrue(harness.markers.isEmpty());
+    }
+
+    @Test
     public void targetReengagementCompletesOnNpcAttackAfterTargetLoss()
     {
         final Harness harness = new Harness(new TargetReengagementTracker());
@@ -94,6 +113,88 @@ public class ExecutionTrackerTest
         assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
         assertEquals(OpportunityStatus.COMPLETED, harness.markers.get(1).getStatus());
         assertEquals("gear-switch.GEAR_SWITCH", harness.markers.get(1).getOpportunityType());
+    }
+
+    @Test
+    public void gearSwitchIgnoresInventoryPotionDoseReplacement()
+    {
+        final Harness harness = new Harness(new GearSwitchTracker());
+
+        harness.accept(new InventoryDeltaTelemetryEvent(
+            time(350),
+            tags(),
+            93,
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 2434, 1, 139, 1))));
+
+        assertTrue(harness.markers.isEmpty());
+    }
+
+    @Test
+    public void gearSwitchAttackCompletesOnNpcAttackAfterEquipmentSwitch()
+    {
+        final Harness harness = new Harness(new GearSwitchAttackTracker());
+
+        harness.accept(new InventoryDeltaTelemetryEvent(
+            time(355),
+            tags(),
+            94,
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, 11802, 1, 11804, 1))));
+        harness.accept(new PlayerActionTelemetryEvent(
+            time(356),
+            tags(),
+            "Attack",
+            "Araxxor",
+            EntityRef.npc(1, 13668, "Araxxor"),
+            "NPC_FIRST_OPTION",
+            location(),
+            0));
+
+        assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
+        assertEquals(OpportunityStatus.COMPLETED, harness.markers.get(1).getStatus());
+        assertEquals("gear-switch-attack.GEAR_SWITCH_ATTACK", harness.markers.get(1).getOpportunityType());
+        assertEquals("1", harness.markers.get(1).getContext().get("deltaCount"));
+    }
+
+    @Test
+    public void gearSwitchAttackWaitsForAttackAction()
+    {
+        final Harness harness = new Harness(new GearSwitchAttackTracker());
+
+        harness.accept(new InventoryDeltaTelemetryEvent(
+            time(358),
+            tags(),
+            94,
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, 11802, 1, 11804, 1))));
+        harness.accept(new PlayerActionTelemetryEvent(
+            time(359),
+            tags(),
+            "Walk here",
+            "",
+            EntityRef.unknown(),
+            "WALK",
+            location(),
+            0));
+
+        assertEquals(1, harness.markers.size());
+        assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
+    }
+
+    @Test
+    public void potionRecoveryCompletesWhenKnownPotionIsConsumed()
+    {
+        final Harness harness = new Harness(new PotionRecoveryTracker());
+
+        harness.accept(new InventoryDeltaTelemetryEvent(
+            time(360),
+            tags(),
+            93,
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 2434, 1, 139, 1))));
+
+        assertEquals(2, harness.markers.size());
+        assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
+        assertEquals(OpportunityStatus.COMPLETED, harness.markers.get(1).getStatus());
+        assertEquals("potion-recovery.POTION_RECOVERY", harness.markers.get(1).getOpportunityType());
+        assertEquals("2434", harness.markers.get(1).getContext().get("potionItemId"));
     }
 
     @Test
@@ -177,7 +278,7 @@ public class ExecutionTrackerTest
     }
 
     @Test
-    public void combatSupportPresetIncludesFoodRecovery()
+    public void combatSupportPresetIncludesRecoveryTrackers()
     {
         final Harness harness = new Harness(CommonExecutionTrackers.combatSupport());
 
@@ -194,9 +295,15 @@ public class ExecutionTrackerTest
             tags(),
             93,
             Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 385, 1, -1, 0))));
+        harness.accept(new InventoryDeltaTelemetryEvent(
+            time(702),
+            tags(),
+            93,
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 2434, 1, 139, 1))));
 
-        assertEquals(2, harness.markers.size());
+        assertEquals(4, harness.markers.size());
         assertEquals("food-recovery.FOOD_RECOVERY", harness.markers.get(1).getOpportunityType());
+        assertEquals("potion-recovery.POTION_RECOVERY", harness.markers.get(3).getOpportunityType());
     }
 
     private static final class Harness

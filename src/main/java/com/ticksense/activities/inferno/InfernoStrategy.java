@@ -96,11 +96,13 @@ public final class InfernoStrategy implements ActivityStrategy
     public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
     {
         state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
+        state.noteReusableExecutionEvent(context, session, event);
         state.flushActivationDerivedSpans();
 
         if (event instanceof RegionInstanceTelemetryEvent)
         {
             state.updateRegion(((RegionInstanceTelemetryEvent) event).getLocalPlayerLocation());
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof NpcStateTelemetryEvent)
@@ -108,22 +110,26 @@ public final class InfernoStrategy implements ActivityStrategy
             final NpcStateTelemetryEvent npc = (NpcStateTelemetryEvent) event;
             state.noteWaveNpc(npc);
             state.noteNibblerNpc(npc);
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof InteractingChangedTelemetryEvent)
         {
             state.noteNibblerInteraction((InteractingChangedTelemetryEvent) event);
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof InventoryDeltaTelemetryEvent)
         {
             state.noteSupplyUsage((InventoryDeltaTelemetryEvent) event);
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof DamageTelemetryEvent)
         {
             state.noteDamage((DamageTelemetryEvent) event);
         }
+        state.expireTimedOut(event.getTime());
     }
 
     @Override

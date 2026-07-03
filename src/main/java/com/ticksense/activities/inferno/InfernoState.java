@@ -1,15 +1,20 @@
 package com.ticksense.activities.inferno;
 
+import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.activities.OpportunityLifecycle;
+import com.ticksense.activities.execution.CommonExecutionTrackers;
+import com.ticksense.activities.execution.ExecutionTrackerSet;
 import com.ticksense.core.ActivityId;
+import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
@@ -46,6 +51,7 @@ final class InfernoState
     private final int[] waveNpcIds;
     private final int[] supplyItemIds;
     private final int[] verifiedRegionIds;
+    private final ExecutionTrackerSet reusableExecutionTrackers = CommonExecutionTrackers.combatSupport();
 
     private int currentRegionId = -1;
     private ActivityId activeActivityId;
@@ -117,6 +123,7 @@ final class InfernoState
     void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
+        reusableExecutionTrackers.startActivity(activityId);
     }
 
     void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
@@ -125,6 +132,12 @@ final class InfernoState
         {
             opportunityLifecycle = nextLifecycle;
         }
+        reusableExecutionTrackers.ensureOpportunityLifecycle(nextLifecycle);
+    }
+
+    void noteReusableExecutionEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
+    {
+        reusableExecutionTrackers.onEvent(context, session, event);
     }
 
     void flushActivationDerivedSpans()
@@ -242,6 +255,20 @@ final class InfernoState
                 Collections.singletonList(new OpportunityEvidence(time, "region.instance", EvidenceStrength.CONFIRMING, detail)));
             nibblerWindow = null;
         }
+        reusableExecutionTrackers.cancelOpenOpportunities(time, detail);
+    }
+
+    void expireTimedOut(EventTime time)
+    {
+        if (opportunityLifecycle != null)
+        {
+            opportunityLifecycle.expireTimedOut(time);
+        }
+        reusableExecutionTrackers.expireTimedOut(time);
+        if (!isOpen(nibblerWindow))
+        {
+            nibblerWindow = null;
+        }
     }
 
     Map<String, String> snapshotAttributes()
@@ -266,6 +293,7 @@ final class InfernoState
         pendingWave = null;
         waveSpan = null;
         nibblerWindow = null;
+        reusableExecutionTrackers.reset();
         waveSpanCount = 0;
         nibblerResponseCount = 0;
         supplyUseCount = 0;

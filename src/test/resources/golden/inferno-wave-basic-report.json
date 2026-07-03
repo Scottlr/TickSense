@@ -61,6 +61,17 @@
       ]
     },
     {
+      "type": "potion-recovery.POTION_RECOVERY",
+      "label": "potion-recovery.potion_recovery",
+      "status": "COMPLETED",
+      "gameTick": 707,
+      "latencyTicks": 0,
+      "latencyMillis": 0,
+      "evidenceSummary": [
+        "Potion item 2434 was consumed or dosed down."
+      ]
+    },
+    {
       "type": "INFERNO_WAVE",
       "label": "Wave span",
       "status": "COMPLETED",

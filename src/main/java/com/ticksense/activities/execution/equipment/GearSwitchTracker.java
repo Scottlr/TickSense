@@ -20,7 +20,7 @@ public final class GearSwitchTracker extends AbstractExecutionTracker
 
     public GearSwitchTracker()
     {
-        this(new HashSet<Integer>());
+        this(GearSwitchDetector.defaultEquipmentContainerIds());
     }
 
     public GearSwitchTracker(Set<Integer> equipmentContainerIds)
@@ -42,7 +42,7 @@ public final class GearSwitchTracker extends AbstractExecutionTracker
             return;
         }
         final InventoryDeltaTelemetryEvent inventory = (InventoryDeltaTelemetryEvent) event;
-        if (!isLikelyGearSwitch(inventory))
+        if (!GearSwitchDetector.isLikelyGearSwitch(inventory, equipmentContainerIds))
         {
             return;
         }
@@ -61,25 +61,4 @@ public final class GearSwitchTracker extends AbstractExecutionTracker
         complete(instance, inventory.getTime(), InventoryDeltaTelemetryEvent.TYPE, "Detected an equipment-style item replacement.");
     }
 
-    private boolean isLikelyGearSwitch(InventoryDeltaTelemetryEvent event)
-    {
-        if (!equipmentContainerIds.isEmpty())
-        {
-            return equipmentContainerIds.contains(event.getContainerId()) && !event.getDeltas().isEmpty();
-        }
-
-        // TODO: Replace this heuristic with verified normalized equipment-container IDs.
-        for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
-        {
-            if (delta.getBeforeItemId() > 0
-                && delta.getAfterItemId() > 0
-                && delta.getBeforeItemId() != delta.getAfterItemId()
-                && delta.getBeforeQuantity() == 1
-                && delta.getAfterQuantity() == 1)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
 }

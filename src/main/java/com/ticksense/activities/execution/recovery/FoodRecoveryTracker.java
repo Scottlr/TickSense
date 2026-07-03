@@ -63,7 +63,9 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
 
     private void openAfterDamage(ActivitySession session, DamageTelemetryEvent event)
     {
-        if (event.getTargetRef().getType() != EntityRef.Type.LOCAL_PLAYER || isOpen(recoveryWindow))
+        if (event.getTargetRef().getType() != EntityRef.Type.LOCAL_PLAYER
+            || event.getHealthRatio() <= 0
+            || isOpen(recoveryWindow))
         {
             return;
         }

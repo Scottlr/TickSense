@@ -1,10 +1,12 @@
 package com.ticksense.activities.execution;
 
+import com.ticksense.activities.execution.equipment.GearSwitchAttackTracker;
 import com.ticksense.activities.execution.equipment.GearSwitchTracker;
 import com.ticksense.activities.execution.movement.MovementResponseTracker;
 import com.ticksense.activities.execution.movement.TargetReengagementTracker;
 import com.ticksense.activities.execution.prayer.PrayerSwitchTracker;
 import com.ticksense.activities.execution.recovery.FoodRecoveryTracker;
+import com.ticksense.activities.execution.recovery.PotionRecoveryTracker;
 
 public final class CommonExecutionTrackers
 {
@@ -26,7 +28,9 @@ public final class CommonExecutionTrackers
         return ExecutionTrackerSet.of(
             "combat-support",
             new FoodRecoveryTracker(),
+            new PotionRecoveryTracker(),
             new GearSwitchTracker(),
+            new GearSwitchAttackTracker(),
             new PrayerSwitchTracker());
     }
 

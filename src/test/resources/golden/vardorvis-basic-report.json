@@ -70,6 +70,15 @@
       "evidenceSummary": [
         "Local player took 18 damage during the verified Vardorvis ranged-head window."
       ]
+    },
+    {
+      "type": "food-recovery.FOOD_RECOVERY",
+      "label": "food-recovery.food_recovery",
+      "status": "EXPIRED",
+      "gameTick": 520,
+      "latencyTicks": 7,
+      "latencyMillis": 4200,
+      "evidenceSummary": []
     }
   ],
   "tickLossBreakdown": {

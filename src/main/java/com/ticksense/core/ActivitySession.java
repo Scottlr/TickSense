@@ -1,8 +1,5 @@
 package com.ticksense.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,8 +29,8 @@ public final class ActivitySession
         this.endTime = endTime;
         this.finishReason = finishReason;
         validateFinishState(endTime, finishReason);
-        this.spans = immutableList(spans);
-        this.metadata = immutableMap(metadata);
+        this.spans = CoreCollections.immutableList(spans);
+        this.metadata = CoreCollections.immutableStringMap(metadata);
     }
 
     public ActivitySession finish(FinishReason finishReason)
@@ -80,24 +77,6 @@ public final class ActivitySession
     public Map<String, String> getMetadata()
     {
         return metadata;
-    }
-
-    private static List<ActivitySpan> immutableList(List<ActivitySpan> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(source));
-    }
-
-    private static Map<String, String> immutableMap(Map<String, String> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(source));
     }
 
     private static void validateFinishState(EventTime endTime, FinishReason finishReason)

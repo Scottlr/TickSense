@@ -39,6 +39,7 @@ public class TickSensePanel extends PluginPanel
     private static final String CONFIG_GROUP = "ticksense";
     private static final int RECENT_REPORT_LIMIT = 20;
     private static final double NORMAL_CONFIDENCE_THRESHOLD = 0.75D;
+    private static final RetentionPolicy DEFAULT_RETENTION_POLICY = new RetentionPolicy(30, 100, false);
 
     private final TickSenseServices services;
     private final ReportRepository reportRepository;
@@ -457,20 +458,12 @@ public class TickSensePanel extends PluginPanel
     {
         if (exportBundleWriter == null)
         {
-            JOptionPane.showMessageDialog(
-                this,
-                "Debug bundle export is unavailable in this context.",
-                "Export debug bundle",
-                JOptionPane.INFORMATION_MESSAGE);
+            showInfoMessage("Export debug bundle", "Debug bundle export is unavailable in this context.");
             return;
         }
         if (selectedSummary == null)
         {
-            JOptionPane.showMessageDialog(
-                this,
-                "Select a completed report before exporting a debug bundle.",
-                "Export debug bundle",
-                JOptionPane.INFORMATION_MESSAGE);
+            showInfoMessage("Export debug bundle", "Select a completed report before exporting a debug bundle.");
             return;
         }
 
@@ -479,19 +472,11 @@ public class TickSensePanel extends PluginPanel
             final java.nio.file.Path bundlePath = exportBundleWriter.writeBundle(
                 selectedSummary.getReportId(),
                 exportBundleWriter.defaultExportDirectory());
-            JOptionPane.showMessageDialog(
-                this,
-                "Exported debug bundle to " + bundlePath,
-                "Export debug bundle",
-                JOptionPane.INFORMATION_MESSAGE);
+            showInfoMessage("Export debug bundle", "Exported debug bundle to " + bundlePath);
         }
         catch (IOException ex)
         {
-            JOptionPane.showMessageDialog(
-                this,
-                "TickSense could not export a debug bundle for the selected report.",
-                "Export debug bundle",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Export debug bundle", "TickSense could not export a debug bundle for the selected report.");
         }
     }
 
@@ -499,7 +484,7 @@ public class TickSensePanel extends PluginPanel
     {
         if (reportIndexMaintenanceService == null)
         {
-            JOptionPane.showMessageDialog(this, "Report index maintenance is unavailable in this context.", "Rebuild report index", JOptionPane.INFORMATION_MESSAGE);
+            showInfoMessage("Rebuild report index", "Report index maintenance is unavailable in this context.");
             return;
         }
         try
@@ -509,7 +494,7 @@ public class TickSensePanel extends PluginPanel
         }
         catch (IOException ex)
         {
-            JOptionPane.showMessageDialog(this, "TickSense could not rebuild the report index right now.", "Rebuild report index", JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Rebuild report index", "TickSense could not rebuild the report index right now.");
         }
     }
 
@@ -517,17 +502,17 @@ public class TickSensePanel extends PluginPanel
     {
         if (reportIndexMaintenanceService == null)
         {
-            JOptionPane.showMessageDialog(this, "Retention maintenance is unavailable in this context.", "Apply retention", JOptionPane.INFORMATION_MESSAGE);
+            showInfoMessage("Apply retention", "Retention maintenance is unavailable in this context.");
             return;
         }
         try
         {
-            reportIndexMaintenanceService.applyRetention(new RetentionPolicy(30, 100, false));
+            reportIndexMaintenanceService.applyRetention(DEFAULT_RETENTION_POLICY);
             refreshReports();
         }
         catch (IOException ex)
         {
-            JOptionPane.showMessageDialog(this, "TickSense could not apply retention right now.", "Apply retention", JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Apply retention", "TickSense could not apply retention right now.");
         }
     }
 
@@ -550,11 +535,22 @@ public class TickSensePanel extends PluginPanel
         }
         catch (IOException ex)
         {
-            JOptionPane.showMessageDialog(
-                this,
-                "TickSense could not delete local data right now.",
-                "Delete local data",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Delete local data", "TickSense could not delete local data right now.");
         }
+    }
+
+    private void showInfoMessage(String title, String message)
+    {
+        showMessage(title, message, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showErrorMessage(String title, String message)
+    {
+        showMessage(title, message, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showMessage(String title, String message, int messageType)
+    {
+        JOptionPane.showMessageDialog(this, message, title, messageType);
     }
 }

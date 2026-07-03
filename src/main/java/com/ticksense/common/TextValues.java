@@ -17,4 +17,9 @@ public final class TextValues
         }
         return normalized;
     }
+
+    public static String trimmedOrEmpty(String value)
+    {
+        return value == null ? "" : value.trim();
+    }
 }

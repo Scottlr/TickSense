@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
@@ -46,10 +47,10 @@ public final class ActivityReport
         List<String> summaryLines)
     {
         this.schemaVersion = requireSchemaVersion(schemaVersion);
-        this.reportId = AnalyticsTexts.requireText(reportId, "reportId");
+        this.reportId = TextValues.requireText(reportId, "reportId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.detectedActivityName = AnalyticsTexts.requireText(detectedActivityName, "detectedActivityName");
+        this.detectedActivityName = TextValues.requireText(detectedActivityName, "detectedActivityName");
         this.createdAtMillis = requireNonNegative(createdAtMillis, "createdAtMillis");
         this.durationTicks = requireNonNegative(durationTicks, "durationTicks");
         this.durationMillis = requireNonNegative(durationMillis, "durationMillis");

@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import java.util.Collections;
@@ -42,16 +43,16 @@ public final class ReportSummary
         Map<String, Integer> tickLossCategories)
     {
         this.schemaVersion = requireSchemaVersion(schemaVersion);
-        this.reportId = AnalyticsTexts.requireText(reportId, "reportId");
+        this.reportId = TextValues.requireText(reportId, "reportId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.detectedActivityName = AnalyticsTexts.requireText(detectedActivityName, "detectedActivityName");
+        this.detectedActivityName = TextValues.requireText(detectedActivityName, "detectedActivityName");
         this.createdAtMillis = requireNonNegative(createdAtMillis, "createdAtMillis");
         this.durationTicks = requireNonNegative(durationTicks, "durationTicks");
         this.durationMillis = requireNonNegative(durationMillis, "durationMillis");
-        this.finishReason = AnalyticsTexts.requireText(finishReason, "finishReason");
+        this.finishReason = TextValues.requireText(finishReason, "finishReason");
         this.confidence = requireConfidence(confidence);
-        this.evidenceSummaryText = AnalyticsTexts.safeText(evidenceSummaryText);
+        this.evidenceSummaryText = TextValues.trimmedOrEmpty(evidenceSummaryText);
         this.summaryLines = AnalyticsCollections.immutableTextList(summaryLines, "summaryLines");
         this.metricValues = immutableMap(metricValues, "metricValues");
         this.tickLossCategories = immutableMap(tickLossCategories, "tickLossCategories");
@@ -174,7 +175,7 @@ public final class ReportSummary
         for (Map.Entry<String, V> entry : values.entrySet())
         {
             copy.put(
-                AnalyticsTexts.requireText(entry.getKey(), fieldName + " key"),
+                TextValues.requireText(entry.getKey(), fieldName + " key"),
                 Objects.requireNonNull(entry.getValue(), fieldName + " value"));
         }
         return Collections.unmodifiableMap(copy);

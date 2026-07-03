@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -91,10 +92,10 @@ public final class ScoreBreakdown
 
         private Component(String key, String label, double delta, String reason)
         {
-            this.key = AnalyticsTexts.requireText(key, "key");
-            this.label = AnalyticsTexts.requireText(label, "label");
+            this.key = TextValues.requireText(key, "key");
+            this.label = TextValues.requireText(label, "label");
             this.delta = requireFinite(delta, "delta");
-            this.reason = AnalyticsTexts.safeText(reason);
+            this.reason = TextValues.trimmedOrEmpty(reason);
         }
 
         public String getKey()

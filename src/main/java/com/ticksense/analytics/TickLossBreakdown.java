@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -59,7 +60,7 @@ public final class TickLossBreakdown
         final Map<String, Integer> copied = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : values.entrySet())
         {
-            final String key = AnalyticsTexts.requireText(entry.getKey(), "category key");
+            final String key = TextValues.requireText(entry.getKey(), "category key");
             copied.put(key, requireNonNegative(Objects.requireNonNull(entry.getValue(), "category value"), "category value"));
         }
         return Collections.unmodifiableMap(copied);

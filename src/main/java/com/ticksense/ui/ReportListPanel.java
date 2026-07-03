@@ -2,6 +2,7 @@ package com.ticksense.ui;
 
 import com.ticksense.analytics.ReportSummary;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.util.Collections;
 import java.util.List;
@@ -11,15 +12,22 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 
 public class ReportListPanel extends JPanel
 {
+    private static final String EMPTY_CARD = "empty";
+    private static final String REPORTS_CARD = "reports";
+
     private final JLabel emptyState = new JLabel("No reports yet.", SwingConstants.CENTER);
     private final DefaultListModel<ReportSummary> reportModel = new DefaultListModel<>();
     private final JList<ReportSummary> reportList = PanelLists.readOnlyList(reportModel, ColorScheme.TEXT_COLOR);
+    private final CardLayout contentLayout = new CardLayout();
+    private final JPanel content = new JPanel(contentLayout);
+    private final JScrollPane reportScrollPane = PanelScrollPanes.borderless(reportList);
 
     public ReportListPanel()
     {
@@ -27,10 +35,14 @@ public class ReportListPanel extends JPanel
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(new EmptyBorder(12, 8, 12, 8));
 
+        content.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         emptyState.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         reportList.setCellRenderer(new ReportSummaryRenderer());
 
-        add(emptyState, BorderLayout.CENTER);
+        content.add(emptyState, EMPTY_CARD);
+        content.add(reportScrollPane, REPORTS_CARD);
+        add(content, BorderLayout.CENTER);
+        showEmptyState();
     }
 
     public void setReports(List<ReportSummary> reports)
@@ -42,14 +54,14 @@ public class ReportListPanel extends JPanel
             reportModel.addElement(report);
         }
 
-        removeAll();
         if (normalized.isEmpty())
         {
-            add(emptyState, BorderLayout.CENTER);
+            reportList.clearSelection();
+            showEmptyState();
         }
         else
         {
-            add(PanelScrollPanes.borderless(reportList), BorderLayout.CENTER);
+            showReports();
             reportList.setSelectedIndex(0);
         }
         revalidate();
@@ -74,6 +86,16 @@ public class ReportListPanel extends JPanel
     public int getReportCount()
     {
         return reportModel.getSize();
+    }
+
+    private void showEmptyState()
+    {
+        contentLayout.show(content, EMPTY_CARD);
+    }
+
+    private void showReports()
+    {
+        contentLayout.show(content, REPORTS_CARD);
     }
 
     private static final class ReportSummaryRenderer extends DefaultListCellRenderer

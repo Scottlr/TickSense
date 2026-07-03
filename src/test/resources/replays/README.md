@@ -59,3 +59,22 @@ Construction capture instructions for T024/T032 follow-up:
 - `construction-basic.jsonl` should prove the `oak-larder` flow end to end: larder space presence, menu open, build click, construction widget confirmation, build animation, oak plank inventory delta, Construction XP gain, remove click, rebuilt larder/object transition, and either bank or servant refill evidence.
 - Preserve event ordering and timestamps so downstream menu-latency and build-cadence analysis stays auditable.
 - Refresh the fixture notes whenever POH widget IDs, menu text, or item requirements change in RuneLite-visible evidence.
+
+Reserved post-MVP Vardorvis fixture name for T025/T034 follow-up:
+
+- `vardorvis-basic.jsonl`
+
+Vardorvis verification review:
+
+- Review date: `2026-07-03`
+- Current decision: `PARTIALLY_VERIFIED`
+- Verified source so far: official RuneLite `NpcID` constants in the pinned `runelite-api` dependency for Vardorvis boss variants and the detached head NPC.
+- Missing evidence: sanitized normalized ranged-head projectile IDs and timing, blood-splat graphic IDs, axe projectile/graphic IDs, prayer-response evidence, mechanic-window damage attribution, and arena/region evidence.
+
+Vardorvis capture instructions for T025/T034 follow-up:
+
+- Record normalized TickSense telemetry only; do not commit raw RuneLite objects, screenshots, or video.
+- Remove or replace player names, account identifiers, and unrelated chat before commit.
+- `vardorvis-basic.jsonl` should prove boss presence, detached head presence, ranged-head projectile timing, blood-splat graphic timing, axe mechanic timing, prayer-response evidence if visible, damage during mechanic windows, and enough region/instance context to keep later reports scoped to Vardorvis.
+- Preserve event ordering and timestamps so downstream mechanic-latency analysis stays auditable.
+- Refresh the fixture notes whenever Vardorvis mechanic IDs or RuneLite-visible cues change.

@@ -138,7 +138,7 @@
 | T024 | [x] | Construction Registry and Verification Fixtures | Verify Construction menu/widget evidence and create primitive ID registries and fixtures. |  | T006, T010, T020 | [`tasks/T024.md`](tasks/T024.md) |
 | T032 | [ ] | Construction Strategy and Opportunities | Detect one verified Construction method and observe-only menu/cadence opportunities. |  | T008, T011, T016, T024 | [`tasks/T032.md`](tasks/T032.md) |
 | T033 | [ ] | Construction Metrics and Golden Report | Generate Construction reports and golden replay coverage. |  | T017, T019, T032 | [`tasks/T033.md`](tasks/T033.md) |
-| T025 | [ ] | Vardorvis Registry and Verification Fixtures | Verify Vardorvis mechanic evidence before reporting timings. |  | T006, T010, T020 | [`tasks/T025.md`](tasks/T025.md) |
+| T025 | [x] | Vardorvis Registry and Verification Fixtures | Verify Vardorvis mechanic evidence before reporting timings. |  | T006, T010, T020 | [`tasks/T025.md`](tasks/T025.md) |
 | T034 | [ ] | Vardorvis Strategy and Opportunities | Detect verified Vardorvis mechanic opportunities without live solving. |  | T008, T011, T016, T025 | [`tasks/T034.md`](tasks/T034.md) |
 | T035 | [ ] | Vardorvis Metrics and Golden Report | Generate Vardorvis reports and golden replay coverage. |  | T017, T019, T034 | [`tasks/T035.md`](tasks/T035.md) |
 | T026 | [ ] | Inferno Registry and Verification Fixtures | Verify Inferno wave, NPC, prayer, supply, and death evidence. |  | T006, T010, T020 | [`tasks/T026.md`](tasks/T026.md) |

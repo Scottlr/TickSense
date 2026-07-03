@@ -61,7 +61,7 @@ public final class JsonReportRepository implements ReportRepository
     @Override
     public synchronized Optional<ActivityReport> findById(String reportId) throws IOException
     {
-        final Path path = reportPath(requireText(reportId, "reportId"));
+        final Path path = reportPath(StorageTexts.requireText(reportId, "reportId"));
         if (Files.notExists(path))
         {
             return Optional.empty();
@@ -228,17 +228,6 @@ public final class JsonReportRepository implements ReportRepository
     {
         return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
     }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
     private static final class PersistedReportIndex
     {
         private final int schemaVersion;

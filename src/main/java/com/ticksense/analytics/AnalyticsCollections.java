@@ -1,6 +1,5 @@
 package com.ticksense.analytics;
 
-import com.ticksense.common.ImmutableCollections;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Collections;
@@ -29,11 +28,6 @@ final class AnalyticsCollections
         return Collections.unmodifiableList(copied);
     }
 
-    static <T> List<T> immutableList(List<T> values)
-    {
-        return ImmutableCollections.immutableList(values);
-    }
-
     static Map<String, MetricValue> immutableMetricValues(Map<String, MetricValue> values)
     {
         if (values == null || values.isEmpty())
@@ -49,11 +43,6 @@ final class AnalyticsCollections
                 Objects.requireNonNull(entry.getValue(), "metric value"));
         }
         return Collections.unmodifiableMap(copied);
-    }
-
-    static <K, V> Map<K, V> immutableMap(Map<K, V> values)
-    {
-        return ImmutableCollections.immutableMap(values);
     }
 
     static List<OpportunityTimelineEntry> immutableTimelineEntries(List<OpportunityTimelineEntry> values)

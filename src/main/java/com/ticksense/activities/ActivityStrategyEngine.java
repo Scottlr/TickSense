@@ -97,12 +97,12 @@ public final class ActivityStrategyEngine implements TelemetrySink
 
     public synchronized List<ActivitySession> getCompletedSessions()
     {
-        return Collections.unmodifiableList(new ArrayList<>(completedSessions));
+        return ActivityCollections.immutableList(completedSessions);
     }
 
     public synchronized List<ActivityReportData> getCompletedActivityData()
     {
-        return Collections.unmodifiableList(new ArrayList<>(completedActivityData));
+        return ActivityCollections.immutableList(completedActivityData);
     }
 
     public synchronized List<ActivityDiagnostic> getDiagnostics()

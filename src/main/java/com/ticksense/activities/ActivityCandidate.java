@@ -33,7 +33,7 @@ public final class ActivityCandidate
         this.evidenceSummary = immutableList(evidenceSummary);
         this.firstEvidenceTime = Objects.requireNonNull(firstEvidenceTime, "firstEvidenceTime");
         this.suppressed = suppressed;
-        this.suppressionReason = safeText(suppressionReason);
+        this.suppressionReason = ActivityTexts.safeText(suppressionReason);
     }
 
     public ActivityId getActivityId()
@@ -98,8 +98,4 @@ public final class ActivityCandidate
         return Collections.unmodifiableList(new ArrayList<>(values));
     }
 
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
-    }
 }

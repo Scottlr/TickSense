@@ -3,8 +3,6 @@ package com.ticksense.activities;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +28,7 @@ public final class ActivityCandidate
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         this.confidence = requireConfidence(confidence);
-        this.evidenceSummary = immutableList(evidenceSummary);
+        this.evidenceSummary = ActivityCollections.immutableList(evidenceSummary);
         this.firstEvidenceTime = Objects.requireNonNull(firstEvidenceTime, "firstEvidenceTime");
         this.suppressed = suppressed;
         this.suppressionReason = ActivityTexts.safeText(suppressionReason);
@@ -88,14 +86,4 @@ public final class ActivityCandidate
         }
         return value;
     }
-
-    private static List<String> immutableList(List<String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(values));
-    }
-
 }

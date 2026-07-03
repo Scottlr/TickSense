@@ -4,8 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
-import com.ticksense.activities.ActivityStrategyFactory;
-import com.ticksense.activities.gemmining.GemMiningStrategy;
+import com.ticksense.activities.gemmining.GemMiningModule;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ReportSummary;
 import com.ticksense.replay.TimelineReplayRunner;
@@ -48,7 +47,7 @@ public class MvpPipelineTest
             telemetryBus,
             new JsonlTimelineRepository(paths, "mvp-gem", new Gson(), Clock.fixed(Instant.parse("2026-07-03T00:00:00Z"), ZoneOffset.UTC)),
             reportRepository,
-            gemMiningFactory(),
+            Collections.singletonList(new GemMiningModule()),
             true);
 
         try
@@ -91,7 +90,7 @@ public class MvpPipelineTest
             telemetryBus,
             new JsonlTimelineRepository(paths, "mvp-low", new Gson(), Clock.fixed(Instant.parse("2026-07-03T00:05:00Z"), ZoneOffset.UTC)),
             reportRepository,
-            gemMiningFactory(),
+            Collections.singletonList(new GemMiningModule()),
             true);
 
         try
@@ -110,11 +109,6 @@ public class MvpPipelineTest
         {
             services.close();
         }
-    }
-
-    private static ActivityStrategyFactory gemMiningFactory()
-    {
-        return () -> Collections.singletonList(new GemMiningStrategy());
     }
 
     private static TickSenseConfig debugConfig(boolean diagnosticsEnabled)

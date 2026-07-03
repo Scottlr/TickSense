@@ -23,9 +23,6 @@ import java.util.Optional;
 
 public final class InfernoStrategy implements ActivityStrategy
 {
-    private static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.INFERNO, "Inferno", 35, 0.75D, true);
-
     private final InfernoState state;
 
     public InfernoStrategy()
@@ -56,7 +53,7 @@ public final class InfernoStrategy implements ActivityStrategy
     @Override
     public ActivityDefinition getDefinition()
     {
-        return DEFINITION;
+        return InfernoModule.DEFINITION;
     }
 
     @Override

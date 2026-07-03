@@ -23,9 +23,6 @@ import java.util.Optional;
 
 public final class VardorvisStrategy implements ActivityStrategy
 {
-    private static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.VARDORVIS, "Vardorvis", 30, 0.75D, true);
-
     private final VardorvisState state;
 
     public VardorvisStrategy()
@@ -62,7 +59,7 @@ public final class VardorvisStrategy implements ActivityStrategy
     @Override
     public ActivityDefinition getDefinition()
     {
-        return DEFINITION;
+        return VardorvisModule.DEFINITION;
     }
 
     @Override

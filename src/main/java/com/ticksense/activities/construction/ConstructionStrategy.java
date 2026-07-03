@@ -27,15 +27,12 @@ import java.util.Optional;
 
 public final class ConstructionStrategy implements ActivityStrategy
 {
-    private static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.CONSTRUCTION, "Construction", 20, 0.75D, false);
-
     private final ConstructionState state = new ConstructionState();
 
     @Override
     public ActivityDefinition getDefinition()
     {
-        return DEFINITION;
+        return ConstructionModule.DEFINITION;
     }
 
     @Override

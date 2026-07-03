@@ -3,13 +3,14 @@ package com.ticksense.activities.gemmining;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
-import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
+import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineEntry;
+import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.core.ActivitySession;
@@ -18,7 +19,6 @@ import com.ticksense.core.FinishReasonType;
 import com.ticksense.core.EventTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +47,7 @@ public final class GemMiningAnalyzer
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityReportData normalizedActivityData = Objects.requireNonNull(activityData, "activityData");
-        final List<ResolvedOpportunity> opportunities = resolveOpportunities(opportunityMarkers);
+        final List<ResolvedOpportunity> opportunities = OpportunityMarkerResolver.resolve(opportunityMarkers);
 
         final List<Double> rockResponseLatencies = latenciesFor(opportunities, GemMiningState.OPPORTUNITY_RESPAWN_TO_CLICK);
         final List<Double> movementLatencies = latenciesFor(opportunities, GemMiningState.OPPORTUNITY_MOVEMENT_TO_ROCK);
@@ -109,33 +109,6 @@ public final class GemMiningAnalyzer
             reportData.getSummaryLines());
     }
 
-    private static List<ResolvedOpportunity> resolveOpportunities(List<OpportunityMarker> markers)
-    {
-        if (markers == null || markers.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final Map<String, OpportunityMarker> openMarkers = new LinkedHashMap<>();
-        final List<ResolvedOpportunity> resolved = new ArrayList<>();
-        for (OpportunityMarker marker : markers)
-        {
-            if (marker.getStatus() == OpportunityStatus.OPEN)
-            {
-                openMarkers.put(marker.getOpportunityInstanceId(), marker);
-                continue;
-            }
-
-            final OpportunityMarker open = openMarkers.get(marker.getOpportunityInstanceId());
-            if (open != null)
-            {
-                resolved.add(new ResolvedOpportunity(open, marker));
-            }
-        }
-        resolved.sort(Comparator.comparingInt(ResolvedOpportunity::endTick).thenComparing(ResolvedOpportunity::type));
-        return Collections.unmodifiableList(resolved);
-    }
-
     private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
     {
         final List<Double> latencies = new ArrayList<>();
@@ -162,12 +135,12 @@ public final class GemMiningAnalyzer
             timeline.add(new OpportunityTimelineEntry(
                 opportunity.type(),
                 labelFor(opportunity.type()),
-                opportunity.terminal.getStatus().name(),
+                opportunity.status().name(),
                 opportunity.endTick(),
-                opportunity.terminal.getTime().getWallTimeMillis(),
+                opportunity.endWallTimeMillis(),
                 opportunity.latencyTicks(),
                 opportunity.latencyMillis(),
-                evidenceDetails(opportunity.terminal.getEvidence())));
+                evidenceDetails(opportunity.terminalEvidence())));
         }
         return Collections.unmodifiableList(timeline);
     }
@@ -337,42 +310,5 @@ public final class GemMiningAnalyzer
             return String.valueOf((int) Math.rint(value));
         }
         return String.format(Locale.US, "%.1f", value);
-    }
-
-    private static final class ResolvedOpportunity
-    {
-        private final OpportunityMarker open;
-        private final OpportunityMarker terminal;
-
-        private ResolvedOpportunity(OpportunityMarker open, OpportunityMarker terminal)
-        {
-            this.open = open;
-            this.terminal = terminal;
-        }
-
-        private String type()
-        {
-            return terminal.getOpportunityType();
-        }
-
-        private boolean completed()
-        {
-            return terminal.getStatus() == OpportunityStatus.COMPLETED;
-        }
-
-        private int latencyTicks()
-        {
-            return terminal.getTime().getGameTick() - open.getTime().getGameTick();
-        }
-
-        private long latencyMillis()
-        {
-            return terminal.getTime().getWallTimeMillis() - open.getTime().getWallTimeMillis();
-        }
-
-        private int endTick()
-        {
-            return terminal.getTime().getGameTick();
-        }
     }
 }

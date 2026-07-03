@@ -8,12 +8,13 @@ import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
+import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineEntry;
+import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +43,7 @@ public final class VardorvisAnalyzer
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityReportData normalizedActivityData = Objects.requireNonNull(activityData, "activityData");
-        final List<ResolvedOpportunity> opportunities = resolveOpportunities(opportunityMarkers);
+        final List<ResolvedOpportunity> opportunities = OpportunityMarkerResolver.resolve(opportunityMarkers);
 
         final List<Double> responseLatencies = latenciesFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.COMPLETED);
         final int damageDuringOpportunities = damageDuringFailedOpportunities(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE);
@@ -96,33 +97,6 @@ public final class VardorvisAnalyzer
             reportData.getSummaryLines());
     }
 
-    private static List<ResolvedOpportunity> resolveOpportunities(List<OpportunityMarker> markers)
-    {
-        if (markers == null || markers.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final Map<String, OpportunityMarker> openMarkers = new LinkedHashMap<>();
-        final List<ResolvedOpportunity> resolved = new ArrayList<>();
-        for (OpportunityMarker marker : markers)
-        {
-            if (marker.getStatus() == OpportunityStatus.OPEN)
-            {
-                openMarkers.put(marker.getOpportunityInstanceId(), marker);
-                continue;
-            }
-
-            final OpportunityMarker open = openMarkers.get(marker.getOpportunityInstanceId());
-            if (open != null)
-            {
-                resolved.add(new ResolvedOpportunity(open, marker));
-            }
-        }
-        resolved.sort(Comparator.comparingInt(ResolvedOpportunity::endTick).thenComparing(ResolvedOpportunity::type));
-        return Collections.unmodifiableList(resolved);
-    }
-
     private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType, OpportunityStatus status)
     {
         final List<Double> latencies = new ArrayList<>();
@@ -158,7 +132,7 @@ public final class VardorvisAnalyzer
             {
                 continue;
             }
-            for (String detail : evidenceDetails(opportunity.terminal.getEvidence()))
+            for (String detail : evidenceDetails(opportunity.terminalEvidence()))
             {
                 final Matcher matcher = DAMAGE_PATTERN.matcher(detail);
                 if (matcher.find())
@@ -183,12 +157,12 @@ public final class VardorvisAnalyzer
             timeline.add(new OpportunityTimelineEntry(
                 opportunity.type(),
                 labelFor(opportunity.type()),
-                opportunity.terminal.getStatus().name(),
+                opportunity.status().name(),
                 opportunity.endTick(),
-                opportunity.terminal.getTime().getWallTimeMillis(),
+                opportunity.endWallTimeMillis(),
                 opportunity.latencyTicks(),
                 opportunity.latencyMillis(),
-                evidenceDetails(opportunity.terminal.getEvidence())));
+                evidenceDetails(opportunity.terminalEvidence())));
         }
         return Collections.unmodifiableList(timeline);
     }
@@ -323,42 +297,5 @@ public final class VardorvisAnalyzer
             return String.valueOf((int) Math.rint(value));
         }
         return String.format(Locale.US, "%.1f", value);
-    }
-
-    private static final class ResolvedOpportunity
-    {
-        private final OpportunityMarker open;
-        private final OpportunityMarker terminal;
-
-        private ResolvedOpportunity(OpportunityMarker open, OpportunityMarker terminal)
-        {
-            this.open = open;
-            this.terminal = terminal;
-        }
-
-        private String type()
-        {
-            return terminal.getOpportunityType();
-        }
-
-        private OpportunityStatus status()
-        {
-            return terminal.getStatus();
-        }
-
-        private int latencyTicks()
-        {
-            return terminal.getTime().getGameTick() - open.getTime().getGameTick();
-        }
-
-        private long latencyMillis()
-        {
-            return terminal.getTime().getWallTimeMillis() - open.getTime().getWallTimeMillis();
-        }
-
-        private int endTick()
-        {
-            return terminal.getTime().getGameTick();
-        }
     }
 }

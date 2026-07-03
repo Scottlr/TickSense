@@ -2,6 +2,9 @@ package com.ticksense.runelite;
 
 import com.google.inject.Provides;
 import com.ticksense.activities.ActivityStrategyFactory;
+import com.ticksense.activities.araxxor.AraxxorIds;
+import com.ticksense.activities.araxxor.AraxxorStrategy;
+import com.ticksense.activities.araxxor.AraxxorVerificationDecision;
 import com.ticksense.analytics.TrendAnalyzer;
 import com.ticksense.activities.construction.ConstructionIds;
 import com.ticksense.activities.construction.ConstructionStrategy;
@@ -247,6 +250,10 @@ public class TickSensePlugin extends Plugin
             if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
             {
                 strategies.add(new ConstructionStrategy());
+            }
+            if (AraxxorVerificationDecision.current().allowsNormalStrategyEnablement() && AraxxorIds.verifiedRegionIds().length > 0)
+            {
+                strategies.add(new AraxxorStrategy());
             }
             if (VardorvisIds.verificationDecision().allowsNormalReports())
             {

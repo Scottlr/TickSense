@@ -26,8 +26,8 @@ public final class ActivityDiagnostic
     {
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         this.confidence = requireConfidence(confidence);
-        this.decision = requireText(decision, "decision");
-        this.reason = safeText(reason);
+        this.decision = ActivityTexts.requireText(decision, "decision");
+        this.reason = ActivityTexts.safeText(reason);
         this.time = Objects.requireNonNull(time, "time");
         this.evidence = immutableList(evidence);
     }
@@ -69,21 +69,6 @@ public final class ActivityDiagnostic
             throw new IllegalArgumentException("confidence must be between 0.0 and 1.0");
         }
         return value;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
     }
 
     private static List<String> immutableList(List<String> values)

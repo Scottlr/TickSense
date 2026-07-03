@@ -13,9 +13,9 @@ public final class OpportunityEvidence
     public OpportunityEvidence(EventTime time, String sourceEventType, EvidenceStrength strength, String detail)
     {
         this.time = Objects.requireNonNull(time, "time");
-        this.sourceEventType = requireText(sourceEventType, "sourceEventType");
+        this.sourceEventType = ActivityTexts.requireText(sourceEventType, "sourceEventType");
         this.strength = Objects.requireNonNull(strength, "strength");
-        this.detail = safeText(detail);
+        this.detail = ActivityTexts.safeText(detail);
     }
 
     public EventTime getTime()
@@ -36,21 +36,6 @@ public final class OpportunityEvidence
     public String getDetail()
     {
         return detail;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
     }
 
     @Override

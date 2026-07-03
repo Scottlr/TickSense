@@ -19,7 +19,7 @@ public final class ActivityDefinition
         boolean bossActivity)
     {
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.displayName = requireText(displayName, "displayName");
+        this.displayName = ActivityTexts.requireText(displayName, "displayName");
         this.priority = priority;
         this.activationThreshold = requireThreshold(activationThreshold);
         this.bossActivity = bossActivity;
@@ -48,16 +48,6 @@ public final class ActivityDefinition
     public boolean isBossActivity()
     {
         return bossActivity;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
     }
 
     private static double requireThreshold(double threshold)

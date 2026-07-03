@@ -9,17 +9,18 @@ import com.ticksense.analytics.AnalysisMath;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
+import com.ticksense.analytics.MetricValueMap;
 import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,15 +51,17 @@ public final class InfernoAnalyzer
         final int supplyUsage = AnalysisMath.intAttribute(normalizedActivityData, "supplyUseCount");
         final int deathTimelineEvents = AnalysisMath.intAttribute(normalizedActivityData, "deathTimelineEventCount");
 
-        final Map<String, MetricValue> metrics = new LinkedHashMap<>();
-        metrics.put(WAVE_DURATION.getKey(), new MetricValue(WAVE_DURATION, AnalysisMath.average(waveDurations)));
-        metrics.put(NIBBLER_RESPONSE.getKey(), new MetricValue(NIBBLER_RESPONSE, AnalysisMath.average(nibblerResponses)));
-        metrics.put(SUPPLY_USAGE.getKey(), new MetricValue(SUPPLY_USAGE, supplyUsage));
-        metrics.put(DEATH_TIMELINE_EVENTS.getKey(), new MetricValue(DEATH_TIMELINE_EVENTS, deathTimelineEvents));
+        final Map<String, MetricValue> metrics = MetricValueMap.builder()
+            .put(WAVE_DURATION, AnalysisMath.average(waveDurations))
+            .put(NIBBLER_RESPONSE, AnalysisMath.average(nibblerResponses))
+            .put(SUPPLY_USAGE, supplyUsage)
+            .put(DEATH_TIMELINE_EVENTS, deathTimelineEvents)
+            .build();
 
-        final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
-        tickLossCategories.put("Wave duration", (int) Math.round(AnalysisMath.sum(waveDurations)));
-        tickLossCategories.put("Nibbler response", (int) Math.round(AnalysisMath.sum(nibblerResponses)));
+        final Map<String, Integer> tickLossCategories = TickLossCategories.builder()
+            .putRounded("Wave duration", AnalysisMath.sum(waveDurations))
+            .putRounded("Nibbler response", AnalysisMath.sum(nibblerResponses))
+            .build();
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(
             tickLossCategories.get("Wave duration") + tickLossCategories.get("Nibbler response"),
             tickLossCategories);

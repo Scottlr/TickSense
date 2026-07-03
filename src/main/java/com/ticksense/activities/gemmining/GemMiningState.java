@@ -5,7 +5,7 @@ import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
-import com.ticksense.activities.OpportunityTracker;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
@@ -56,8 +56,8 @@ final class GemMiningState
     private MovementTowardRock pendingMovement;
     private PendingClick pendingClick;
     private ActivityId activeActivityId;
-    private OpportunityTracker tracker;
-    private final List<OpportunityInstance> opportunities = new ArrayList<>();
+    private OpportunityLifecycle opportunityLifecycle;
+    private final List<OpportunityInstance> opportunityInstances = new ArrayList<>();
     private int redundantClicks;
     private int totalMineClicks;
     private int totalIdleTicks;
@@ -202,11 +202,11 @@ final class GemMiningState
         activeActivityId = activityId;
     }
 
-    void ensureTracker(OpportunityTracker nextTracker)
+    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
-        if (tracker == null)
+        if (opportunityLifecycle == null)
         {
-            tracker = nextTracker;
+            opportunityLifecycle = nextLifecycle;
         }
     }
 
@@ -217,11 +217,11 @@ final class GemMiningState
 
     void cancelOpenOpportunities(EventTime endTime, String detail)
     {
-        if (tracker == null || activeActivityId == null)
+        if (opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
-        tracker.cancelOpenOpportunities(
+        opportunityLifecycle.cancelOpenOpportunities(
             activeActivityId,
             endTime,
             Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
@@ -249,8 +249,8 @@ final class GemMiningState
         pendingMovement = null;
         pendingClick = null;
         activeActivityId = null;
-        tracker = null;
-        opportunities.clear();
+        opportunityLifecycle = null;
+        opportunityInstances.clear();
         redundantClicks = 0;
         totalMineClicks = 0;
         totalIdleTicks = 0;
@@ -259,7 +259,7 @@ final class GemMiningState
 
     private void flushPendingCycleOpportunities()
     {
-        if (tracker == null || activeActivityId == null || availableRock == null || pendingClick == null || pendingClick.opportunitiesEmitted)
+        if (opportunityLifecycle == null || activeActivityId == null || availableRock == null || pendingClick == null || pendingClick.opportunitiesEmitted)
         {
             return;
         }
@@ -272,7 +272,7 @@ final class GemMiningState
             RESPAWN_TO_CLICK,
             availableRock.availableSince,
             cycleContext(availableRock));
-        tracker.complete(respawn.getInstanceId(), pendingClick.time, cycleEvidence("player.action", "Mine click on available gem rock."));
+        opportunityLifecycle.complete(respawn.getInstanceId(), pendingClick.time, cycleEvidence("player.action", "Mine click on available gem rock."));
 
         final int idleTicks = Math.max(0, pendingClick.time.getGameTick() - availableRock.availableSince.getGameTick());
         if (idleTicks > 0)
@@ -281,7 +281,7 @@ final class GemMiningState
                 IDLE,
                 availableRock.availableSince,
                 cycleContext(availableRock));
-            tracker.complete(idle.getInstanceId(), pendingClick.time, cycleEvidence("player.action", "Rock stayed available before the next mine click."));
+            opportunityLifecycle.complete(idle.getInstanceId(), pendingClick.time, cycleEvidence("player.action", "Rock stayed available before the next mine click."));
             totalIdleTicks += idleTicks;
         }
 
@@ -291,7 +291,7 @@ final class GemMiningState
                 MOVEMENT_TO_ROCK,
                 pendingMovement.time,
                 movementContext(pendingMovement, availableRock));
-            tracker.complete(movement.getInstanceId(), pendingClick.time, cycleEvidence("movement.location", "Player moved into range before mining."));
+            opportunityLifecycle.complete(movement.getInstanceId(), pendingClick.time, cycleEvidence("movement.location", "Player moved into range before mining."));
             pendingMovement = null;
         }
         pendingClick.opportunitiesEmitted = true;
@@ -302,8 +302,8 @@ final class GemMiningState
         EventTime startTime,
         Map<String, String> context)
     {
-        final OpportunityInstance instance = tracker.start(activeActivityId, definition, startTime, context);
-        opportunities.add(instance);
+        final OpportunityInstance instance = opportunityLifecycle.start(activeActivityId, definition, startTime, context);
+        opportunityInstances.add(instance);
         return instance;
     }
 

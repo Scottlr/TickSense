@@ -5,7 +5,7 @@ import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
-import com.ticksense.activities.OpportunityTracker;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
@@ -62,8 +62,8 @@ final class ConstructionState
     private OpportunityInstance inventoryCycle;
     private OpportunityInstance cadenceOpportunity;
     private ActivityId activeActivityId;
-    private OpportunityTracker tracker;
-    private final List<OpportunityInstance> opportunities = new ArrayList<>();
+    private OpportunityLifecycle opportunityLifecycle;
+    private final List<OpportunityInstance> opportunityInstances = new ArrayList<>();
     private int menuLatencyCount;
     private int buildRemoveCadenceCount;
     private int inventoryCycleCount;
@@ -127,7 +127,7 @@ final class ConstructionState
         removeClickCount++;
         if (cadenceOpportunity != null && cadenceOpportunity.getStatus() == OpportunityStatus.OPEN)
         {
-            tracker.complete(
+            opportunityLifecycle.complete(
                 cadenceOpportunity.getInstanceId(),
                 time,
                 evidence(time, "player.action", "Verified remove click followed the last build confirmation."));
@@ -154,7 +154,7 @@ final class ConstructionState
                     "option", option,
                     "target", target,
                     "regionId", String.valueOf(location.getRegionId())));
-            tracker.complete(menuLatency.getInstanceId(), time, evidence(time, "player.action", "Verified menu click followed menu-open evidence."));
+            opportunityLifecycle.complete(menuLatency.getInstanceId(), time, evidence(time, "player.action", "Verified menu click followed menu-open evidence."));
             menuLatencyCount++;
         }
         pendingMenu = null;
@@ -210,7 +210,7 @@ final class ConstructionState
         }
         if (inventoryCycle != null && inventoryCycle.getStatus() == OpportunityStatus.OPEN)
         {
-            tracker.complete(
+            opportunityLifecycle.complete(
                 inventoryCycle.getInstanceId(),
                 time,
                 evidence(time, "widget", "Verified bank widget completed the construction inventory cycle."));
@@ -225,7 +225,7 @@ final class ConstructionState
                 context(
                     "method", ConstructionIds.approvedMethodName(),
                     "refillPath", pendingBanking.startedByInventoryExhaustion ? "bank-after-inventory-exhaustion" : "bank-after-remove"));
-            tracker.complete(
+            opportunityLifecycle.complete(
                 downtime.getInstanceId(),
                 time,
                 evidence(time, "widget", "Verified bank widget ended Construction downtime."));
@@ -270,17 +270,17 @@ final class ConstructionState
         activeActivityId = activityId;
     }
 
-    void ensureTracker(OpportunityTracker nextTracker)
+    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
-        if (tracker == null)
+        if (opportunityLifecycle == null)
         {
-            tracker = nextTracker;
+            opportunityLifecycle = nextLifecycle;
         }
     }
 
     void flushActivationDerivedOpportunities()
     {
-        if (tracker == null || activeActivityId == null || pendingBuild == null)
+        if (opportunityLifecycle == null || activeActivityId == null || pendingBuild == null)
         {
             return;
         }
@@ -301,7 +301,7 @@ final class ConstructionState
                     "option", pendingMenu.option,
                     "target", pendingMenu.target,
                     "regionId", String.valueOf(pendingBuild.location.getRegionId())));
-            tracker.complete(
+            opportunityLifecycle.complete(
                 menuLatency.getInstanceId(),
                 pendingBuild.clickTime,
                 evidence(pendingBuild.clickTime, "player.action", "Verified menu click followed menu-open evidence."));
@@ -313,11 +313,11 @@ final class ConstructionState
 
     void cancelOpenOpportunities(EventTime endTime, String detail)
     {
-        if (tracker == null || activeActivityId == null)
+        if (opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
-        tracker.cancelOpenOpportunities(
+        opportunityLifecycle.cancelOpenOpportunities(
             activeActivityId,
             endTime,
             Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
@@ -347,8 +347,8 @@ final class ConstructionState
         inventoryCycle = null;
         cadenceOpportunity = null;
         activeActivityId = null;
-        tracker = null;
-        opportunities.clear();
+        opportunityLifecycle = null;
+        opportunityInstances.clear();
         menuLatencyCount = 0;
         buildRemoveCadenceCount = 0;
         inventoryCycleCount = 0;
@@ -361,7 +361,7 @@ final class ConstructionState
 
     private void noteBuildConfirmation(EventTime time, String sourceType, String detail)
     {
-        if (pendingBuild == null || tracker == null || activeActivityId == null)
+        if (pendingBuild == null || opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
@@ -385,8 +385,8 @@ final class ConstructionState
         EventTime startTime,
         Map<String, String> context)
     {
-        final OpportunityInstance instance = tracker.start(activeActivityId, definition, startTime, context);
-        opportunities.add(instance);
+        final OpportunityInstance instance = opportunityLifecycle.start(activeActivityId, definition, startTime, context);
+        opportunityInstances.add(instance);
         return instance;
     }
 

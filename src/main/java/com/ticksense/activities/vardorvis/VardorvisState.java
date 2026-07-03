@@ -5,7 +5,7 @@ import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
-import com.ticksense.activities.OpportunityTracker;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
@@ -45,7 +45,7 @@ final class VardorvisState
     private int currentRegionId = -1;
     private WorldLocation currentPlayerLocation = WorldLocation.unknown();
     private ActivityId activeActivityId;
-    private OpportunityTracker tracker;
+    private OpportunityLifecycle opportunityLifecycle;
     private PendingProjectile pendingRangedHeadProjectile;
     private OpportunityInstance rangedHeadOpportunity;
     private int rangedHeadResponseCount;
@@ -113,17 +113,17 @@ final class VardorvisState
         activeActivityId = activityId;
     }
 
-    void ensureTracker(OpportunityTracker nextTracker)
+    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
-        if (tracker == null)
+        if (opportunityLifecycle == null)
         {
-            tracker = nextTracker;
+            opportunityLifecycle = nextLifecycle;
         }
     }
 
     void flushActivationDerivedOpportunities()
     {
-        if (pendingRangedHeadProjectile == null || tracker == null || activeActivityId == null)
+        if (pendingRangedHeadProjectile == null || opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
@@ -146,7 +146,7 @@ final class VardorvisState
         {
             return;
         }
-        tracker.complete(
+        opportunityLifecycle.complete(
             rangedHeadOpportunity.getInstanceId(),
             event.getTime(),
             Collections.singletonList(new OpportunityEvidence(
@@ -164,7 +164,7 @@ final class VardorvisState
         {
             return;
         }
-        tracker.complete(
+        opportunityLifecycle.complete(
             rangedHeadOpportunity.getInstanceId(),
             event.getTime(),
             Collections.singletonList(new OpportunityEvidence(
@@ -182,7 +182,7 @@ final class VardorvisState
         {
             return;
         }
-        tracker.fail(
+        opportunityLifecycle.fail(
             rangedHeadOpportunity.getInstanceId(),
             event.getTime(),
             Collections.singletonList(new OpportunityEvidence(
@@ -196,11 +196,11 @@ final class VardorvisState
 
     void cancelOpenOpportunities(EventTime endTime, String detail)
     {
-        if (tracker == null || activeActivityId == null)
+        if (opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
-        tracker.cancelOpenOpportunities(
+        opportunityLifecycle.cancelOpenOpportunities(
             activeActivityId,
             endTime,
             Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
@@ -224,7 +224,7 @@ final class VardorvisState
         currentRegionId = -1;
         currentPlayerLocation = WorldLocation.unknown();
         activeActivityId = null;
-        tracker = null;
+        opportunityLifecycle = null;
         pendingRangedHeadProjectile = null;
         rangedHeadOpportunity = null;
         rangedHeadResponseCount = 0;
@@ -246,11 +246,11 @@ final class VardorvisState
 
     private void openRangedHeadOpportunity(ProjectileTelemetryEvent event)
     {
-        if (tracker == null || activeActivityId == null)
+        if (opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
-        rangedHeadOpportunity = tracker.start(
+        rangedHeadOpportunity = opportunityLifecycle.start(
             activeActivityId,
             RANGED_HEAD_RESPONSE,
             event.getTime(),

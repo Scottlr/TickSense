@@ -12,14 +12,14 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 
-public class OpportunityTrackerTest
+public class OpportunityLifecycleTest
 {
     @Test
     public void completesOpportunityWithLatency()
     {
         final List<OpportunityMarker> markers = new ArrayList<>();
-        final OpportunityTracker tracker = new OpportunityTracker(markers::add);
-        final OpportunityInstance instance = tracker.start(
+        final OpportunityLifecycle lifecycle = new OpportunityLifecycle(markers::add);
+        final OpportunityInstance instance = lifecycle.start(
             ActivityId.of("activity-1"),
             definition(1_500L),
             time(1_000L, 100),
@@ -27,7 +27,7 @@ public class OpportunityTrackerTest
 
         final OpportunityEvidence clicked = evidence(1_200L, 101, "MenuOptionClicked", EvidenceStrength.MODERATE, "Clicked target");
         final OpportunityEvidence confirmed = evidence(1_800L, 103, "InteractingChanged", EvidenceStrength.CONFIRMING, "Interaction confirmed");
-        tracker.complete(instance.getInstanceId(), time(1_800L, 103), Arrays.asList(clicked, confirmed));
+        lifecycle.complete(instance.getInstanceId(), time(1_800L, 103), Arrays.asList(clicked, confirmed));
 
         assertEquals(OpportunityStatus.COMPLETED, instance.getStatus());
         assertEquals(800L, instance.latencyMillis());
@@ -43,11 +43,11 @@ public class OpportunityTrackerTest
     public void failsOpportunityOnFailureEvidence()
     {
         final List<OpportunityMarker> markers = new ArrayList<>();
-        final OpportunityTracker tracker = new OpportunityTracker(markers::add);
-        final OpportunityInstance instance = tracker.start(ActivityId.of("activity-1"), definition(1_500L), time(1_000L, 100), Collections.emptyMap());
+        final OpportunityLifecycle lifecycle = new OpportunityLifecycle(markers::add);
+        final OpportunityInstance instance = lifecycle.start(ActivityId.of("activity-1"), definition(1_500L), time(1_000L, 100), Collections.emptyMap());
         final OpportunityEvidence damage = evidence(1_400L, 102, "HitsplatApplied", EvidenceStrength.STRONG, "Damage taken");
 
-        tracker.fail(instance.getInstanceId(), time(1_400L, 102), Collections.singletonList(damage));
+        lifecycle.fail(instance.getInstanceId(), time(1_400L, 102), Collections.singletonList(damage));
 
         assertEquals(OpportunityStatus.FAILED, instance.getStatus());
         assertEquals(Collections.singletonList(damage), instance.getEvidence());
@@ -58,10 +58,10 @@ public class OpportunityTrackerTest
     public void expiresOpenOpportunityAfterTimeout()
     {
         final List<OpportunityMarker> markers = new ArrayList<>();
-        final OpportunityTracker tracker = new OpportunityTracker(markers::add);
-        final OpportunityInstance instance = tracker.start(ActivityId.of("activity-1"), definition(600L), time(1_000L, 100), Collections.emptyMap());
+        final OpportunityLifecycle lifecycle = new OpportunityLifecycle(markers::add);
+        final OpportunityInstance instance = lifecycle.start(ActivityId.of("activity-1"), definition(600L), time(1_000L, 100), Collections.emptyMap());
 
-        final List<OpportunityInstance> expired = tracker.expireTimedOut(time(1_700L, 102));
+        final List<OpportunityInstance> expired = lifecycle.expireTimedOut(time(1_700L, 102));
 
         assertEquals(1, expired.size());
         assertEquals(instance, expired.get(0));
@@ -72,13 +72,13 @@ public class OpportunityTrackerTest
     @Test
     public void cancelsOpenOpportunitiesOnActivityTermination()
     {
-        final OpportunityTracker tracker = new OpportunityTracker();
+        final OpportunityLifecycle lifecycle = new OpportunityLifecycle();
         final ActivityId activityId = ActivityId.of("activity-1");
-        final OpportunityInstance first = tracker.start(activityId, definition(1_000L), time(1_000L, 100), Collections.emptyMap());
-        final OpportunityInstance second = tracker.start(activityId, definition(1_000L), time(1_100L, 101), Collections.emptyMap());
-        final OpportunityInstance other = tracker.start(ActivityId.of("activity-2"), definition(1_000L), time(1_200L, 102), Collections.emptyMap());
+        final OpportunityInstance first = lifecycle.start(activityId, definition(1_000L), time(1_000L, 100), Collections.emptyMap());
+        final OpportunityInstance second = lifecycle.start(activityId, definition(1_000L), time(1_100L, 101), Collections.emptyMap());
+        final OpportunityInstance other = lifecycle.start(ActivityId.of("activity-2"), definition(1_000L), time(1_200L, 102), Collections.emptyMap());
 
-        final List<OpportunityInstance> cancelled = tracker.cancelOpenOpportunities(
+        final List<OpportunityInstance> cancelled = lifecycle.cancelOpenOpportunities(
             activityId,
             time(1_900L, 105),
             Collections.singletonList(evidence(1_900L, 105, "FinishReason", EvidenceStrength.CONFIRMING, "Activity ended")));
@@ -93,12 +93,12 @@ public class OpportunityTrackerTest
     public void doesNotOverwriteTerminalStatus()
     {
         final List<OpportunityMarker> markers = new ArrayList<>();
-        final OpportunityTracker tracker = new OpportunityTracker(markers::add);
-        final OpportunityInstance instance = tracker.start(ActivityId.of("activity-1"), definition(1_000L), time(1_000L, 100), Collections.emptyMap());
+        final OpportunityLifecycle lifecycle = new OpportunityLifecycle(markers::add);
+        final OpportunityInstance instance = lifecycle.start(ActivityId.of("activity-1"), definition(1_000L), time(1_000L, 100), Collections.emptyMap());
 
-        tracker.complete(instance.getInstanceId(), time(1_300L, 101), Collections.singletonList(
+        lifecycle.complete(instance.getInstanceId(), time(1_300L, 101), Collections.singletonList(
             evidence(1_300L, 101, "InteractingChanged", EvidenceStrength.CONFIRMING, "Completed")));
-        tracker.fail(instance.getInstanceId(), time(1_600L, 103), Collections.singletonList(
+        lifecycle.fail(instance.getInstanceId(), time(1_600L, 103), Collections.singletonList(
             evidence(1_600L, 103, "HitsplatApplied", EvidenceStrength.STRONG, "Late failure")));
 
         assertEquals(OpportunityStatus.COMPLETED, instance.getStatus());

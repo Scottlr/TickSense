@@ -435,12 +435,13 @@ flowchart TB
   subgraph Pure_Java_Core
     Telemetry[TelemetryEvent]
     Strategy[ActivityStrategy]
-    Opportunity[OpportunityTracker]
+    Execution[ExecutionTracker]
+    Opportunity[OpportunityLifecycle]
     Metrics[AnalyticsEngine]
     Reports[ReportBuilder]
     Storage[TimelineRepository]
   end
-  Plugin --> Adapter --> Telemetry --> Strategy --> Opportunity --> Metrics --> Reports
+  Plugin --> Adapter --> Telemetry --> Strategy --> Execution --> Opportunity --> Metrics --> Reports
   Telemetry --> Storage
 ```
 
@@ -506,9 +507,9 @@ flowchart TB
 
 **Consequences:** no AI in MVP; future payloads are minimized and reviewable.
 
-# 9. Package and Module Structure
+# 9. Package and Boundary Structure
 
-Start as one Plugin Hub-compatible Gradle project with strict package boundaries. Split into Gradle submodules later only if needed.
+Start as one Plugin Hub-compatible Gradle project with strict package boundaries. Split into Gradle subprojects later only if needed.
 
 ```text
 com.ticksense.runelite
@@ -523,14 +524,14 @@ com.ticksense.ui
 com.ticksense.ai        // future only, not MVP
 ```
 
-| Package/module | Responsibility | May depend on | Must not depend on | Key classes/interfaces |
+| Package/layer | Responsibility | May depend on | Must not depend on | Key classes/interfaces |
 |---|---|---|---|---|
 | `ticksense-runelite` / `com.ticksense.runelite` | Plugin entrypoint, RuneLite subscriptions, adapter wiring, config. | RuneLite API/client, telemetry, UI, storage interface. | Analytics internals where avoidable. | `TickSensePlugin`, `TickSenseConfig`, `RuneLiteEventAdapter`, `RuneLiteClock`, `RuneLiteSnapshotter`. |
 | `ticksense-core` | Shared primitives. | Java stdlib. | RuneLite, Swing, network clients. | `EventTime`, `EntityRef`, `ActivityId`, `ActivitySession`, `FinishReason`, `WorldLocation`. |
 | `ticksense-telemetry` | Normalized event model and bus. | `core`. | RuneLite API. | `TelemetryEvent`, `TelemetryCategory`, event classes, `TelemetrySink`. |
-| `ticksense-activities` | Strategy interfaces, registry, confidence arbitration, opportunity lifecycle. | `core`, `telemetry`. | RuneLite, Swing, storage implementation. | `ActivityStrategy`, `ActivityStrategyEngine`, `ActivityCandidate`, `OpportunityTracker`. |
+| `ticksense-activities` | Strategy interfaces, registry, confidence arbitration, execution trackers, opportunity lifecycle. | `core`, `telemetry`. | RuneLite, Swing, storage implementation. | `ActivityStrategy`, `ExecutionTracker`, `ActivityStrategyEngine`, `ActivityCandidate`, `OpportunityLifecycle`. |
 | `ticksense-activities-herbcleaning` | Herb cleaning strategy and metrics. | activities, telemetry, core. | RuneLite. | `HerbCleaningStrategy`, `HerbCleaningIds`, `HerbCleaningAnalyzer`. |
-| `ticksense-activities-araxxor` | Araxxor strategy and spider opportunities. | activities, telemetry, core. | RuneLite. | `AraxxorStrategy`, `AraxxorIds`, `SpiderOpportunityTracker`, `AraxxorAnalyzer`. |
+| `ticksense-activities-araxxor` | Araxxor strategy and spider opportunities. | activities, telemetry, core. | RuneLite. | `AraxxorStrategy`, `AraxxorIds`, `AraxxorExecutionTracker`, `AraxxorAnalyzer`. |
 | `ticksense-analytics` | Metric definitions, report building, scoring, trends. | core, telemetry, activity report models. | RuneLite/Swing/network. | `MetricDefinition`, `MetricValue`, `ReportBuilder`, `ExecutionScore`, `TrendAnalyzer`. |
 | `ticksense-storage` | JSONL timelines, report index, export/import. | core, telemetry, analytics models. | RuneLite API except filesystem provider. | `TimelineRepository`, `JsonlTimelineRepository`, `ReportRepository`, `ExportBundleWriter`. |
 | `ticksense-ui` | RuneLite side panel and report views. | RuneLite client UI, report models. | Activity internals. | `TickSensePanel`, `ReportListPanel`, `ActivityReportPanel`, `OpportunityTimelinePanel`. |
@@ -678,6 +679,20 @@ public interface ActivityStrategy
     void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink);
     Optional<FinishReason> evaluateTermination(ActivityContext context, ActivitySession session, TelemetryEvent event);
     ActivityReportData buildActivityData(ActivityContext context, ActivitySession session);
+}
+```
+
+Execution trackers are reusable behavior helpers that run inside an active activity. They observe normalized activity state, track execution windows such as recovery, switching, re-engagement, or movement response, and emit opportunities through the shared lifecycle object.
+
+```java
+public interface ExecutionTracker
+{
+    String id();
+    void startActivity(ActivityId activityId);
+    void ensureOpportunityLifecycle(OpportunityLifecycle opportunityLifecycle);
+    void expireTimedOut(EventTime time);
+    void cancelOpenOpportunities(EventTime time, String detail);
+    void reset();
 }
 ```
 

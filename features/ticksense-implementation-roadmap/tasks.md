@@ -9,7 +9,7 @@
 - External persistence research was performed against public RuneLite/plugin repositories: RuneLite Developer Guide, plugin-hub README, example-plugin agent guidelines, Ground Markers/Object Markers core plugins, and Inventory Setups.
 - Persistence research result: use RuneLite `Config`/`ConfigManager` for plugin settings and small profile-backed values; use TickSense-owned files under `RuneLite.RUNELITE_DIR`/`~/.runelite/ticksense/` for timelines, reports, indexes, and debug bundles.
 - Feature bundle path: `features/ticksense-implementation-roadmap/`.
-- Planned implementation starts as one Plugin Hub-compatible Java 11 Gradle project. Package boundaries are enforced by Java packages first; Gradle submodules are deferred until the codebase needs them.
+- Planned implementation starts as one Plugin Hub-compatible Java 11 Gradle project. Package boundaries are enforced by Java packages first; Gradle subprojects are deferred until the codebase needs them.
 - Package root is assumed to be `com.ticksense` because the architecture suggests `com.ticksense` or `dev.ticksense`; pick `com.ticksense` unless the project owner changes it before T001.
 - TickSense is planned as a cheap, local-only RuneLite plugin. It works fully offline after installation and has no external-service dependency.
 - The local-only hard decisions in this roadmap supersede optional AI/external-service references that still exist in `docs/ARCHITECTURE.md`.
@@ -74,14 +74,14 @@
 | Inferno strategy | Later/future wave, nibbler, prayer timing, supply, and death-timeline analytics. | T026, T036, T037 | Avoid live solver behavior; keep later than Araxxor/Construction/Vardorvis. |
 | Sailing idea | Future idea only. | None | No tasks until content, IDs, and mechanics are stable enough to verify. |
 
-## Proposed Package/Module Ownership
+## Proposed Package Ownership
 
 | Package | Owner Responsibility | Primary Tasks |
 |---|---|---|
 | `com.ticksense.runelite` | Plugin entrypoint, config, RuneLite subscriptions, adapter wiring, clock, snapshotter. | T001, T002, T003, T006, T007, T020 |
 | `com.ticksense.core` | Shared primitives such as IDs, time, entity refs, locations, finish reasons, sessions. | T004, T009, T010 |
 | `com.ticksense.telemetry` | Normalized event interfaces/classes, categories, JSON serialization, telemetry bus contracts. | T005, T006, T007 |
-| `com.ticksense.activities` | Opportunity model, strategy interfaces, registry, candidate arbitration, activity lifecycle. | T008, T009, T011 |
+| `com.ticksense.activities` | Opportunity model, execution trackers, strategy interfaces, registry, candidate arbitration, activity lifecycle. | T008, T009, T011 |
 | `com.ticksense.activities.gemmining` | Gem mining verification, strategy, and analyzer. | T023, T030, T031 |
 | `com.ticksense.activities.araxxor` | Post-MVP Araxxor IDs, verification gates/fixtures, strategy, spider opportunities, boss report data. | T014, T029, T015 |
 | `com.ticksense.activities.construction` | Construction verification, strategy, and analyzer. | T024, T032, T033 |
@@ -118,7 +118,7 @@
 | T005 | [x] | Normalized Telemetry Events and Serialization | Define normalized telemetry interfaces/classes, event categories, payloads, schema versioning, and JSON serialization. |  | T004 | [`tasks/T005.md`](tasks/T005.md) |
 | T006 | [x] | Adapter Mappers and Snapshot Tests | Map MVP RuneLite events into normalized telemetry snapshots and test that no RuneLite types leak into core models. |  | T003, T005 | [`tasks/T006.md`](tasks/T006.md) |
 | T007 | [x] | Telemetry Bus, Session Clock, and Debug Recorder | Fan out normalized events, track session/tick sequencing, and write bounded opt-in debug JSONL. |  | T003, T005, T006 | [`tasks/T007.md`](tasks/T007.md) |
-| T008 | [x] | Opportunity Model and Tracker | Add opportunity definitions, instances, evidence, terminal states, latency helpers, and lifecycle tests. |  | T004, T005 | [`tasks/T008.md`](tasks/T008.md) |
+| T008 | [x] | Opportunity Model and Lifecycle | Add opportunity definitions, instances, evidence, terminal states, latency helpers, and lifecycle tests. |  | T004, T005 | [`tasks/T008.md`](tasks/T008.md) |
 | T009 | [x] | Activity Strategy Contracts and Registry | Define strategy interfaces, markers, candidate confidence, and a registry/factory for strategies. |  | T004, T005, T008 | [`tasks/T009.md`](tasks/T009.md) |
 | T010 | [x] | JSONL Timeline Repository | Persist and read schema-versioned normalized timelines plus activity/opportunity markers with local JSONL storage. |  | T005, T007, T008, T009 | [`tasks/T010.md`](tasks/T010.md) |
 | T011 | [x] | Activity Strategy Engine Lifecycle | Implement candidate arbitration, active-session lifecycle, termination handling, and diagnostics emission. |  | T007, T008, T009, T010 | [`tasks/T011.md`](tasks/T011.md) |
@@ -281,6 +281,6 @@ Removed task traceability:
 5. T005 - Normalized Telemetry Events and Serialization
 6. T006 - Adapter Mappers and Snapshot Tests
 7. T007 - Telemetry Bus, Session Clock, and Debug Recorder
-8. T008 - Opportunity Model and Tracker
+8. T008 - Opportunity Model and Lifecycle
 9. T009 - Activity Strategy Contracts and Registry
 10. T010 - JSONL Timeline Repository

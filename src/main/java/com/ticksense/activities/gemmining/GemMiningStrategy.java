@@ -76,7 +76,7 @@ public final class GemMiningStrategy implements ActivityStrategy
     @Override
     public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
     {
-        state.ensureTracker(new com.ticksense.activities.OpportunityTracker(sink));
+        state.ensureOpportunityLifecycle(new com.ticksense.activities.OpportunityLifecycle(sink));
         if (state.availableRock() != null)
         {
             state.emitCycleOpportunitiesForActiveClick();

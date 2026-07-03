@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class OpportunityTracker
+public final class OpportunityLifecycle
 {
     private static final OpportunitySink NO_OP_SINK = marker -> { };
 
@@ -19,12 +19,12 @@ public final class OpportunityTracker
     private final AtomicLong markerSequence = new AtomicLong();
     private final Map<String, OpportunityInstance> instances = new LinkedHashMap<>();
 
-    public OpportunityTracker()
+    public OpportunityLifecycle()
     {
         this(NO_OP_SINK);
     }
 
-    public OpportunityTracker(OpportunitySink sink)
+    public OpportunityLifecycle(OpportunitySink sink)
     {
         this.sink = Objects.requireNonNull(sink, "sink");
     }

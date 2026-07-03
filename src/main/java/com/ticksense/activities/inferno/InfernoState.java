@@ -5,7 +5,7 @@ import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
-import com.ticksense.activities.OpportunityTracker;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
@@ -49,7 +49,7 @@ final class InfernoState
 
     private int currentRegionId = -1;
     private ActivityId activeActivityId;
-    private OpportunityTracker tracker;
+    private OpportunityLifecycle opportunityLifecycle;
     private PendingWave pendingWave;
     private OpportunityInstance waveSpan;
     private OpportunityInstance nibblerWindow;
@@ -119,17 +119,17 @@ final class InfernoState
         activeActivityId = activityId;
     }
 
-    void ensureTracker(OpportunityTracker nextTracker)
+    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
-        if (tracker == null)
+        if (opportunityLifecycle == null)
         {
-            tracker = nextTracker;
+            opportunityLifecycle = nextLifecycle;
         }
     }
 
     void flushActivationDerivedSpans()
     {
-        if (pendingWave == null || tracker == null || activeActivityId == null)
+        if (pendingWave == null || opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
@@ -159,7 +159,7 @@ final class InfernoState
         {
             return;
         }
-        nibblerWindow = tracker.start(
+        nibblerWindow = opportunityLifecycle.start(
             activeActivityId,
             NIBBLER_WINDOW,
             event.getTime(),
@@ -178,7 +178,7 @@ final class InfernoState
         {
             return;
         }
-        tracker.complete(
+        opportunityLifecycle.complete(
             nibblerWindow.getInstanceId(),
             event.getTime(),
             Collections.singletonList(new OpportunityEvidence(
@@ -227,7 +227,7 @@ final class InfernoState
     {
         if (isOpen(waveSpan))
         {
-            tracker.complete(
+            opportunityLifecycle.complete(
                 waveSpan.getInstanceId(),
                 time,
                 Collections.singletonList(new OpportunityEvidence(time, "region.instance", EvidenceStrength.CONFIRMING, detail)));
@@ -236,7 +236,7 @@ final class InfernoState
         }
         if (isOpen(nibblerWindow))
         {
-            tracker.cancel(
+            opportunityLifecycle.cancel(
                 nibblerWindow.getInstanceId(),
                 time,
                 Collections.singletonList(new OpportunityEvidence(time, "region.instance", EvidenceStrength.CONFIRMING, detail)));
@@ -262,7 +262,7 @@ final class InfernoState
     {
         currentRegionId = -1;
         activeActivityId = null;
-        tracker = null;
+        opportunityLifecycle = null;
         pendingWave = null;
         waveSpan = null;
         nibblerWindow = null;
@@ -288,11 +288,11 @@ final class InfernoState
 
     private void openWaveSpan(NpcStateTelemetryEvent event)
     {
-        if (tracker == null || activeActivityId == null)
+        if (opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
-        waveSpan = tracker.start(
+        waveSpan = opportunityLifecycle.start(
             activeActivityId,
             WAVE_SPAN,
             event.getTime(),

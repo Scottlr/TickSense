@@ -1,11 +1,12 @@
 package com.ticksense.activities.araxxor;
 
 import com.ticksense.activities.EvidenceStrength;
+import com.ticksense.activities.ExecutionTracker;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.activities.OpportunityStatus;
-import com.ticksense.activities.OpportunityTracker;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
@@ -14,8 +15,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class SpiderOpportunityTracker
+final class AraxxorExecutionTracker implements ExecutionTracker
 {
+    private static final String ID = "araxxor.execution";
+
     static final String OPPORTUNITY_SPIDER_ENGAGEMENT = "ARAXXOR_SPIDER_ENGAGEMENT";
     static final String OPPORTUNITY_BOSS_REENGAGEMENT = "ARAXXOR_BOSS_REENGAGEMENT";
     static final String OPPORTUNITY_TARGET_REENGAGEMENT = "ARAXXOR_TARGET_REENGAGEMENT";
@@ -42,7 +45,7 @@ final class SpiderOpportunityTracker
         Collections.singletonList("Re-engage Araxxor after target loss"));
 
     private ActivityId activeActivityId;
-    private OpportunityTracker tracker;
+    private OpportunityLifecycle opportunityLifecycle;
     private OpportunityInstance spiderEngagement;
     private OpportunityInstance bossReengagement;
     private OpportunityInstance targetReengagement;
@@ -53,26 +56,34 @@ final class SpiderOpportunityTracker
     private int bossReengagementDamage;
     private int targetReengagementDamage;
 
-    void startActivity(ActivityId activityId)
+    @Override
+    public String id()
+    {
+        return ID;
+    }
+
+    @Override
+    public void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
     }
 
-    void ensureTracker(OpportunityTracker nextTracker)
+    @Override
+    public void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
-        if (tracker == null)
+        if (opportunityLifecycle == null)
         {
-            tracker = nextTracker;
+            opportunityLifecycle = nextLifecycle;
         }
     }
 
     void openSpiderEngagement(EventTime time, int spiderNpcId, int regionId)
     {
-        if (tracker == null || activeActivityId == null || isOpen(spiderEngagement))
+        if (opportunityLifecycle == null || activeActivityId == null || isOpen(spiderEngagement))
         {
             return;
         }
-        spiderEngagement = tracker.start(
+        spiderEngagement = opportunityLifecycle.start(
             activeActivityId,
             SPIDER_ENGAGEMENT,
             time,
@@ -87,7 +98,7 @@ final class SpiderOpportunityTracker
         {
             return;
         }
-        tracker.complete(spiderEngagement.getInstanceId(), time, evidence(evidenceType, time, detail));
+        opportunityLifecycle.complete(spiderEngagement.getInstanceId(), time, evidence(evidenceType, time, detail));
         spiderEngagementCount++;
         spiderEngagement = null;
     }
@@ -98,17 +109,17 @@ final class SpiderOpportunityTracker
         {
             return;
         }
-        tracker.fail(spiderEngagement.getInstanceId(), time, evidence("npc.state", time, detail));
+        opportunityLifecycle.fail(spiderEngagement.getInstanceId(), time, evidence("npc.state", time, detail));
         spiderEngagement = null;
     }
 
     void openBossReengagement(EventTime time, int spiderNpcId, int regionId)
     {
-        if (tracker == null || activeActivityId == null || isOpen(bossReengagement))
+        if (opportunityLifecycle == null || activeActivityId == null || isOpen(bossReengagement))
         {
             return;
         }
-        bossReengagement = tracker.start(
+        bossReengagement = opportunityLifecycle.start(
             activeActivityId,
             BOSS_REENGAGEMENT,
             time,
@@ -123,18 +134,18 @@ final class SpiderOpportunityTracker
         {
             return;
         }
-        tracker.complete(bossReengagement.getInstanceId(), time, evidence(evidenceType, time, detail));
+        opportunityLifecycle.complete(bossReengagement.getInstanceId(), time, evidence(evidenceType, time, detail));
         bossReengagementCount++;
         bossReengagement = null;
     }
 
     void openTargetReengagement(EventTime time, int regionId)
     {
-        if (tracker == null || activeActivityId == null || isOpen(targetReengagement))
+        if (opportunityLifecycle == null || activeActivityId == null || isOpen(targetReengagement))
         {
             return;
         }
-        targetReengagement = tracker.start(
+        targetReengagement = opportunityLifecycle.start(
             activeActivityId,
             TARGET_REENGAGEMENT,
             time,
@@ -147,7 +158,7 @@ final class SpiderOpportunityTracker
         {
             return;
         }
-        tracker.complete(targetReengagement.getInstanceId(), time, evidence(evidenceType, time, detail));
+        opportunityLifecycle.complete(targetReengagement.getInstanceId(), time, evidence(evidenceType, time, detail));
         targetReengagementCount++;
         targetReengagement = null;
     }
@@ -168,22 +179,24 @@ final class SpiderOpportunityTracker
         }
     }
 
-    void expireTimedOut(EventTime time)
+    @Override
+    public void expireTimedOut(EventTime time)
     {
-        if (tracker != null)
+        if (opportunityLifecycle != null)
         {
-            tracker.expireTimedOut(time);
+            opportunityLifecycle.expireTimedOut(time);
         }
         clearIfTerminal();
     }
 
-    void cancelOpenOpportunities(EventTime time, String detail)
+    @Override
+    public void cancelOpenOpportunities(EventTime time, String detail)
     {
-        if (tracker == null || activeActivityId == null)
+        if (opportunityLifecycle == null || activeActivityId == null)
         {
             return;
         }
-        tracker.cancelOpenOpportunities(activeActivityId, time, evidence("region.instance", time, detail));
+        opportunityLifecycle.cancelOpenOpportunities(activeActivityId, time, evidence("region.instance", time, detail));
         spiderEngagement = null;
         bossReengagement = null;
         targetReengagement = null;
@@ -201,10 +214,11 @@ final class SpiderOpportunityTracker
             targetReengagementDamage);
     }
 
-    void reset()
+    @Override
+    public void reset()
     {
         activeActivityId = null;
-        tracker = null;
+        opportunityLifecycle = null;
         spiderEngagement = null;
         bossReengagement = null;
         targetReengagement = null;

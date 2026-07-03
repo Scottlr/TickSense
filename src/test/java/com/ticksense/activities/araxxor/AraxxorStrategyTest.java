@@ -52,7 +52,7 @@ public class AraxxorStrategyTest
         harness.accept(bossDefeatEvent(612, 13668));
 
         final OpportunityMarker spider = harness.terminalOpportunity(
-            SpiderOpportunityTracker.OPPORTUNITY_SPIDER_ENGAGEMENT,
+            AraxxorExecutionTracker.OPPORTUNITY_SPIDER_ENGAGEMENT,
             OpportunityStatus.COMPLETED);
         assertEquals(606, spider.getTime().getGameTick());
 
@@ -74,7 +74,7 @@ public class AraxxorStrategyTest
         harness.accept(bossDefeatEvent(615, 13668));
 
         final OpportunityMarker boss = harness.terminalOpportunity(
-            SpiderOpportunityTracker.OPPORTUNITY_BOSS_REENGAGEMENT,
+            AraxxorExecutionTracker.OPPORTUNITY_BOSS_REENGAGEMENT,
             OpportunityStatus.COMPLETED);
         assertEquals(610, boss.getTime().getGameTick());
         assertEquals("13671", boss.getContext().get("spiderNpcId"));

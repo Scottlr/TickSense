@@ -1,6 +1,6 @@
 package com.ticksense.activities.araxxor;
 
-import com.ticksense.activities.OpportunityTracker;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
@@ -21,7 +21,7 @@ final class AraxxorState
     private final int[] araxxorNpcIds;
     private final int[] spiderNpcIds;
     private final int[] verifiedRegionIds;
-    private final SpiderOpportunityTracker opportunityTracker = new SpiderOpportunityTracker();
+    private final AraxxorExecutionTracker executionTracker = new AraxxorExecutionTracker();
 
     private int currentRegionId = -1;
     private boolean currentInstanced;
@@ -89,12 +89,12 @@ final class AraxxorState
 
     void startActivity(ActivityId activityId)
     {
-        opportunityTracker.startActivity(activityId);
+        executionTracker.startActivity(activityId);
     }
 
-    void ensureTracker(OpportunityTracker tracker)
+    void ensureOpportunityLifecycle(OpportunityLifecycle opportunityLifecycle)
     {
-        opportunityTracker.ensureTracker(tracker);
+        executionTracker.ensureOpportunityLifecycle(opportunityLifecycle);
     }
 
     void noteNpc(NpcStateTelemetryEvent event)
@@ -123,7 +123,7 @@ final class AraxxorState
         if ("SPAWNED".equals(event.getStateChange()))
         {
             spiderPresent = true;
-            opportunityTracker.openSpiderEngagement(event.getTime(), npcId, currentRegionId);
+            executionTracker.openSpiderEngagement(event.getTime(), npcId, currentRegionId);
             return;
         }
 
@@ -131,10 +131,10 @@ final class AraxxorState
         {
             if (spiderPresent)
             {
-                opportunityTracker.failSpiderEngagement(
+                executionTracker.failSpiderEngagement(
                     event.getTime(),
                     "Verified Araxxor spider window closed before engagement evidence completed.");
-                opportunityTracker.openBossReengagement(event.getTime(), npcId, currentRegionId);
+                executionTracker.openBossReengagement(event.getTime(), npcId, currentRegionId);
             }
             spiderPresent = false;
         }
@@ -150,7 +150,7 @@ final class AraxxorState
         final int npcId = event.getTargetRef().getId();
         if (contains(spiderNpcIds, npcId) && isAttackAction(event))
         {
-            opportunityTracker.completeSpiderEngagement(
+            executionTracker.completeSpiderEngagement(
                 event.getTime(),
                 "player.action",
                 "Local player attacked the verified Araxxor spider.");
@@ -166,11 +166,11 @@ final class AraxxorState
 
         bossPresent = true;
         lastBossSeenTick = event.getTime().getGameTick();
-        opportunityTracker.completeBossReengagement(
+        executionTracker.completeBossReengagement(
             event.getTime(),
             "player.action",
             "Local player re-engaged verified Araxxor with an attack click.");
-        opportunityTracker.completeTargetReengagement(
+        executionTracker.completeTargetReengagement(
             event.getTime(),
             "player.action",
             "Local player recovered Araxxor target with an attack click.");
@@ -190,7 +190,7 @@ final class AraxxorState
             final int npcId = event.getInteractingRef().getId();
             if (contains(spiderNpcIds, npcId))
             {
-                opportunityTracker.completeSpiderEngagement(
+                executionTracker.completeSpiderEngagement(
                     event.getTime(),
                     "interacting.changed",
                     "Local player engaged the verified Araxxor spider.");
@@ -203,11 +203,11 @@ final class AraxxorState
             {
                 bossPresent = true;
                 lastBossSeenTick = event.getTime().getGameTick();
-                opportunityTracker.completeBossReengagement(
+                executionTracker.completeBossReengagement(
                     event.getTime(),
                     "interacting.changed",
                     "Local player re-engaged verified Araxxor.");
-                opportunityTracker.completeTargetReengagement(
+                executionTracker.completeTargetReengagement(
                     event.getTime(),
                     "interacting.changed",
                     "Local player restored Araxxor targeting.");
@@ -223,7 +223,7 @@ final class AraxxorState
             && bossPresent
             && !spiderPresent)
         {
-            opportunityTracker.openTargetReengagement(event.getTime(), currentRegionId);
+            executionTracker.openTargetReengagement(event.getTime(), currentRegionId);
         }
 
         lastLocalTarget = TargetType.NONE;
@@ -234,7 +234,7 @@ final class AraxxorState
     {
         if (event.getTargetRef().getType() == EntityRef.Type.LOCAL_PLAYER)
         {
-            opportunityTracker.noteDamage(event.getAmount());
+            executionTracker.noteDamage(event.getAmount());
         }
     }
 
@@ -265,17 +265,17 @@ final class AraxxorState
 
     void expireTimedOut(EventTime time)
     {
-        opportunityTracker.expireTimedOut(time);
+        executionTracker.expireTimedOut(time);
     }
 
     void cancelOpenOpportunities(EventTime time, String detail)
     {
-        opportunityTracker.cancelOpenOpportunities(time, detail);
+        executionTracker.cancelOpenOpportunities(time, detail);
     }
 
     Map<String, String> snapshotAttributes()
     {
-        return opportunityTracker.snapshotData(verificationDecision.getStatus().name()).toAttributes();
+        return executionTracker.snapshotData(verificationDecision.getStatus().name()).toAttributes();
     }
 
     void resetForNextSession()
@@ -287,7 +287,7 @@ final class AraxxorState
         lastLocalTargetNpcId = -1;
         lastLocalTarget = TargetType.NONE;
         lastBossSeenTick = -1;
-        opportunityTracker.reset();
+        executionTracker.reset();
     }
 
     private static boolean isAttackAction(PlayerActionTelemetryEvent event)

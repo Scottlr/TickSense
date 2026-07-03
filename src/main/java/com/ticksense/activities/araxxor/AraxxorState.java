@@ -10,6 +10,7 @@ import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.common.IntIdSet;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
@@ -24,9 +25,9 @@ final class AraxxorState
     private static final int BOSS_ABSENT_IDLE_TICKS = 5;
 
     private final AraxxorVerificationDecision verificationDecision;
-    private final int[] araxxorNpcIds;
-    private final int[] spiderNpcIds;
-    private final int[] verifiedRegionIds;
+    private final IntIdSet araxxorNpcIds;
+    private final IntIdSet spiderNpcIds;
+    private final IntIdSet verifiedRegionIds;
     private final AraxxorExecutionTracker executionTracker = new AraxxorExecutionTracker();
     private final ExecutionTrackerSet reusableExecutionTrackers = ExecutionTrackerSet.of(
         "araxxor-reusable-execution",
@@ -48,9 +49,9 @@ final class AraxxorState
         int[] verifiedRegionIds)
     {
         this.verificationDecision = verificationDecision;
-        this.araxxorNpcIds = araxxorNpcIds.clone();
-        this.spiderNpcIds = spiderNpcIds.clone();
-        this.verifiedRegionIds = verifiedRegionIds.clone();
+        this.araxxorNpcIds = IntIdSet.of(araxxorNpcIds);
+        this.spiderNpcIds = IntIdSet.of(spiderNpcIds);
+        this.verifiedRegionIds = IntIdSet.of(verifiedRegionIds);
     }
 
     boolean allowsNormalStrategyEnablement()
@@ -73,7 +74,7 @@ final class AraxxorState
             && isVerifiedRegion(currentRegionId)
             && event.getActorRef().getType() == EntityRef.Type.LOCAL_PLAYER
             && event.getInteractingRef().getType() == EntityRef.Type.NPC
-            && contains(araxxorNpcIds, event.getInteractingRef().getId());
+            && araxxorNpcIds.contains(event.getInteractingRef().getId());
     }
 
     void noteActivationInteraction(InteractingChangedTelemetryEvent event)
@@ -122,7 +123,7 @@ final class AraxxorState
         }
 
         final int npcId = event.getNpcRef().getId();
-        if (contains(araxxorNpcIds, npcId))
+        if (araxxorNpcIds.contains(npcId))
         {
             bossPresent = !"DESPAWNED".equals(event.getStateChange()) && event.getHealthRatio() != 0;
             if (bossPresent)
@@ -132,7 +133,7 @@ final class AraxxorState
             return;
         }
 
-        if (!contains(spiderNpcIds, npcId))
+        if (!spiderNpcIds.contains(npcId))
         {
             return;
         }
@@ -165,7 +166,7 @@ final class AraxxorState
         }
 
         final int npcId = event.getTargetRef().getId();
-        if (contains(spiderNpcIds, npcId) && isAttackAction(event))
+        if (spiderNpcIds.contains(npcId) && isAttackAction(event))
         {
             executionTracker.completeSpiderEngagement(
                 event.getTime(),
@@ -176,7 +177,7 @@ final class AraxxorState
             return;
         }
 
-        if (!contains(araxxorNpcIds, npcId) || !isAttackAction(event))
+        if (!araxxorNpcIds.contains(npcId) || !isAttackAction(event))
         {
             return;
         }
@@ -205,7 +206,7 @@ final class AraxxorState
         if (event.getInteractingRef().getType() == EntityRef.Type.NPC)
         {
             final int npcId = event.getInteractingRef().getId();
-            if (contains(spiderNpcIds, npcId))
+            if (spiderNpcIds.contains(npcId))
             {
                 executionTracker.completeSpiderEngagement(
                     event.getTime(),
@@ -216,7 +217,7 @@ final class AraxxorState
                 return;
             }
 
-            if (contains(araxxorNpcIds, npcId))
+            if (araxxorNpcIds.contains(npcId))
             {
                 bossPresent = true;
                 lastBossSeenTick = event.getTime().getGameTick();
@@ -236,7 +237,7 @@ final class AraxxorState
 
         if (event.getInteractingRef().getType() == EntityRef.Type.UNKNOWN
             && lastLocalTarget == TargetType.BOSS
-            && contains(araxxorNpcIds, lastLocalTargetNpcId)
+            && araxxorNpcIds.contains(lastLocalTargetNpcId)
             && bossPresent
             && !spiderPresent)
         {
@@ -263,7 +264,7 @@ final class AraxxorState
 
     boolean isBossDefeat(NpcStateTelemetryEvent event)
     {
-        return contains(araxxorNpcIds, event.getNpcRef().getId())
+        return araxxorNpcIds.contains(event.getNpcRef().getId())
             && ("DESPAWNED".equals(event.getStateChange()) || event.getHealthRatio() == 0);
     }
 
@@ -316,14 +317,9 @@ final class AraxxorState
             || event.getActionKind().startsWith("NPC_");
     }
 
-    private boolean contains(int[] values, int needle)
-    {
-        return Arrays.stream(values).anyMatch(value -> value == needle);
-    }
-
     private boolean isVerifiedRegion(int regionId)
     {
-        return contains(verifiedRegionIds, regionId);
+        return verifiedRegionIds.contains(regionId);
     }
 
     private enum TargetType

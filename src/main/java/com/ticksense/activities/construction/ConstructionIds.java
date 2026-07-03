@@ -1,5 +1,7 @@
 package com.ticksense.activities.construction;
 
+import com.ticksense.common.IntIdSet;
+
 public final class ConstructionIds
 {
     private static final String APPROVED_METHOD_NAME = "oak-larder";
@@ -21,7 +23,6 @@ public final class ConstructionIds
         9625, // RuneLite ItemID.CRYSTAL_SAW
         29774 // RuneLite ItemID.AMYS_SAW_OFFHAND
     };
-
     private static final int[] BUILD_ANIMATION_IDS = {
         3676, // RuneLite AnimationID.CONSTRUCTION
         8912 // RuneLite AnimationID.CONSTRUCTION_IMCANDO
@@ -39,6 +40,14 @@ public final class ConstructionIds
     private static final int[] CONSTRUCTION_WIDGET_CHILD_IDS = {
         12 // Source-owned normalized verification fixture construction build widget child for oak larder
     };
+
+    private static final IntIdSet METHOD_ITEM_ID_SET = IntIdSet.of(METHOD_ITEM_IDS);
+    private static final IntIdSet BUILD_SPOT_OBJECT_ID_SET = IntIdSet.of(BUILD_SPOT_OBJECT_IDS);
+    private static final IntIdSet BUILT_OBJECT_ID_SET = IntIdSet.of(BUILT_OBJECT_IDS);
+    private static final IntIdSet BUILD_ANIMATION_ID_SET = IntIdSet.of(BUILD_ANIMATION_IDS);
+    private static final IntIdSet BANK_WIDGET_GROUP_ID_SET = IntIdSet.of(BANK_WIDGET_GROUP_IDS);
+    private static final IntIdSet CONSTRUCTION_WIDGET_GROUP_ID_SET = IntIdSet.of(CONSTRUCTION_WIDGET_GROUP_IDS);
+    private static final IntIdSet CONSTRUCTION_WIDGET_CHILD_ID_SET = IntIdSet.of(CONSTRUCTION_WIDGET_CHILD_IDS);
 
     private static final ConstructionVerificationDecision VERIFICATION_DECISION =
         ConstructionVerificationDecision.current();
@@ -85,6 +94,41 @@ public final class ConstructionIds
     public static int[] constructionWidgetChildIds()
     {
         return CONSTRUCTION_WIDGET_CHILD_IDS.clone();
+    }
+
+    public static boolean isBuildSpotObjectId(int objectId)
+    {
+        return BUILD_SPOT_OBJECT_ID_SET.contains(objectId);
+    }
+
+    public static boolean isBuiltObjectId(int objectId)
+    {
+        return BUILT_OBJECT_ID_SET.contains(objectId);
+    }
+
+    public static boolean isMethodItemId(int itemId)
+    {
+        return METHOD_ITEM_ID_SET.contains(itemId);
+    }
+
+    public static boolean isBuildAnimationId(int animationId)
+    {
+        return BUILD_ANIMATION_ID_SET.contains(animationId);
+    }
+
+    public static boolean isBankWidgetGroupId(int groupId)
+    {
+        return BANK_WIDGET_GROUP_ID_SET.contains(groupId);
+    }
+
+    public static boolean isConstructionWidgetGroupId(int groupId)
+    {
+        return CONSTRUCTION_WIDGET_GROUP_ID_SET.contains(groupId);
+    }
+
+    public static boolean isConstructionWidgetChildId(int childId)
+    {
+        return CONSTRUCTION_WIDGET_CHILD_ID_SET.contains(childId);
     }
 
     public static ConstructionVerificationDecision verificationDecision()

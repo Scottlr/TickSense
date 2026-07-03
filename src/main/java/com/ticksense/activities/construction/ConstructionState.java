@@ -18,7 +18,6 @@ import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import com.ticksense.telemetry.events.StatChangedTelemetryEvent;
 import com.ticksense.telemetry.events.WidgetTelemetryEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -101,20 +100,20 @@ final class ConstructionState
 
     void markObjectState(int objectId, WorldLocation location, String objectName, String stateChange, EventTime time)
     {
-        if (contains(ConstructionIds.buildSpotObjectIds(), objectId) && StateChanges.AVAILABLE.equals(stateChange))
+        if (ConstructionIds.isBuildSpotObjectId(objectId) && StateChanges.AVAILABLE.equals(stateChange))
         {
             availableBuildSpot = new BuildSpotAvailability(objectId, objectName, location, time);
             builtObject = null;
             return;
         }
-        if (contains(ConstructionIds.builtObjectIds(), objectId) && StateChanges.BUILT.equals(stateChange))
+        if (ConstructionIds.isBuiltObjectId(objectId) && StateChanges.BUILT.equals(stateChange))
         {
             builtObject = new BuiltObject(objectId, objectName, location, time);
             availableBuildSpot = null;
             noteBuildConfirmation(time, ObjectStateTelemetryEvent.TYPE, "Verified oak larder object became built.");
             return;
         }
-        if (contains(ConstructionIds.buildSpotObjectIds(), objectId) && StateChanges.AVAILABLE.equals(stateChange) && cadenceOpportunity != null)
+        if (ConstructionIds.isBuildSpotObjectId(objectId) && StateChanges.AVAILABLE.equals(stateChange) && cadenceOpportunity != null)
         {
             builtObject = null;
         }
@@ -170,8 +169,8 @@ final class ConstructionState
 
     void noteConstructionWidget(EventTime time, int groupId, int childId)
     {
-        if (contains(ConstructionIds.constructionWidgetGroupIds(), groupId)
-            && contains(ConstructionIds.constructionWidgetChildIds(), childId))
+        if (ConstructionIds.isConstructionWidgetGroupId(groupId)
+            && ConstructionIds.isConstructionWidgetChildId(childId))
         {
             noteBuildConfirmation(time, WidgetTelemetryEvent.TYPE, "Verified construction widget confirmed the oak larder build choice.");
         }
@@ -179,7 +178,7 @@ final class ConstructionState
 
     void noteConstructionAnimation(EventTime time, int animationId)
     {
-        if (contains(ConstructionIds.buildAnimationIds(), animationId))
+        if (ConstructionIds.isBuildAnimationId(animationId))
         {
             noteBuildConfirmation(time, AnimationTelemetryEvent.TYPE, "Verified Construction build animation confirmed progress.");
         }
@@ -187,7 +186,7 @@ final class ConstructionState
 
     void noteInventoryDelta(EventTime time, int beforeItemId, int afterItemId, int afterQuantity)
     {
-        if (beforeItemId == 8778 || afterItemId == 8778)
+        if (ConstructionIds.isMethodItemId(beforeItemId) || ConstructionIds.isMethodItemId(afterItemId))
         {
             noteBuildConfirmation(time, InventoryDeltaTelemetryEvent.TYPE, "Oak plank inventory changed during the verified build flow.");
             if (afterItemId == -1 || afterQuantity <= 0)
@@ -207,7 +206,7 @@ final class ConstructionState
 
     boolean isBankWidget(int groupId)
     {
-        return contains(ConstructionIds.bankWidgetGroupIds(), groupId);
+        return ConstructionIds.isBankWidgetGroupId(groupId);
     }
 
     void noteBankWidget(EventTime time, int groupId)
@@ -421,11 +420,6 @@ final class ConstructionState
     static boolean isRemoveAction(String option, String target)
     {
         return normalize(option).equals("remove") && normalize(target).contains("oak larder");
-    }
-
-    private static boolean contains(int[] values, int needle)
-    {
-        return Arrays.stream(values).anyMatch(value -> value == needle);
     }
 
     private static String normalize(String text)

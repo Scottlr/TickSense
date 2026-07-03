@@ -14,6 +14,7 @@ import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.common.IntIdSet;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.MovementTelemetryEvent;
@@ -41,12 +42,12 @@ final class VardorvisState
         Collections.singletonList("Move or act after the verified ranged-head cue"));
 
     private final VardorvisVerificationDecision verificationDecision;
-    private final int[] bossNpcIds;
-    private final int[] headNpcIds;
-    private final int[] rangedHeadProjectileIds;
-    private final int[] bloodSplatGraphicIds;
-    private final int[] axeMechanicIds;
-    private final int[] verifiedRegionIds;
+    private final IntIdSet bossNpcIds;
+    private final IntIdSet headNpcIds;
+    private final IntIdSet rangedHeadProjectileIds;
+    private final IntIdSet bloodSplatGraphicIds;
+    private final IntIdSet axeMechanicIds;
+    private final IntIdSet verifiedRegionIds;
     private final ExecutionTrackerSet reusableExecutionTrackers = CommonExecutionTrackers.combatSupport();
 
     private int currentRegionId = -1;
@@ -68,12 +69,12 @@ final class VardorvisState
         int[] verifiedRegionIds)
     {
         this.verificationDecision = verificationDecision;
-        this.bossNpcIds = bossNpcIds.clone();
-        this.headNpcIds = headNpcIds.clone();
-        this.rangedHeadProjectileIds = rangedHeadProjectileIds.clone();
-        this.bloodSplatGraphicIds = bloodSplatGraphicIds.clone();
-        this.axeMechanicIds = axeMechanicIds.clone();
-        this.verifiedRegionIds = verifiedRegionIds.clone();
+        this.bossNpcIds = IntIdSet.of(bossNpcIds);
+        this.headNpcIds = IntIdSet.of(headNpcIds);
+        this.rangedHeadProjectileIds = IntIdSet.of(rangedHeadProjectileIds);
+        this.bloodSplatGraphicIds = IntIdSet.of(bloodSplatGraphicIds);
+        this.axeMechanicIds = IntIdSet.of(axeMechanicIds);
+        this.verifiedRegionIds = IntIdSet.of(verifiedRegionIds);
     }
 
     boolean allowsNormalReports()
@@ -98,14 +99,14 @@ final class VardorvisState
 
     boolean isVerifiedRegion(int regionId)
     {
-        return contains(verifiedRegionIds, regionId);
+        return verifiedRegionIds.contains(regionId);
     }
 
     boolean canActivateFromRangedHead(ProjectileTelemetryEvent event)
     {
         return allowsMechanic(MECHANIC_RANGED_HEAD_RESPONSE)
             && isVerifiedRegion(currentRegionId)
-            && contains(rangedHeadProjectileIds, event.getProjectileId())
+            && rangedHeadProjectileIds.contains(event.getProjectileId())
             && isHeadRef(event.getSourceRef())
             && event.getTargetRef().getType() == EntityRef.Type.LOCAL_PLAYER;
     }
@@ -242,8 +243,8 @@ final class VardorvisState
         attributes.put("verifiedMechanics", String.join(",", verificationDecision.getVerifiedMechanics()));
         attributes.put("rangedHeadResponseCount", String.valueOf(rangedHeadResponseCount));
         attributes.put("rangedHeadDamageFailures", String.valueOf(rangedHeadDamageFailures));
-        attributes.put("bloodSplatGraphicIdCount", String.valueOf(bloodSplatGraphicIds.length));
-        attributes.put("axeMechanicIdCount", String.valueOf(axeMechanicIds.length));
+        attributes.put("bloodSplatGraphicIdCount", String.valueOf(bloodSplatGraphicIds.size()));
+        attributes.put("axeMechanicIdCount", String.valueOf(axeMechanicIds.size()));
         return attributes;
     }
 
@@ -292,12 +293,7 @@ final class VardorvisState
 
     private boolean isHeadRef(EntityRef ref)
     {
-        return ref.getType() == EntityRef.Type.NPC && contains(headNpcIds, ref.getId());
-    }
-
-    private static boolean contains(int[] values, int needle)
-    {
-        return Arrays.stream(values).anyMatch(value -> value == needle);
+        return ref.getType() == EntityRef.Type.NPC && headNpcIds.contains(ref.getId());
     }
 
     private static Map<String, String> context(String... pairs)

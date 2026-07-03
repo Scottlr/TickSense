@@ -13,13 +13,14 @@ import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
-import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.common.IntIdSet;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,10 +49,10 @@ final class InfernoState
         Collections.singletonList("Engage the verified nibbler"));
 
     private final InfernoVerificationDecision verificationDecision;
-    private final int[] nibblerNpcIds;
-    private final int[] waveNpcIds;
-    private final int[] supplyItemIds;
-    private final int[] verifiedRegionIds;
+    private final IntIdSet nibblerNpcIds;
+    private final IntIdSet waveNpcIds;
+    private final IntIdSet supplyItemIds;
+    private final IntIdSet verifiedRegionIds;
     private final ExecutionTrackerSet reusableExecutionTrackers = CommonExecutionTrackers.combatSupport();
 
     private int currentRegionId = -1;
@@ -74,10 +75,10 @@ final class InfernoState
         int[] verifiedRegionIds)
     {
         this.verificationDecision = verificationDecision;
-        this.nibblerNpcIds = nibblerNpcIds.clone();
-        this.waveNpcIds = waveNpcIds.clone();
-        this.supplyItemIds = supplyItemIds.clone();
-        this.verifiedRegionIds = verifiedRegionIds.clone();
+        this.nibblerNpcIds = IntIdSet.of(nibblerNpcIds);
+        this.waveNpcIds = IntIdSet.of(waveNpcIds);
+        this.supplyItemIds = IntIdSet.of(supplyItemIds);
+        this.verifiedRegionIds = IntIdSet.of(verifiedRegionIds);
     }
 
     boolean allowsStrategyEnablement()
@@ -105,7 +106,7 @@ final class InfernoState
 
     boolean isVerifiedRegion(int regionId)
     {
-        return contains(verifiedRegionIds, regionId);
+        return verifiedRegionIds.contains(regionId);
     }
 
     boolean canActivateFromWaveNpc(NpcStateTelemetryEvent event)
@@ -113,7 +114,7 @@ final class InfernoState
         return verificationDecision.allowsWaveSpans()
             && isVerifiedRegion(currentRegionId)
             && "SPAWNED".equals(event.getStateChange())
-            && contains(waveNpcIds, event.getNpcRef().getId());
+            && waveNpcIds.contains(event.getNpcRef().getId());
     }
 
     void noteActivationWave(NpcStateTelemetryEvent event)
@@ -155,7 +156,7 @@ final class InfernoState
     {
         if (!verificationDecision.allowsWaveSpans()
             || !"SPAWNED".equals(event.getStateChange())
-            || !contains(waveNpcIds, event.getNpcRef().getId())
+            || !waveNpcIds.contains(event.getNpcRef().getId())
             || isOpen(waveSpan))
         {
             return;
@@ -167,7 +168,7 @@ final class InfernoState
     {
         if (!verificationDecision.allowsNibblerWindows()
             || !"SPAWNED".equals(event.getStateChange())
-            || !contains(nibblerNpcIds, event.getNpcRef().getId())
+            || !nibblerNpcIds.contains(event.getNpcRef().getId())
             || !isOpen(waveSpan)
             || isOpen(nibblerWindow))
         {
@@ -188,7 +189,7 @@ final class InfernoState
         if (!isOpen(nibblerWindow)
             || event.getActorRef().getType() != EntityRef.Type.LOCAL_PLAYER
             || event.getInteractingRef().getType() != EntityRef.Type.NPC
-            || !contains(nibblerNpcIds, event.getInteractingRef().getId()))
+            || !nibblerNpcIds.contains(event.getInteractingRef().getId()))
         {
             return;
         }
@@ -213,7 +214,7 @@ final class InfernoState
         }
         for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
         {
-            if (contains(supplyItemIds, delta.getBeforeItemId()) && delta.getAfterQuantity() < delta.getBeforeQuantity())
+            if (supplyItemIds.contains(delta.getBeforeItemId()) && delta.getAfterQuantity() < delta.getBeforeQuantity())
             {
                 supplyUseCount += (delta.getBeforeQuantity() - delta.getAfterQuantity());
                 appendDeathTimeline("Tick " + event.getTime().getGameTick() + ": used verified supply item " + delta.getBeforeItemId() + ".");
@@ -352,11 +353,6 @@ final class InfernoState
             values.put(pairs[i], pairs[i + 1]);
         }
         return values;
-    }
-
-    private static boolean contains(int[] values, int needle)
-    {
-        return Arrays.stream(values).anyMatch(value -> value == needle);
     }
 
     private static boolean isOpen(OpportunityInstance instance)

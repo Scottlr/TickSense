@@ -1,6 +1,6 @@
 package com.ticksense.activities.gemmining;
 
-import java.util.ArrayList;
+import com.ticksense.activities.VerificationTexts;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -19,9 +19,9 @@ public final class GemMiningVerificationDecision
         List<String> notes)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedEvidence = immutableCopy(verifiedEvidence, "verifiedEvidence");
-        this.blockers = immutableCopy(blockers, "blockers");
-        this.notes = immutableCopy(notes, "notes");
+        this.verifiedEvidence = VerificationTexts.immutableCopy(verifiedEvidence, "verifiedEvidence");
+        this.blockers = VerificationTexts.immutableCopy(blockers, "blockers");
+        this.notes = VerificationTexts.immutableCopy(notes, "notes");
     }
 
     public static GemMiningVerificationDecision verified(List<String> verifiedEvidence, List<String> notes)
@@ -66,23 +66,6 @@ public final class GemMiningVerificationDecision
     {
         return status == Status.VERIFIED;
     }
-
-    private static List<String> immutableCopy(List<String> values, String fieldName)
-    {
-        Objects.requireNonNull(values, fieldName);
-        final List<String> copy = new ArrayList<>(values.size());
-        for (String value : values)
-        {
-            final String normalized = Objects.requireNonNull(value, fieldName + " entry").trim();
-            if (normalized.isEmpty())
-            {
-                throw new IllegalArgumentException(fieldName + " entries must not be blank");
-            }
-            copy.add(normalized);
-        }
-        return Collections.unmodifiableList(copy);
-    }
-
     public enum Status
     {
         VERIFIED,

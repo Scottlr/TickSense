@@ -3,8 +3,6 @@ package com.ticksense.activities;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +17,7 @@ public final class OpportunityInstance
     private final EventTime startTime;
     private final Map<String, String> context;
     private final List<OpportunityEvidence> evidence = new ArrayList<>();
-    private final List<OpportunityEvidence> evidenceView = Collections.unmodifiableList(evidence);
+    private final List<OpportunityEvidence> evidenceView = java.util.Collections.unmodifiableList(evidence);
 
     private EventTime endTime;
     private OpportunityStatus status = OpportunityStatus.OPEN;
@@ -31,11 +29,11 @@ public final class OpportunityInstance
         EventTime startTime,
         Map<String, String> context)
     {
-        this.instanceId = requireText(instanceId, "instanceId");
+        this.instanceId = ActivityTexts.requireText(instanceId, "instanceId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.definition = Objects.requireNonNull(definition, "definition");
         this.startTime = Objects.requireNonNull(startTime, "startTime");
-        this.context = immutableMap(context);
+        this.context = ActivityCollections.immutableStringMap(context);
     }
 
     public String getInstanceId()
@@ -113,24 +111,5 @@ public final class OpportunityInstance
         endTime = nextEndTime;
         status = nextStatus;
         return true;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static Map<String, String> immutableMap(Map<String, String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(values));
     }
 }

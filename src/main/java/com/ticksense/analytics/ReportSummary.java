@@ -43,16 +43,16 @@ public final class ReportSummary
         Map<String, Integer> tickLossCategories)
     {
         this.schemaVersion = requireSchemaVersion(schemaVersion);
-        this.reportId = requireText(reportId, "reportId");
+        this.reportId = AnalyticsTexts.requireText(reportId, "reportId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.detectedActivityName = requireText(detectedActivityName, "detectedActivityName");
+        this.detectedActivityName = AnalyticsTexts.requireText(detectedActivityName, "detectedActivityName");
         this.createdAtMillis = requireNonNegative(createdAtMillis, "createdAtMillis");
         this.durationTicks = requireNonNegative(durationTicks, "durationTicks");
         this.durationMillis = requireNonNegative(durationMillis, "durationMillis");
-        this.finishReason = requireText(finishReason, "finishReason");
+        this.finishReason = AnalyticsTexts.requireText(finishReason, "finishReason");
         this.confidence = requireConfidence(confidence);
-        this.evidenceSummaryText = safeText(evidenceSummaryText);
+        this.evidenceSummaryText = AnalyticsTexts.safeText(evidenceSummaryText);
         this.summaryLines = immutableStrings(summaryLines);
         this.metricValues = immutableDoubleMap(metricValues, "metricValues");
         this.tickLossCategories = immutableIntegerMap(tickLossCategories, "tickLossCategories");
@@ -164,21 +164,6 @@ public final class ReportSummary
         return value;
     }
 
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
-    }
-
     private static List<String> immutableStrings(List<String> values)
     {
         if (values == null || values.isEmpty())
@@ -189,7 +174,7 @@ public final class ReportSummary
         final List<String> copied = new ArrayList<>(values.size());
         for (String value : values)
         {
-            copied.add(requireText(value, "summaryLines value"));
+            copied.add(AnalyticsTexts.requireText(value, "summaryLines value"));
         }
         return Collections.unmodifiableList(copied);
     }
@@ -203,7 +188,7 @@ public final class ReportSummary
         final Map<String, Double> copy = new LinkedHashMap<>();
         for (Map.Entry<String, Double> entry : values.entrySet())
         {
-            copy.put(requireText(entry.getKey(), fieldName + " key"), Objects.requireNonNull(entry.getValue(), fieldName + " value"));
+            copy.put(AnalyticsTexts.requireText(entry.getKey(), fieldName + " key"), Objects.requireNonNull(entry.getValue(), fieldName + " value"));
         }
         return Collections.unmodifiableMap(copy);
     }
@@ -217,7 +202,7 @@ public final class ReportSummary
         final Map<String, Integer> copy = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : values.entrySet())
         {
-            copy.put(requireText(entry.getKey(), fieldName + " key"), Objects.requireNonNull(entry.getValue(), fieldName + " value"));
+            copy.put(AnalyticsTexts.requireText(entry.getKey(), fieldName + " key"), Objects.requireNonNull(entry.getValue(), fieldName + " value"));
         }
         return Collections.unmodifiableMap(copy);
     }

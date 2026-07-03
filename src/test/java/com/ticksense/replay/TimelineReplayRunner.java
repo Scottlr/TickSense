@@ -6,6 +6,9 @@ import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategy;
 import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.construction.ConstructionAnalyzer;
+import com.ticksense.activities.construction.ConstructionIds;
+import com.ticksense.activities.construction.ConstructionStrategy;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.gemmining.GemMiningAnalyzer;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
@@ -119,6 +122,10 @@ public final class TimelineReplayRunner
         {
             return new GemMiningAnalyzer().buildReport(session, reportData, opportunityMarkers);
         }
+        if (session.getActivityType() == ActivityType.CONSTRUCTION)
+        {
+            return new ConstructionAnalyzer().buildReport(session, reportData, opportunityMarkers);
+        }
         throw new IllegalArgumentException("No replay analyzer registered for " + session.getActivityType());
     }
 
@@ -193,9 +200,13 @@ public final class TimelineReplayRunner
 
     private static ActivityRegistry defaultRegistry()
     {
-        return ActivityRegistry.builder()
-            .register(new GemMiningStrategy())
-            .build();
+        final ActivityRegistry.Builder builder = ActivityRegistry.builder()
+            .register(new GemMiningStrategy());
+        if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
+        {
+            builder.register(new ConstructionStrategy());
+        }
+        return builder.build();
     }
 
     public static final class ReplayResult

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "activityType": "CONSTRUCTION",
+  "detectedActivityName": "Construction",
+  "durationTicks": 39,
+  "durationMillis": 23400,
+  "finishReason": {
+    "type": "BANK_OPENED",
+    "confidence": 0.95,
+    "explanation": "Construction ended because verified banking evidence completed the oak-larder cycle.",
+    "evidence": [
+      "Bank widget group 12 loaded after the verified build/remove flow."
+    ],
+    "gameTick": 439
+  },
+  "confidence": 0.92,
+  "evidenceSummary": [
+    "Construction verification decision is VERIFIED for method oak-larder.",
+    "Verified build spot 15403 is available at 3110,3497.",
+    "Observed verified Build click on Larder space at region 7513.",
+    "Observe-only Construction analytics: menu, widget, animation, inventory, XP, and bank evidence are retrospective only.",
+    "Verification status: VERIFIED",
+    "Verified method: oak-larder"
+  ],
+  "metrics": {
+    "menuLatency": {
+      "displayName": "Menu latency",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 1.0
+    },
+    "buildRemoveCadence": {
+      "displayName": "Build/remove cadence",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 13.0
+    },
+    "bankingDowntime": {
+      "displayName": "Banking downtime",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 34.0
+    },
+    "inventoryCycle": {
+      "displayName": "Inventory cycle",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 37.0
+    },
+    "executionScore": {
+      "displayName": "Execution score",
+      "unit": "SCORE",
+      "lowerValueBetter": false,
+      "value": 33.75
+    }
+  },
+  "opportunities": [
+    {
+      "type": "CONSTRUCTION_MENU_LATENCY",
+      "label": "Menu latency",
+      "status": "COMPLETED",
+      "gameTick": 402,
+      "latencyTicks": 1,
+      "latencyMillis": 600,
+      "evidenceSummary": [
+        "Verified menu click followed menu-open evidence."
+      ]
+    },
+    {
+      "type": "CONSTRUCTION_BUILD_REMOVE_CADENCE",
+      "label": "Build/remove cadence",
+      "status": "COMPLETED",
+      "gameTick": 416,
+      "latencyTicks": 13,
+      "latencyMillis": 7800,
+      "evidenceSummary": [
+        "Verified remove click followed the last build confirmation."
+      ]
+    },
+    {
+      "type": "CONSTRUCTION_BANKING_DOWNTIME",
+      "label": "Banking downtime",
+      "status": "COMPLETED",
+      "gameTick": 439,
+      "latencyTicks": 34,
+      "latencyMillis": 20400,
+      "evidenceSummary": [
+        "Verified bank widget ended Construction downtime."
+      ]
+    },
+    {
+      "type": "CONSTRUCTION_INVENTORY_CYCLE",
+      "label": "Inventory cycle",
+      "status": "COMPLETED",
+      "gameTick": 439,
+      "latencyTicks": 37,
+      "latencyMillis": 22200,
+      "evidenceSummary": [
+        "Verified bank widget completed the construction inventory cycle."
+      ]
+    }
+  ],
+  "tickLossBreakdown": {
+    "totalTickLoss": 48,
+    "categories": {
+      "Menu latency": 1,
+      "Build/remove cadence": 13,
+      "Banking downtime": 34
+    }
+  },
+  "summaryLines": [
+    "Best execution: Menu latency 1 ticks",
+    "Longest cycle: Inventory cycle 37 ticks"
+  ]
+}

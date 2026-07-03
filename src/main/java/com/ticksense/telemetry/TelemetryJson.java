@@ -29,6 +29,8 @@ import java.util.Objects;
 
 public final class TelemetryJson
 {
+    private static final Map<String, PayloadDecoder> PAYLOAD_DECODERS = payloadDecoders();
+
     private TelemetryJson()
     {
     }
@@ -269,17 +271,23 @@ public final class TelemetryJson
 
     private static TelemetryEvent eventFromPayload(String type, EventTime time, Map<String, String> tags, Map<String, Object> payload)
     {
-        if (GameTickTelemetryEvent.TYPE.equals(type))
+        final PayloadDecoder decoder = PAYLOAD_DECODERS.get(type);
+        if (decoder == null)
         {
-            return new GameTickTelemetryEvent(time, tags, intField(payload, "tick"));
+            throw new IllegalArgumentException("Unknown telemetry event type: " + type);
         }
-        if (ClientTickTelemetryEvent.TYPE.equals(type))
-        {
-            return new ClientTickTelemetryEvent(time, tags, intField(payload, "clientTickSequence"));
-        }
-        if (PlayerActionTelemetryEvent.TYPE.equals(type))
-        {
-            return new PlayerActionTelemetryEvent(
+        return decoder.decode(time, tags, payload);
+    }
+
+    private static Map<String, PayloadDecoder> payloadDecoders()
+    {
+        final Map<String, PayloadDecoder> decoders = new LinkedHashMap<>();
+        decoders.put(GameTickTelemetryEvent.TYPE, (time, tags, payload) ->
+            new GameTickTelemetryEvent(time, tags, intField(payload, "tick")));
+        decoders.put(ClientTickTelemetryEvent.TYPE, (time, tags, payload) ->
+            new ClientTickTelemetryEvent(time, tags, intField(payload, "clientTickSequence")));
+        decoders.put(PlayerActionTelemetryEvent.TYPE, (time, tags, payload) ->
+            new PlayerActionTelemetryEvent(
                 time,
                 tags,
                 stringField(payload, "option"),
@@ -287,11 +295,9 @@ public final class TelemetryJson
                 entityRefFromMap(asMap(payload.get("targetRef"), "targetRef")),
                 stringField(payload, "actionKind"),
                 worldLocationFromMap(asMap(payload.get("location"), "location")),
-                intField(payload, "menuActionId"));
-        }
-        if (MenuInteractionTelemetryEvent.TYPE.equals(type))
-        {
-            return new MenuInteractionTelemetryEvent(
+                intField(payload, "menuActionId")));
+        decoders.put(MenuInteractionTelemetryEvent.TYPE, (time, tags, payload) ->
+            new MenuInteractionTelemetryEvent(
                 time,
                 tags,
                 stringField(payload, "interactionType"),
@@ -301,11 +307,9 @@ public final class TelemetryJson
                 intField(payload, "identifier"),
                 intField(payload, "param0"),
                 intField(payload, "param1"),
-                entityRefFromMap(asMap(payload.get("widgetRef"), "widgetRef")));
-        }
-        if (NpcStateTelemetryEvent.TYPE.equals(type))
-        {
-            return new NpcStateTelemetryEvent(
+                entityRefFromMap(asMap(payload.get("widgetRef"), "widgetRef"))));
+        decoders.put(NpcStateTelemetryEvent.TYPE, (time, tags, payload) ->
+            new NpcStateTelemetryEvent(
                 time,
                 tags,
                 entityRefFromMap(asMap(payload.get("npcRef"), "npcRef")),
@@ -315,11 +319,9 @@ public final class TelemetryJson
                 intField(payload, "graphicId"),
                 entityRefFromMap(asMap(payload.get("interactingRef"), "interactingRef")),
                 intField(payload, "healthRatio"),
-                intField(payload, "healthScale"));
-        }
-        if (ObjectStateTelemetryEvent.TYPE.equals(type))
-        {
-            return new ObjectStateTelemetryEvent(
+                intField(payload, "healthScale")));
+        decoders.put(ObjectStateTelemetryEvent.TYPE, (time, tags, payload) ->
+            new ObjectStateTelemetryEvent(
                 time,
                 tags,
                 intField(payload, "objectId"),
@@ -327,38 +329,30 @@ public final class TelemetryJson
                 worldLocationFromMap(asMap(payload.get("location"), "location")),
                 stringField(payload, "objectType"),
                 stringList(payload.get("actions")),
-                stringField(payload, "stateChange"));
-        }
-        if (InteractingChangedTelemetryEvent.TYPE.equals(type))
-        {
-            return new InteractingChangedTelemetryEvent(
+                stringField(payload, "stateChange")));
+        decoders.put(InteractingChangedTelemetryEvent.TYPE, (time, tags, payload) ->
+            new InteractingChangedTelemetryEvent(
                 time,
                 tags,
                 entityRefFromMap(asMap(payload.get("actorRef"), "actorRef")),
                 entityRefFromMap(asMap(payload.get("interactingRef"), "interactingRef")),
-                stringField(payload, "stateChange"));
-        }
-        if (AnimationTelemetryEvent.TYPE.equals(type))
-        {
-            return new AnimationTelemetryEvent(
+                stringField(payload, "stateChange")));
+        decoders.put(AnimationTelemetryEvent.TYPE, (time, tags, payload) ->
+            new AnimationTelemetryEvent(
                 time,
                 tags,
                 entityRefFromMap(asMap(payload.get("actorRef"), "actorRef")),
                 intField(payload, "animationId"),
-                intField(payload, "previousAnimationId"));
-        }
-        if (GraphicTelemetryEvent.TYPE.equals(type))
-        {
-            return new GraphicTelemetryEvent(
+                intField(payload, "previousAnimationId")));
+        decoders.put(GraphicTelemetryEvent.TYPE, (time, tags, payload) ->
+            new GraphicTelemetryEvent(
                 time,
                 tags,
                 entityRefFromMap(asMap(payload.get("actorRef"), "actorRef")),
                 intField(payload, "graphicId"),
-                worldLocationFromMap(asMap(payload.get("location"), "location")));
-        }
-        if (ProjectileTelemetryEvent.TYPE.equals(type))
-        {
-            return new ProjectileTelemetryEvent(
+                worldLocationFromMap(asMap(payload.get("location"), "location"))));
+        decoders.put(ProjectileTelemetryEvent.TYPE, (time, tags, payload) ->
+            new ProjectileTelemetryEvent(
                 time,
                 tags,
                 intField(payload, "projectileId"),
@@ -366,48 +360,38 @@ public final class TelemetryJson
                 entityRefFromMap(asMap(payload.get("targetRef"), "targetRef")),
                 worldLocationFromMap(asMap(payload.get("location"), "location")),
                 intField(payload, "startCycle"),
-                intField(payload, "endCycle"));
-        }
-        if (DamageTelemetryEvent.TYPE.equals(type))
-        {
-            return new DamageTelemetryEvent(
+                intField(payload, "endCycle")));
+        decoders.put(DamageTelemetryEvent.TYPE, (time, tags, payload) ->
+            new DamageTelemetryEvent(
                 time,
                 tags,
                 entityRefFromMap(asMap(payload.get("targetRef"), "targetRef")),
                 intField(payload, "hitsplatType"),
                 intField(payload, "amount"),
                 intField(payload, "healthRatio"),
-                intField(payload, "healthScale"));
-        }
-        if (InventoryDeltaTelemetryEvent.TYPE.equals(type))
-        {
-            return new InventoryDeltaTelemetryEvent(time, tags, intField(payload, "containerId"), itemDeltas(payload.get("deltas")));
-        }
-        if (StatChangedTelemetryEvent.TYPE.equals(type))
-        {
-            return new StatChangedTelemetryEvent(
+                intField(payload, "healthScale")));
+        decoders.put(InventoryDeltaTelemetryEvent.TYPE, (time, tags, payload) ->
+            new InventoryDeltaTelemetryEvent(time, tags, intField(payload, "containerId"), itemDeltas(payload.get("deltas"))));
+        decoders.put(StatChangedTelemetryEvent.TYPE, (time, tags, payload) ->
+            new StatChangedTelemetryEvent(
                 time,
                 tags,
                 stringField(payload, "skill"),
                 intField(payload, "xp"),
                 intField(payload, "xpDelta"),
                 intField(payload, "level"),
-                intField(payload, "boostedLevel"));
-        }
-        if (MovementTelemetryEvent.TYPE.equals(type))
-        {
-            return new MovementTelemetryEvent(
+                intField(payload, "boostedLevel")));
+        decoders.put(MovementTelemetryEvent.TYPE, (time, tags, payload) ->
+            new MovementTelemetryEvent(
                 time,
                 tags,
                 entityRefFromMap(asMap(payload.get("entityRef"), "entityRef")),
                 worldLocationFromMap(asMap(payload.get("fromLocation"), "fromLocation")),
                 worldLocationFromMap(asMap(payload.get("toLocation"), "toLocation")),
                 stringField(payload, "movementKind"),
-                nullableIntField(payload, "distanceTiles"));
-        }
-        if (RegionInstanceTelemetryEvent.TYPE.equals(type))
-        {
-            return new RegionInstanceTelemetryEvent(
+                nullableIntField(payload, "distanceTiles")));
+        decoders.put(RegionInstanceTelemetryEvent.TYPE, (time, tags, payload) ->
+            new RegionInstanceTelemetryEvent(
                 time,
                 tags,
                 intField(payload, "world"),
@@ -415,11 +399,9 @@ public final class TelemetryJson
                 stringField(payload, "worldViewId"),
                 booleanField(payload, "instanced"),
                 stringField(payload, "gameState"),
-                worldLocationFromMap(asMap(payload.get("localPlayerLocation"), "localPlayerLocation")));
-        }
-        if (WidgetTelemetryEvent.TYPE.equals(type))
-        {
-            return new WidgetTelemetryEvent(
+                worldLocationFromMap(asMap(payload.get("localPlayerLocation"), "localPlayerLocation"))));
+        decoders.put(WidgetTelemetryEvent.TYPE, (time, tags, payload) ->
+            new WidgetTelemetryEvent(
                 time,
                 tags,
                 intField(payload, "groupId"),
@@ -428,19 +410,16 @@ public final class TelemetryJson
                 stringField(payload, "text"),
                 stringField(payload, "eventKind"),
                 booleanField(payload, "visible"),
-                stringList(payload.get("actions")));
-        }
-        if (EnvironmentTelemetryEvent.TYPE.equals(type))
-        {
-            return new EnvironmentTelemetryEvent(
+                stringList(payload.get("actions"))));
+        decoders.put(EnvironmentTelemetryEvent.TYPE, (time, tags, payload) ->
+            new EnvironmentTelemetryEvent(
                 time,
                 tags,
                 intField(payload, "fps"),
                 intField(payload, "world"),
                 stringField(payload, "gameState"),
-                stringField(payload, "pluginVersion"));
-        }
-        throw new IllegalArgumentException("Unknown telemetry event type: " + type);
+                stringField(payload, "pluginVersion")));
+        return Collections.unmodifiableMap(decoders);
     }
 
     private static Map<String, Object> eventTimeToMap(EventTime time)
@@ -746,6 +725,11 @@ public final class TelemetryJson
             throw new IllegalArgumentException(fieldName + " must be a boolean");
         }
         return (Boolean) value;
+    }
+
+    private interface PayloadDecoder
+    {
+        TelemetryEvent decode(EventTime time, Map<String, String> tags, Map<String, Object> payload);
     }
 
     private static final class JsonParser

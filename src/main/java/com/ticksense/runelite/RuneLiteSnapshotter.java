@@ -189,7 +189,7 @@ public final class RuneLiteSnapshotter
                 labels.add(menuEntryLabel(menuEntry));
             }
         }
-        return immutableList(labels);
+        return RuneliteCollections.immutableList(labels);
     }
 
     String menuEntryLabel(MenuEntry menuEntry)
@@ -218,7 +218,7 @@ public final class RuneLiteSnapshotter
                 actions.add(action);
             }
         }
-        return immutableList(actions);
+        return RuneliteCollections.immutableList(actions);
     }
 
     List<InventoryDeltaTelemetryEvent.ItemDelta> itemDeltas(int containerId, ItemContainer itemContainer)
@@ -243,7 +243,7 @@ public final class RuneLiteSnapshotter
                     afterItem.quantity));
             }
         }
-        return immutableList(deltas);
+        return RuneliteCollections.immutableList(deltas);
     }
 
     private static ItemSnapshot[] itemSnapshots(ItemContainer itemContainer)
@@ -271,12 +271,6 @@ public final class RuneLiteSnapshotter
     {
         return snapshots == null || slot >= snapshots.length ? ItemSnapshot.EMPTY : snapshots[slot];
     }
-
-    private static <T> List<T> immutableList(List<T> values)
-    {
-        return values.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(values);
-    }
-
     private static final class ItemSnapshot
     {
         private static final ItemSnapshot EMPTY = new ItemSnapshot(UNKNOWN, 0);

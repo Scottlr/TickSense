@@ -6,6 +6,7 @@ import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
@@ -23,7 +24,7 @@ public abstract class AbstractExecutionTracker implements ExecutionTracker
 
     protected AbstractExecutionTracker(String id)
     {
-        this.id = requireText(id, "id");
+        this.id = TextValues.requireText(id, "id");
     }
 
     @Override
@@ -113,7 +114,7 @@ public abstract class AbstractExecutionTracker implements ExecutionTracker
         String... expectedResponses)
     {
         return new OpportunityDefinition(
-            id + "." + requireText(idSuffix, "idSuffix"),
+            id + "." + TextValues.requireText(idSuffix, "idSuffix"),
             displayName,
             activityType,
             timeoutMillis,
@@ -138,14 +139,5 @@ public abstract class AbstractExecutionTracker implements ExecutionTracker
     protected static boolean isOpen(OpportunityInstance instance)
     {
         return instance != null && instance.getStatus() == OpportunityStatus.OPEN;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        if (value == null || value.trim().isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return value.trim();
     }
 }

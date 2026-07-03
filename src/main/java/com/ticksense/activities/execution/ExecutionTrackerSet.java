@@ -2,14 +2,14 @@ package com.ticksense.activities.execution;
 
 import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityLifecycle;
+import com.ticksense.common.ImmutableCollections;
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EventTime;
 import com.ticksense.telemetry.TelemetryEvent;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public final class ExecutionTrackerSet implements ExecutionTracker
@@ -19,8 +19,8 @@ public final class ExecutionTrackerSet implements ExecutionTracker
 
     public ExecutionTrackerSet(String id, Collection<? extends ExecutionTracker> trackers)
     {
-        this.id = requireText(id, "id");
-        this.trackers = immutableList(trackers);
+        this.id = TextValues.requireText(id, "id");
+        this.trackers = ImmutableCollections.immutableList(trackers);
     }
 
     public static ExecutionTrackerSet of(String id, ExecutionTracker... trackers)
@@ -107,23 +107,5 @@ public final class ExecutionTrackerSet implements ExecutionTracker
     public List<ExecutionTracker> trackers()
     {
         return trackers;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        if (value == null || value.trim().isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return value.trim();
-    }
-
-    private static <T> List<T> immutableList(Collection<? extends T> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(values));
     }
 }

@@ -41,9 +41,17 @@ public class BossStubModuleCatalogTest
     @Test
     public void exposesSourceOwnedBossNpcIds()
     {
-        assertEquals(4, ScurriusIds.bossNpcIds().length);
-        assertEquals(6, PhantomMuspahIds.bossNpcIds().length);
-        assertEquals(7, HunllefIds.crystallineHunllefNpcIds().length);
-        assertEquals(4, HunllefIds.corruptedHunllefNpcIds().length);
+        assertTrue(ScurriusIds.isBossNpcId(7221));
+        assertTrue(ScurriusIds.isBossNpcId(15695));
+        assertFalse(ScurriusIds.isBossNpcId(-1));
+
+        assertTrue(PhantomMuspahIds.isBossNpcId(12077));
+        assertTrue(PhantomMuspahIds.isBossNpcId(15549));
+        assertFalse(PhantomMuspahIds.isBossNpcId(-1));
+
+        assertTrue(HunllefIds.isCrystallineHunllef(9021));
+        assertTrue(HunllefIds.isCorruptedHunllef(9035));
+        assertTrue(HunllefIds.isHunllef(15614));
+        assertFalse(HunllefIds.isHunllef(-1));
     }
 }

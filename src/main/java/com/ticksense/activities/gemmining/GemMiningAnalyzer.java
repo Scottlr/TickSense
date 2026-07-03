@@ -3,6 +3,7 @@ package com.ticksense.activities.gemmining;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
+import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
@@ -42,7 +43,7 @@ public final class GemMiningAnalyzer
     private static final MetricDefinition EXECUTION_SCORE =
         new MetricDefinition("executionScore", "Execution score", MetricUnit.SCORE, "Gem mining execution score.", false);
 
-    public GemMiningReportData analyze(
+    public ActivityAnalysisData analyze(
         ActivitySession session,
         ActivityReportData activityData,
         List<OpportunityMarker> opportunityMarkers)
@@ -77,7 +78,7 @@ public final class GemMiningAnalyzer
             idleTicks + redundantClicks + (int) Math.round(sum(movementLatencies)),
             tickLossCategories);
 
-        return new GemMiningReportData(
+        return new ActivityAnalysisData(
             metrics,
             buildTimeline(opportunities),
             tickLossBreakdown,
@@ -91,7 +92,7 @@ public final class GemMiningAnalyzer
         List<OpportunityMarker> opportunityMarkers)
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
-        final GemMiningReportData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
+        final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
         return new ActivityReport(
             ActivityReport.SCHEMA_VERSION,

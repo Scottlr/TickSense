@@ -1,5 +1,6 @@
 package com.ticksense.activities.execution.equipment;
 
+import com.ticksense.activities.ids.InventoryContainerIds;
 import java.util.Collection;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,15 +9,13 @@ import java.util.Set;
 
 final class GearSwitchContainerIds
 {
-    private static final int DEFAULT_EQUIPMENT_CONTAINER_ID = 94;
-
     private GearSwitchContainerIds()
     {
     }
 
     static Set<Integer> defaultContainerIds()
     {
-        return Set.of(DEFAULT_EQUIPMENT_CONTAINER_ID);
+        return InventoryContainerIds.equipmentContainerIds();
     }
 
     static Set<Integer> of(Set<Integer> containerIds)

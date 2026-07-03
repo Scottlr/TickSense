@@ -3,7 +3,6 @@ package com.ticksense.analytics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public final class OpportunityTimelineEntry
 {
@@ -26,9 +25,9 @@ public final class OpportunityTimelineEntry
         Long latencyMillis,
         List<String> evidenceSummary)
     {
-        this.opportunityType = requireText(opportunityType, "opportunityType");
-        this.label = requireText(label, "label");
-        this.status = requireText(status, "status");
+        this.opportunityType = AnalyticsTexts.requireText(opportunityType, "opportunityType");
+        this.label = AnalyticsTexts.requireText(label, "label");
+        this.status = AnalyticsTexts.requireText(status, "status");
         this.gameTick = requireNonNegative(gameTick, "gameTick");
         this.wallTimeMillis = requireNonNegative(wallTimeMillis, "wallTimeMillis");
         this.latencyTicks = latencyTicks == null ? null : requireNonNegative(latencyTicks, "latencyTicks");
@@ -94,16 +93,6 @@ public final class OpportunityTimelineEntry
         return value;
     }
 
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
     private static List<String> immutableStrings(List<String> values)
     {
         if (values == null || values.isEmpty())
@@ -114,7 +103,7 @@ public final class OpportunityTimelineEntry
         final List<String> copied = new ArrayList<>(values.size());
         for (String value : values)
         {
-            copied.add(requireText(value, "evidenceSummary value"));
+            copied.add(AnalyticsTexts.requireText(value, "evidenceSummary value"));
         }
         return Collections.unmodifiableList(copied);
     }

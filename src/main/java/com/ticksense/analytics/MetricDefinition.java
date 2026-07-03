@@ -22,10 +22,10 @@ public final class MetricDefinition
         String description,
         boolean lowerValueBetter)
     {
-        this.key = requireText(key, "key");
-        this.displayName = requireText(displayName, "displayName");
+        this.key = AnalyticsTexts.requireText(key, "key");
+        this.displayName = AnalyticsTexts.requireText(displayName, "displayName");
         this.unit = Objects.requireNonNull(unit, "unit");
-        this.description = safeText(description);
+        this.description = AnalyticsTexts.safeText(description);
         this.lowerValueBetter = lowerValueBetter;
     }
 
@@ -52,21 +52,6 @@ public final class MetricDefinition
     public boolean isLowerValueBetter()
     {
         return lowerValueBetter;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
     }
 
     @Override

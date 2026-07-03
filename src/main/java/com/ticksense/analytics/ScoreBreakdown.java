@@ -91,10 +91,10 @@ public final class ScoreBreakdown
 
         private Component(String key, String label, double delta, String reason)
         {
-            this.key = requireText(key, "key");
-            this.label = requireText(label, "label");
+            this.key = AnalyticsTexts.requireText(key, "key");
+            this.label = AnalyticsTexts.requireText(label, "label");
             this.delta = requireFinite(delta, "delta");
-            this.reason = safeText(reason);
+            this.reason = AnalyticsTexts.safeText(reason);
         }
 
         public String getKey()
@@ -128,18 +128,4 @@ public final class ScoreBreakdown
         }
     }
 
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
-    }
 }

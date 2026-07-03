@@ -3,7 +3,11 @@ package com.ticksense.activities;
 import com.ticksense.activities.araxxor.AraxxorModule;
 import com.ticksense.activities.construction.ConstructionModule;
 import com.ticksense.activities.gemmining.GemMiningModule;
+import com.ticksense.activities.hunllef.CorruptedGauntletModule;
+import com.ticksense.activities.hunllef.HunllefModule;
 import com.ticksense.activities.inferno.InfernoModule;
+import com.ticksense.activities.phantommuspah.PhantomMuspahModule;
+import com.ticksense.activities.scurrius.ScurriusModule;
 import com.ticksense.activities.vardorvis.VardorvisModule;
 import com.ticksense.analytics.ReportBuilder;
 import com.ticksense.common.ImmutableCollections;
@@ -26,7 +30,11 @@ public final class ActivityModuleCatalog
             new ConstructionModule(),
             new AraxxorModule(),
             new VardorvisModule(),
-            new InfernoModule()));
+            new InfernoModule(),
+            new ScurriusModule(),
+            new PhantomMuspahModule(),
+            new HunllefModule(),
+            new CorruptedGauntletModule()));
     }
 
     public static List<ActivityModule> enabledModules(List<ActivityModule> modules)

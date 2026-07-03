@@ -1,6 +1,6 @@
 package com.ticksense.activities.inferno;
 
-import java.util.ArrayList;
+import com.ticksense.activities.VerificationTexts;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -14,16 +14,16 @@ public final class InfernoVerificationDecision
         EvidenceStatus.BLOCKED,
         EvidenceStatus.PARTIALLY_VERIFIED,
         EvidenceStatus.BLOCKED,
-        listOf(
+        VerificationTexts.listOf(
             "Official RuneLite NpcID constants in the pinned runelite-api dependency verify source-owned Inferno NPC IDs for nibblers, bats, blobs, melee units, rangers, magers, Jad variants, and Zuk.",
             "Official RuneLite ItemID constants in the pinned runelite-api dependency verify common Inferno supply items such as prayer potions, super restores, Saradomin brews, cooked karambwans, rune darts, and toxic blowpipe variants."
         ),
-        listOf(
+        VerificationTexts.listOf(
             "No source-owned normalized Inferno replay fixture currently proves wave/region boundaries or attempt segmentation.",
             "No source-owned normalized Inferno replay fixture currently proves prayer state/timing evidence safely enough for normal reports.",
             "No source-owned normalized Inferno replay fixture currently proves supply-usage timing or death-timeline evidence in TickSense's schema."
         ),
-        listOf(
+        VerificationTexts.listOf(
             "Inferno work must remain retrospective only; do not infer or display live wave solves, prayer calls, or target priorities.",
             "Prayer timing stays disabled until direct prayer-state verification exists in source-owned normalized telemetry."
         ));
@@ -52,15 +52,15 @@ public final class InfernoVerificationDecision
         List<String> notes)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedOnDate = normalizedValue(verifiedOnDate, "verifiedOnDate");
+        this.verifiedOnDate = VerificationTexts.normalizedValue(verifiedOnDate, "verifiedOnDate");
         this.waveEvidenceStatus = Objects.requireNonNull(waveEvidenceStatus, "waveEvidenceStatus");
         this.nibblerEvidenceStatus = Objects.requireNonNull(nibblerEvidenceStatus, "nibblerEvidenceStatus");
         this.prayerEvidenceStatus = Objects.requireNonNull(prayerEvidenceStatus, "prayerEvidenceStatus");
         this.supplyEvidenceStatus = Objects.requireNonNull(supplyEvidenceStatus, "supplyEvidenceStatus");
         this.deathEvidenceStatus = Objects.requireNonNull(deathEvidenceStatus, "deathEvidenceStatus");
-        this.evidence = immutableCopy(evidence, "evidence");
-        this.blockers = immutableCopy(blockers, "blockers");
-        this.notes = immutableCopy(notes, "notes");
+        this.evidence = VerificationTexts.immutableCopy(evidence, "evidence");
+        this.blockers = VerificationTexts.immutableCopy(blockers, "blockers");
+        this.notes = VerificationTexts.immutableCopy(notes, "notes");
     }
 
     public static InfernoVerificationDecision current()
@@ -195,34 +195,6 @@ public final class InfernoVerificationDecision
         return status == Status.VERIFIED
             && allowsWaveSpans()
             && allowsNibblerWindows();
-    }
-
-    private static List<String> immutableCopy(List<String> values, String fieldName)
-    {
-        Objects.requireNonNull(values, fieldName);
-        final List<String> copy = new ArrayList<>(values.size());
-        for (String value : values)
-        {
-            copy.add(normalizedValue(value, fieldName + " entry"));
-        }
-        return Collections.unmodifiableList(copy);
-    }
-
-    private static String normalizedValue(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static List<String> listOf(String... values)
-    {
-        final List<String> list = new ArrayList<>(values.length);
-        Collections.addAll(list, values);
-        return list;
     }
 
     public enum Status

@@ -3,6 +3,8 @@ package com.ticksense.runelite;
 import com.google.inject.Provides;
 import com.ticksense.activities.ActivityStrategyFactory;
 import com.ticksense.analytics.TrendAnalyzer;
+import com.ticksense.activities.construction.ConstructionIds;
+import com.ticksense.activities.construction.ConstructionStrategy;
 import com.ticksense.activities.gemmining.GemMiningIds;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
 import com.ticksense.core.EntityRef;
@@ -231,11 +233,19 @@ public class TickSensePlugin extends Plugin
     @Provides
     ActivityStrategyFactory provideActivityStrategyFactory()
     {
-        if (GemMiningIds.verificationDecision().allowsStrategyEnablement())
+        return () ->
         {
-            return () -> Collections.singletonList(new GemMiningStrategy());
-        }
-        return Collections::emptyList;
+            final List<com.ticksense.activities.ActivityStrategy> strategies = new java.util.ArrayList<>();
+            if (GemMiningIds.verificationDecision().allowsStrategyEnablement())
+            {
+                strategies.add(new GemMiningStrategy());
+            }
+            if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
+            {
+                strategies.add(new ConstructionStrategy());
+            }
+            return strategies;
+        };
     }
 
     @Provides

@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.ImmutableCollections;
 import com.ticksense.core.ActivityType;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,7 +104,7 @@ public final class TrendAnalyzer
 
         private TrendSummary(List<ActivityTrend> activityTrends)
         {
-            this.activityTrends = AnalyticsCollections.immutableList(activityTrends);
+            this.activityTrends = ImmutableCollections.immutableList(activityTrends);
         }
 
         public List<ActivityTrend> getActivityTrends()
@@ -138,8 +139,8 @@ public final class TrendAnalyzer
             this.schemaVersion = schemaVersion;
             this.sampleSize = sampleSize;
             this.smallSampleSize = smallSampleSize;
-            this.metricTrends = AnalyticsCollections.immutableMap(metricTrends);
-            this.repeatedTickLossCategories = AnalyticsCollections.immutableList(repeatedTickLossCategories);
+            this.metricTrends = ImmutableCollections.immutableMap(metricTrends);
+            this.repeatedTickLossCategories = ImmutableCollections.immutableList(repeatedTickLossCategories);
         }
 
         public ActivityType getActivityType()

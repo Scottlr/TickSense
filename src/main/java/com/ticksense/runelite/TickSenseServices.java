@@ -14,24 +14,18 @@ import com.ticksense.analytics.ReportBuilder;
 import com.ticksense.analytics.ReportGenerationService;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
-import com.ticksense.core.EntityRef;
 import com.ticksense.core.FinishReason;
 import com.ticksense.storage.JsonlTimelineRepository;
 import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.TimelineRepository;
 import com.ticksense.storage.debug.DebugEventRecorder;
+import com.ticksense.telemetry.ObservedTelemetryId;
 import com.ticksense.telemetry.TelemetryBus;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
+import com.ticksense.telemetry.TelemetryIdExtractor;
 import com.ticksense.telemetry.TelemetrySink;
-import com.ticksense.telemetry.events.AnimationTelemetryEvent;
-import com.ticksense.telemetry.events.GraphicTelemetryEvent;
-import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
-import com.ticksense.telemetry.events.ObjectStateTelemetryEvent;
-import com.ticksense.telemetry.events.ProjectileTelemetryEvent;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
-import com.ticksense.telemetry.events.WidgetTelemetryEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -272,64 +266,9 @@ public final class TickSenseServices implements AutoCloseable
 
     private void trackObservedIds(TelemetryEvent event)
     {
-        if (event instanceof NpcStateTelemetryEvent)
+        for (ObservedTelemetryId id : TelemetryIdExtractor.extract(event))
         {
-            final NpcStateTelemetryEvent npc = (NpcStateTelemetryEvent) event;
-            observe("npc", npc.getNpcRef().getId(), event);
-            observe("animation", npc.getAnimationId(), event);
-            observe("graphic", npc.getGraphicId(), event);
-            observeEntity("interacting-npc", npc.getInteractingRef(), event);
-            observe("region", npc.getLocation().getRegionId(), event);
-        }
-        else if (event instanceof AnimationTelemetryEvent)
-        {
-            final AnimationTelemetryEvent animation = (AnimationTelemetryEvent) event;
-            observeEntity("actor-npc", animation.getActorRef(), event);
-            observe("animation", animation.getAnimationId(), event);
-        }
-        else if (event instanceof GraphicTelemetryEvent)
-        {
-            final GraphicTelemetryEvent graphic = (GraphicTelemetryEvent) event;
-            observeEntity("actor-npc", graphic.getActorRef(), event);
-            observe("graphic", graphic.getGraphicId(), event);
-            observe("region", graphic.getLocation().getRegionId(), event);
-        }
-        else if (event instanceof ProjectileTelemetryEvent)
-        {
-            final ProjectileTelemetryEvent projectile = (ProjectileTelemetryEvent) event;
-            observe("projectile", projectile.getProjectileId(), event);
-            observeEntity("source-npc", projectile.getSourceRef(), event);
-            observeEntity("target-npc", projectile.getTargetRef(), event);
-            observe("region", projectile.getLocation().getRegionId(), event);
-        }
-        else if (event instanceof ObjectStateTelemetryEvent)
-        {
-            final ObjectStateTelemetryEvent object = (ObjectStateTelemetryEvent) event;
-            observe("object", object.getObjectId(), event);
-            observe("region", object.getLocation().getRegionId(), event);
-        }
-        else if (event instanceof WidgetTelemetryEvent)
-        {
-            final WidgetTelemetryEvent widget = (WidgetTelemetryEvent) event;
-            observe("widget-group", widget.getGroupId(), event);
-            observe("widget-child", widget.getChildId(), event);
-            observe("widget-item", widget.getItemId(), event);
-        }
-        else if (event instanceof InventoryDeltaTelemetryEvent)
-        {
-            observe("container", ((InventoryDeltaTelemetryEvent) event).getContainerId(), event);
-        }
-        else if (event instanceof RegionInstanceTelemetryEvent)
-        {
-            observe("region", ((RegionInstanceTelemetryEvent) event).getRegionId(), event);
-        }
-    }
-
-    private void observeEntity(String kind, EntityRef ref, TelemetryEvent event)
-    {
-        if (ref.getType() == EntityRef.Type.NPC)
-        {
-            observe(kind, ref.getId(), event);
+            observe(id.getKind(), id.getId(), event);
         }
     }
 

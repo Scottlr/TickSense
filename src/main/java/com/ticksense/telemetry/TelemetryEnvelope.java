@@ -13,8 +13,8 @@ public final class TelemetryEnvelope
     {
         TelemetrySchema.requireSupported(schemaVersion);
         this.schemaVersion = schemaVersion;
-        this.eventId = requireText(eventId, "eventId");
-        this.sessionId = requireText(sessionId, "sessionId");
+        this.eventId = TelemetryTexts.requireText(eventId, "eventId");
+        this.sessionId = TelemetryTexts.requireText(sessionId, "sessionId");
         this.event = Objects.requireNonNull(event, "event");
     }
 
@@ -41,15 +41,5 @@ public final class TelemetryEnvelope
     public TelemetryEvent getEvent()
     {
         return event;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
     }
 }

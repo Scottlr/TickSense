@@ -1,9 +1,6 @@
 package com.ticksense.telemetry;
 
 import com.ticksense.core.EventTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,10 +14,10 @@ public abstract class AbstractTelemetryEvent implements TelemetryEvent
 
     protected AbstractTelemetryEvent(String type, TelemetryCategory category, EventTime time, Map<String, String> tags)
     {
-        this.type = requireText(type, "type");
+        this.type = TelemetryTexts.requireText(type, "type");
         this.category = Objects.requireNonNull(category, "category");
         this.time = Objects.requireNonNull(time, "time");
-        this.tags = immutableMap(tags);
+        this.tags = TelemetryCollections.immutableStringMap(tags);
     }
 
     @Override
@@ -49,34 +46,21 @@ public abstract class AbstractTelemetryEvent implements TelemetryEvent
 
     protected static String requireText(String value, String fieldName)
     {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
+        return TelemetryTexts.requireText(value, fieldName);
     }
 
     protected static String safeText(String value)
     {
-        return value == null ? "" : value;
+        return TelemetryTexts.safeText(value);
     }
 
     protected static <T> List<T> immutableList(List<T> source)
     {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(source));
+        return TelemetryCollections.immutableList(source);
     }
 
     protected static Map<String, String> immutableMap(Map<String, String> source)
     {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(source));
+        return TelemetryCollections.immutableStringMap(source);
     }
 }

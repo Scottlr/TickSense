@@ -279,7 +279,8 @@ public class TickSensePlugin extends Plugin
         SessionTelemetryContext sessionTelemetryContext,
         ReportRepository reportRepository,
         List<ActivityModule> activityModules,
-        TickSenseConfig tickSenseConfig)
+        TickSenseConfig tickSenseConfig,
+        DebugEventRecorder debugEventRecorder)
     {
         try
         {
@@ -288,7 +289,8 @@ public class TickSensePlugin extends Plugin
                 sessionTelemetryContext.getSessionId(),
                 reportRepository,
                 activityModules,
-                tickSenseConfig.debugActivityDiagnostics());
+                tickSenseConfig.debugActivityDiagnostics(),
+                debugEventRecorder);
         }
         catch (IOException ex)
         {

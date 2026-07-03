@@ -1,10 +1,16 @@
 package com.ticksense.activities.araxxor;
 
+import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityLifecycle;
+import com.ticksense.activities.execution.CommonExecutionTrackers;
+import com.ticksense.activities.execution.ExecutionTrackerSet;
+import com.ticksense.activities.execution.MovementResponseTracker;
 import com.ticksense.core.ActivityId;
+import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
@@ -22,6 +28,10 @@ final class AraxxorState
     private final int[] spiderNpcIds;
     private final int[] verifiedRegionIds;
     private final AraxxorExecutionTracker executionTracker = new AraxxorExecutionTracker();
+    private final ExecutionTrackerSet reusableExecutionTrackers = ExecutionTrackerSet.of(
+        "araxxor-reusable-execution",
+        CommonExecutionTrackers.combatSupport(),
+        new MovementResponseTracker());
 
     private int currentRegionId = -1;
     private boolean currentInstanced;
@@ -90,11 +100,18 @@ final class AraxxorState
     void startActivity(ActivityId activityId)
     {
         executionTracker.startActivity(activityId);
+        reusableExecutionTrackers.startActivity(activityId);
     }
 
     void ensureOpportunityLifecycle(OpportunityLifecycle opportunityLifecycle)
     {
         executionTracker.ensureOpportunityLifecycle(opportunityLifecycle);
+        reusableExecutionTrackers.ensureOpportunityLifecycle(opportunityLifecycle);
+    }
+
+    void noteReusableExecutionEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
+    {
+        reusableExecutionTrackers.onEvent(context, session, event);
     }
 
     void noteNpc(NpcStateTelemetryEvent event)
@@ -266,11 +283,13 @@ final class AraxxorState
     void expireTimedOut(EventTime time)
     {
         executionTracker.expireTimedOut(time);
+        reusableExecutionTrackers.expireTimedOut(time);
     }
 
     void cancelOpenOpportunities(EventTime time, String detail)
     {
         executionTracker.cancelOpenOpportunities(time, detail);
+        reusableExecutionTrackers.cancelOpenOpportunities(time, detail);
     }
 
     Map<String, String> snapshotAttributes()
@@ -288,6 +307,7 @@ final class AraxxorState
         lastLocalTarget = TargetType.NONE;
         lastBossSeenTick = -1;
         executionTracker.reset();
+        reusableExecutionTrackers.reset();
     }
 
     private static boolean isAttackAction(PlayerActionTelemetryEvent event)

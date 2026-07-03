@@ -93,6 +93,7 @@ public final class AraxxorStrategy implements ActivityStrategy
     public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
     {
         state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
+        state.noteReusableExecutionEvent(context, session, event);
 
         if (event instanceof RegionInstanceTelemetryEvent)
         {

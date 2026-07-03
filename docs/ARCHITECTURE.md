@@ -516,6 +516,7 @@ com.ticksense.runelite
 com.ticksense.core
 com.ticksense.telemetry
 com.ticksense.activities
+com.ticksense.activities.execution
 com.ticksense.activities.herbcleaning
 com.ticksense.activities.araxxor
 com.ticksense.analytics
@@ -529,7 +530,8 @@ com.ticksense.ai        // future only, not MVP
 | `ticksense-runelite` / `com.ticksense.runelite` | Plugin entrypoint, RuneLite subscriptions, adapter wiring, config. | RuneLite API/client, telemetry, UI, storage interface. | Analytics internals where avoidable. | `TickSensePlugin`, `TickSenseConfig`, `RuneLiteEventAdapter`, `RuneLiteClock`, `RuneLiteSnapshotter`. |
 | `ticksense-core` | Shared primitives. | Java stdlib. | RuneLite, Swing, network clients. | `EventTime`, `EntityRef`, `ActivityId`, `ActivitySession`, `FinishReason`, `WorldLocation`. |
 | `ticksense-telemetry` | Normalized event model and bus. | `core`. | RuneLite API. | `TelemetryEvent`, `TelemetryCategory`, event classes, `TelemetrySink`. |
-| `ticksense-activities` | Strategy interfaces, registry, confidence arbitration, execution trackers, opportunity lifecycle. | `core`, `telemetry`. | RuneLite, Swing, storage implementation. | `ActivityStrategy`, `ExecutionTracker`, `ActivityStrategyEngine`, `ActivityCandidate`, `OpportunityLifecycle`. |
+| `ticksense-activities` | Strategy interfaces, registry, confidence arbitration, opportunity lifecycle. | `core`, `telemetry`. | RuneLite, Swing, storage implementation. | `ActivityStrategy`, `ActivityStrategyEngine`, `ActivityCandidate`, `OpportunityLifecycle`. |
+| `ticksense-activities-execution` / `com.ticksense.activities.execution` | Reusable execution behavior trackers that run inside active activities. | activities, core, telemetry. | RuneLite, Swing, storage implementation. | `ExecutionTracker`, `ExecutionTrackerSet`, `CommonExecutionTrackers`, `FoodRecoveryTracker`, `GearSwitchTracker`, `PrayerSwitchTracker`, `TargetReengagementTracker`, `MovementResponseTracker`. |
 | `ticksense-activities-herbcleaning` | Herb cleaning strategy and metrics. | activities, telemetry, core. | RuneLite. | `HerbCleaningStrategy`, `HerbCleaningIds`, `HerbCleaningAnalyzer`. |
 | `ticksense-activities-araxxor` | Araxxor strategy and spider opportunities. | activities, telemetry, core. | RuneLite. | `AraxxorStrategy`, `AraxxorIds`, `AraxxorExecutionTracker`, `AraxxorAnalyzer`. |
 | `ticksense-analytics` | Metric definitions, report building, scoring, trends. | core, telemetry, activity report models. | RuneLite/Swing/network. | `MetricDefinition`, `MetricValue`, `ReportBuilder`, `ExecutionScore`, `TrendAnalyzer`. |
@@ -682,14 +684,18 @@ public interface ActivityStrategy
 }
 ```
 
-Execution trackers are reusable behavior helpers that run inside an active activity. They observe normalized activity state, track execution windows such as recovery, switching, re-engagement, or movement response, and emit opportunities through the shared lifecycle object.
+Execution trackers are reusable behavior helpers under `com.ticksense.activities.execution` that run inside an active activity. They observe normalized activity state, track execution windows such as recovery, switching, re-engagement, or movement response, and emit opportunities through the shared lifecycle object.
+
+Activities may wire individual trackers or use `ExecutionTrackerSet`/`CommonExecutionTrackers` presets such as `combatSupport()` for food/gear/prayer and `combatDefaults()` for food/gear/prayer/target/movement. Tracker implementations should stay conservative: emit only from normalized telemetry, add TODOs where telemetry is too weak, and keep activity-specific assumptions in activity packages.
 
 ```java
 public interface ExecutionTracker
 {
     String id();
+    boolean supports(ActivityContext context, ActivitySession session);
     void startActivity(ActivityId activityId);
     void ensureOpportunityLifecycle(OpportunityLifecycle opportunityLifecycle);
+    void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event);
     void expireTimedOut(EventTime time);
     void cancelOpenOpportunities(EventTime time, String detail);
     void reset();

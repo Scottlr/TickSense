@@ -1,15 +1,20 @@
 package com.ticksense.activities.gemmining;
 
+import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.activities.OpportunityLifecycle;
+import com.ticksense.activities.execution.CommonExecutionTrackers;
+import com.ticksense.activities.execution.ExecutionTrackerSet;
 import com.ticksense.core.ActivityId;
+import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.TelemetryEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +62,7 @@ final class GemMiningState
     private PendingClick pendingClick;
     private ActivityId activeActivityId;
     private OpportunityLifecycle opportunityLifecycle;
+    private final ExecutionTrackerSet reusableExecutionTrackers = CommonExecutionTrackers.skillingDefaults();
     private final List<OpportunityInstance> opportunityInstances = new ArrayList<>();
     private int redundantClicks;
     private int totalMineClicks;
@@ -200,6 +206,7 @@ final class GemMiningState
     void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
+        reusableExecutionTrackers.startActivity(activityId);
     }
 
     void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
@@ -208,6 +215,21 @@ final class GemMiningState
         {
             opportunityLifecycle = nextLifecycle;
         }
+        reusableExecutionTrackers.ensureOpportunityLifecycle(nextLifecycle);
+    }
+
+    void noteReusableExecutionEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
+    {
+        reusableExecutionTrackers.onEvent(context, session, event);
+    }
+
+    void expireTimedOut(EventTime time)
+    {
+        if (opportunityLifecycle != null)
+        {
+            opportunityLifecycle.expireTimedOut(time);
+        }
+        reusableExecutionTrackers.expireTimedOut(time);
     }
 
     void emitCycleOpportunitiesForActiveClick()
@@ -225,6 +247,7 @@ final class GemMiningState
             activeActivityId,
             endTime,
             Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+        reusableExecutionTrackers.cancelOpenOpportunities(endTime, detail);
     }
 
     Map<String, String> snapshotAttributes()
@@ -255,6 +278,7 @@ final class GemMiningState
         totalMineClicks = 0;
         totalIdleTicks = 0;
         miningConfirmations = 0;
+        reusableExecutionTrackers.reset();
     }
 
     private void flushPendingCycleOpportunities()
@@ -339,7 +363,7 @@ final class GemMiningState
     private int countTerminalOpportunities(String opportunityType)
     {
         int count = 0;
-        for (OpportunityInstance instance : opportunities)
+        for (OpportunityInstance instance : opportunityInstances)
         {
             if (opportunityType.equals(instance.getDefinition().getId())
                 && instance.getStatus() != OpportunityStatus.OPEN)

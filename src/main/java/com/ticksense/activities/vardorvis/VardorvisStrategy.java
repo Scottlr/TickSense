@@ -102,17 +102,20 @@ public final class VardorvisStrategy implements ActivityStrategy
     public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
     {
         state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
+        state.noteReusableExecutionEvent(context, session, event);
         state.flushActivationDerivedOpportunities();
 
         if (event instanceof RegionInstanceTelemetryEvent)
         {
             final RegionInstanceTelemetryEvent region = (RegionInstanceTelemetryEvent) event;
             state.updateRegion(region.getLocalPlayerLocation());
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof ProjectileTelemetryEvent)
         {
             state.noteProjectile((ProjectileTelemetryEvent) event);
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof MovementTelemetryEvent)
@@ -120,17 +123,20 @@ public final class VardorvisStrategy implements ActivityStrategy
             final MovementTelemetryEvent movement = (MovementTelemetryEvent) event;
             state.updateRegion(movement.getToLocation());
             state.noteMovementResponse(movement);
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof PlayerActionTelemetryEvent)
         {
             state.noteActionResponse((PlayerActionTelemetryEvent) event);
+            state.expireTimedOut(event.getTime());
             return;
         }
         if (event instanceof DamageTelemetryEvent)
         {
             state.noteDamage((DamageTelemetryEvent) event);
         }
+        state.expireTimedOut(event.getTime());
     }
 
     @Override

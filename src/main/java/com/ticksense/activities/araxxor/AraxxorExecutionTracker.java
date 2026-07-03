@@ -1,12 +1,12 @@
 package com.ticksense.activities.araxxor;
 
 import com.ticksense.activities.EvidenceStrength;
-import com.ticksense.activities.ExecutionTracker;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.activities.execution.ExecutionTracker;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;

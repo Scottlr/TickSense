@@ -10,11 +10,13 @@ import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.activities.execution.GearSwitchTracker;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
+import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.MovementTelemetryEvent;
 import com.ticksense.telemetry.events.ObjectStateTelemetryEvent;
 import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
@@ -93,6 +95,23 @@ public class GemMiningStrategyTest
         assertEquals(202, movement.getTime().getGameTick());
         assertEquals("2838", movement.getContext().get("fromX"));
         assertEquals("2840", movement.getContext().get("toX"));
+    }
+
+    @Test
+    public void emitsReusableGearSwitchOpportunity()
+    {
+        final Harness harness = new Harness();
+
+        harness.accept(regionEvent(200, 11410, playerLocation(2840, 9388, 11410), "LOGGED_IN"));
+        harness.accept(availableRockEvent(200, 11380, rockLocation()));
+        harness.accept(mineClickEvent(202, rockLocation()));
+        harness.accept(gearSwitchEvent(203, 11802, 11804));
+        harness.accept(miningAnimationEvent(204, 624));
+
+        final OpportunityMarker gear = harness.completedOpportunity(
+            GearSwitchTracker.ID + "." + GearSwitchTracker.OPPORTUNITY_GEAR_SWITCH);
+        assertEquals(203, gear.getTime().getGameTick());
+        assertEquals("1", gear.getContext().get("deltaCount"));
     }
 
     private static final class Harness
@@ -203,6 +222,17 @@ public class GemMiningStrategyTest
                 EntityRef.localPlayer(),
                 animationId,
                 -1));
+    }
+
+    private static TelemetryEnvelope gearSwitchEvent(int tick, int beforeItemId, int afterItemId)
+    {
+        return envelope(
+            "gear-switch-" + tick,
+            new InventoryDeltaTelemetryEvent(
+                time(tick),
+                Collections.singletonMap("source", "ItemContainerChanged"),
+                94,
+                Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, beforeItemId, 1, afterItemId, 1))));
     }
 
     private static TelemetryEnvelope envelope(String eventId, com.ticksense.telemetry.TelemetryEvent event)

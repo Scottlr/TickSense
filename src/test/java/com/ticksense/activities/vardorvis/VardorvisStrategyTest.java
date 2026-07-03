@@ -10,12 +10,15 @@ import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.activities.execution.FoodRecoveryTracker;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReasonType;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
+import com.ticksense.telemetry.events.DamageTelemetryEvent;
+import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.MovementTelemetryEvent;
 import com.ticksense.telemetry.events.ProjectileTelemetryEvent;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
@@ -62,6 +65,23 @@ public class VardorvisStrategyTest
         assertFalse(harness.engine.getActiveSession().isPresent());
         assertTrue(harness.engine.getCompletedSessions().isEmpty());
         assertTrue(harness.opportunityMarkers.isEmpty());
+    }
+
+    @Test
+    public void emitsReusableFoodRecoveryOpportunity()
+    {
+        final Harness harness = new Harness(verifiedStrategy());
+
+        harness.accept(regionEvent(500, playerLocation()));
+        harness.accept(rangedHeadProjectileEvent(501, 9911));
+        harness.accept(damageEvent(502, 16, 48));
+        harness.accept(foodConsumedEvent(503, 385));
+        harness.accept(regionEvent(504, outsideLocation()));
+
+        final OpportunityMarker marker = harness.completedOpportunity(
+            FoodRecoveryTracker.ID + "." + FoodRecoveryTracker.OPPORTUNITY_FOOD_RECOVERY);
+        assertEquals(503, marker.getTime().getGameTick());
+        assertEquals("16", marker.getContext().get("damageAmount"));
     }
 
     private static VardorvisStrategy verifiedStrategy()
@@ -155,6 +175,31 @@ public class VardorvisStrategyTest
                 dodgedLocation(),
                 "WALK",
                 2));
+    }
+
+    private static TelemetryEnvelope damageEvent(int tick, int amount, int healthRatio)
+    {
+        return envelope(
+            "damage-" + tick,
+            new DamageTelemetryEvent(
+                time(tick),
+                Collections.singletonMap("source", "HitsplatApplied"),
+                EntityRef.localPlayer(),
+                1,
+                amount,
+                healthRatio,
+                99));
+    }
+
+    private static TelemetryEnvelope foodConsumedEvent(int tick, int foodItemId)
+    {
+        return envelope(
+            "food-" + tick,
+            new InventoryDeltaTelemetryEvent(
+                time(tick),
+                Collections.singletonMap("source", "ItemContainerChanged"),
+                93,
+                Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, foodItemId, 1, -1, 0))));
     }
 
     private static TelemetryEnvelope envelope(String eventId, TelemetryEvent event)

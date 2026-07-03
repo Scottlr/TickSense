@@ -6,6 +6,7 @@ import com.ticksense.activities.ActivityDefinition;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategy;
 import com.ticksense.activities.OpportunitySink;
+import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
@@ -76,7 +77,9 @@ public final class GemMiningStrategy implements ActivityStrategy
     @Override
     public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
     {
-        state.ensureOpportunityLifecycle(new com.ticksense.activities.OpportunityLifecycle(sink));
+        state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
+        state.noteReusableExecutionEvent(context, session, event);
+        state.expireTimedOut(event.getTime());
         if (state.availableRock() != null)
         {
             state.emitCycleOpportunitiesForActiveClick();

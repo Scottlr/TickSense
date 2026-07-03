@@ -1,15 +1,20 @@
 package com.ticksense.activities.vardorvis;
 
+import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.activities.OpportunityLifecycle;
+import com.ticksense.activities.execution.CommonExecutionTrackers;
+import com.ticksense.activities.execution.ExecutionTrackerSet;
 import com.ticksense.core.ActivityId;
+import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.MovementTelemetryEvent;
 import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
@@ -41,6 +46,7 @@ final class VardorvisState
     private final int[] bloodSplatGraphicIds;
     private final int[] axeMechanicIds;
     private final int[] verifiedRegionIds;
+    private final ExecutionTrackerSet reusableExecutionTrackers = CommonExecutionTrackers.combatSupport();
 
     private int currentRegionId = -1;
     private WorldLocation currentPlayerLocation = WorldLocation.unknown();
@@ -111,6 +117,7 @@ final class VardorvisState
     void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
+        reusableExecutionTrackers.startActivity(activityId);
     }
 
     void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
@@ -119,6 +126,12 @@ final class VardorvisState
         {
             opportunityLifecycle = nextLifecycle;
         }
+        reusableExecutionTrackers.ensureOpportunityLifecycle(nextLifecycle);
+    }
+
+    void noteReusableExecutionEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
+    {
+        reusableExecutionTrackers.onEvent(context, session, event);
     }
 
     void flushActivationDerivedOpportunities()
@@ -204,7 +217,21 @@ final class VardorvisState
             activeActivityId,
             endTime,
             Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+        reusableExecutionTrackers.cancelOpenOpportunities(endTime, detail);
         rangedHeadOpportunity = null;
+    }
+
+    void expireTimedOut(EventTime time)
+    {
+        if (opportunityLifecycle != null)
+        {
+            opportunityLifecycle.expireTimedOut(time);
+        }
+        reusableExecutionTrackers.expireTimedOut(time);
+        if (!isOpen(rangedHeadOpportunity))
+        {
+            rangedHeadOpportunity = null;
+        }
     }
 
     Map<String, String> snapshotAttributes()
@@ -229,6 +256,7 @@ final class VardorvisState
         rangedHeadOpportunity = null;
         rangedHeadResponseCount = 0;
         rangedHeadDamageFailures = 0;
+        reusableExecutionTrackers.reset();
     }
 
     java.util.List<String> activationEvidence(ProjectileTelemetryEvent event)

@@ -8,6 +8,7 @@ import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.execution.FoodRecoveryTracker;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.core.EntityRef;
@@ -18,6 +19,7 @@ import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
+import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.ArrayList;
@@ -98,6 +100,24 @@ public class AraxxorStrategyTest
 
         final ActivityReportData data = harness.engine.getCompletedActivityData().get(0);
         assertEquals("12", data.getAttributes().get("spiderWindowDamage"));
+    }
+
+    @Test
+    public void emitsReusableFoodRecoveryOpportunity()
+    {
+        final Harness harness = new Harness(verifiedStrategy());
+
+        harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
+        harness.accept(bossInteractEvent(601, 13668));
+        harness.accept(localDamageEvent(602, 14, 42));
+        harness.accept(foodConsumedEvent(603, 385));
+        harness.accept(bossDefeatEvent(612, 13668));
+
+        final OpportunityMarker food = harness.terminalOpportunity(
+            FoodRecoveryTracker.ID + "." + FoodRecoveryTracker.OPPORTUNITY_FOOD_RECOVERY,
+            OpportunityStatus.COMPLETED);
+        assertEquals(603, food.getTime().getGameTick());
+        assertEquals("14", food.getContext().get("damageAmount"));
     }
 
     @Test
@@ -309,6 +329,17 @@ public class AraxxorStrategyTest
                 amount,
                 healthRatio,
                 99));
+    }
+
+    private static TelemetryEnvelope foodConsumedEvent(int tick, int foodItemId)
+    {
+        return envelope(
+            "food-" + tick,
+            new InventoryDeltaTelemetryEvent(
+                time(tick),
+                Collections.singletonMap("source", "ItemContainerChanged"),
+                93,
+                Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, foodItemId, 1, -1, 0))));
     }
 
     private static TelemetryEnvelope envelope(String eventId, TelemetryEvent event)

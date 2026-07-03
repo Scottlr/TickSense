@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReason;
@@ -97,12 +99,12 @@ public final class ActivityStrategyEngine implements TelemetrySink
 
     public synchronized List<ActivitySession> getCompletedSessions()
     {
-        return ActivityCollections.immutableList(completedSessions);
+        return ImmutableCollections.immutableList(completedSessions);
     }
 
     public synchronized List<ActivityReportData> getCompletedActivityData()
     {
-        return ActivityCollections.immutableList(completedActivityData);
+        return ImmutableCollections.immutableList(completedActivityData);
     }
 
     public synchronized List<ActivityDiagnostic> getDiagnostics()

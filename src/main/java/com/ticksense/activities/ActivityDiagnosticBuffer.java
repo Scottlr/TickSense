@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
@@ -34,6 +36,6 @@ public final class ActivityDiagnosticBuffer
         {
             return Collections.emptyList();
         }
-        return ActivityCollections.immutableList(diagnostics);
+        return ImmutableCollections.immutableList(diagnostics);
     }
 }

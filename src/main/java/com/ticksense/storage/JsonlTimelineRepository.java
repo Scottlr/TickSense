@@ -50,7 +50,7 @@ public final class JsonlTimelineRepository implements TimelineRepository
     public JsonlTimelineRepository(TickSenseDataPaths dataPaths, String sessionId, Gson gson, Clock clock) throws IOException
     {
         this.dataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
-        this.sessionId = requireText(sessionId, "sessionId");
+        this.sessionId = StorageTexts.requireText(sessionId, "sessionId");
         this.gson = Objects.requireNonNull(gson, "gson");
         this.clock = Objects.requireNonNull(clock, "clock");
 
@@ -393,17 +393,6 @@ public final class JsonlTimelineRepository implements TimelineRepository
         }
         TelemetrySchema.requireSupported(persistedSchemaVersion.schemaVersion);
     }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
     private static final class PersistedTimelineRecord
     {
         private final int schemaVersion;

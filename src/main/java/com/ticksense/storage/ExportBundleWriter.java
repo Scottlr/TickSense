@@ -62,7 +62,7 @@ public final class ExportBundleWriter
 
     public Path writeBundle(String reportId, Path destinationDirectory) throws IOException
     {
-        final String normalizedReportId = requireText(reportId, "reportId");
+        final String normalizedReportId = StorageTexts.requireText(reportId, "reportId");
         final Path normalizedDestinationDirectory = Objects.requireNonNull(destinationDirectory, "destinationDirectory");
         final ActivityReport report = findReport(normalizedReportId);
         final List<String> timelineLines = JsonlTimelineRepository.readActivityRecordLines(dataPaths, report.getActivityId(), gson);
@@ -181,15 +181,5 @@ public final class ExportBundleWriter
             zipOutputStream.write('\n');
         }
         zipOutputStream.closeEntry();
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
     }
 }

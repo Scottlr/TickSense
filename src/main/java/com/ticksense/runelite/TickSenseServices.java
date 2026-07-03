@@ -19,6 +19,7 @@ import com.ticksense.core.FinishReason;
 import com.ticksense.storage.JsonlTimelineRepository;
 import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.TimelineRepository;
+import com.ticksense.storage.debug.DebugEventRecorder;
 import com.ticksense.telemetry.TelemetryBus;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
@@ -62,12 +63,30 @@ public final class TickSenseServices implements AutoCloseable
         List<ActivityModule> activityModules,
         boolean diagnosticsEnabled) throws IOException
     {
+        return createForSession(
+            telemetryBus,
+            sessionId,
+            reportRepository,
+            activityModules,
+            diagnosticsEnabled,
+            null);
+    }
+
+    public static TickSenseServices createForSession(
+        TelemetryBus telemetryBus,
+        String sessionId,
+        ReportRepository reportRepository,
+        List<ActivityModule> activityModules,
+        boolean diagnosticsEnabled,
+        DebugEventRecorder debugEventRecorder) throws IOException
+    {
         return create(
             telemetryBus,
             new JsonlTimelineRepository(sessionId),
             reportRepository,
             activityModules,
-            diagnosticsEnabled);
+            diagnosticsEnabled,
+            debugEventRecorder);
     }
 
     public static TickSenseServices create(
@@ -77,13 +96,25 @@ public final class TickSenseServices implements AutoCloseable
         List<ActivityModule> activityModules,
         boolean diagnosticsEnabled)
     {
+        return create(telemetryBus, timelineRepository, reportRepository, activityModules, diagnosticsEnabled, null);
+    }
+
+    public static TickSenseServices create(
+        TelemetryBus telemetryBus,
+        TimelineRepository timelineRepository,
+        ReportRepository reportRepository,
+        List<ActivityModule> activityModules,
+        boolean diagnosticsEnabled,
+        DebugEventRecorder debugEventRecorder)
+    {
         return create(
             telemetryBus,
             timelineRepository,
             reportRepository,
             ActivityModuleCatalog.strategyFactory(activityModules),
             ActivityModuleCatalog.reportBuilders(activityModules),
-            diagnosticsEnabled);
+            diagnosticsEnabled,
+            debugEventRecorder);
     }
 
     public static TickSenseServices create(
@@ -94,6 +125,18 @@ public final class TickSenseServices implements AutoCloseable
         Map<ActivityType, ReportBuilder> reportBuilders,
         boolean diagnosticsEnabled)
     {
+        return create(telemetryBus, timelineRepository, reportRepository, strategyFactory, reportBuilders, diagnosticsEnabled, null);
+    }
+
+    public static TickSenseServices create(
+        TelemetryBus telemetryBus,
+        TimelineRepository timelineRepository,
+        ReportRepository reportRepository,
+        ActivityStrategyFactory strategyFactory,
+        Map<ActivityType, ReportBuilder> reportBuilders,
+        boolean diagnosticsEnabled,
+        DebugEventRecorder debugEventRecorder)
+    {
         final TelemetryBus normalizedTelemetryBus = Objects.requireNonNull(telemetryBus, "telemetryBus");
         final TimelineRepository normalizedTimelineRepository = Objects.requireNonNull(timelineRepository, "timelineRepository");
         final ReportRepository normalizedReportRepository = Objects.requireNonNull(reportRepository, "reportRepository");
@@ -101,11 +144,12 @@ public final class TickSenseServices implements AutoCloseable
             .registerFactory(Objects.requireNonNull(strategyFactory, "strategyFactory"))
             .build();
 
-        final MarkerPersistenceSinks markerSinks = new MarkerPersistenceSinks(normalizedTimelineRepository);
+        final MarkerPersistenceSinks markerSinks = new MarkerPersistenceSinks(normalizedTimelineRepository, debugEventRecorder);
         final ActivityStrategyEngine strategyEngine = new ActivityStrategyEngine(
             registry,
             markerSinks::appendActivityMarker,
             markerSinks::appendOpportunityMarker,
+            debugEventRecorder == null ? null : debugEventRecorder::recordActivityDiagnostic,
             diagnosticsEnabled);
         final ReportGenerationService reportGenerationService =
             new ReportGenerationService(normalizedTimelineRepository, normalizedReportRepository, strategyEngine, reportBuilders);
@@ -317,12 +361,14 @@ public final class TickSenseServices implements AutoCloseable
     private static final class MarkerPersistenceSinks
     {
         private final TimelineRepository timelineRepository;
+        private final DebugEventRecorder debugEventRecorder;
         private ReportGenerationService reportGenerationService;
         private TickSenseServices services;
 
-        private MarkerPersistenceSinks(TimelineRepository timelineRepository)
+        private MarkerPersistenceSinks(TimelineRepository timelineRepository, DebugEventRecorder debugEventRecorder)
         {
             this.timelineRepository = Objects.requireNonNull(timelineRepository, "timelineRepository");
+            this.debugEventRecorder = debugEventRecorder;
         }
 
         private void setReportGenerationService(ReportGenerationService reportGenerationService)
@@ -340,6 +386,10 @@ public final class TickSenseServices implements AutoCloseable
             try
             {
                 timelineRepository.appendActivityMarker(marker);
+                if (debugEventRecorder != null)
+                {
+                    debugEventRecorder.recordActivityMarker(marker);
+                }
                 if (ActivityMarkerTypes.isFinished(marker) && reportGenerationService != null)
                 {
                     final Optional<ActivityReport> report = reportGenerationService.generateForFinishedMarker(marker);
@@ -360,6 +410,10 @@ public final class TickSenseServices implements AutoCloseable
             try
             {
                 timelineRepository.appendOpportunityMarker(marker);
+                if (debugEventRecorder != null)
+                {
+                    debugEventRecorder.recordOpportunityMarker(marker);
+                }
                 if (services != null)
                 {
                     services.trackOpportunityMarker(marker);

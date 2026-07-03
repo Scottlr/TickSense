@@ -1,6 +1,9 @@
 package com.ticksense.storage.debug;
 
 import com.google.gson.Gson;
+import com.ticksense.activities.ActivityDiagnostic;
+import com.ticksense.activities.ActivityMarker;
+import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.TelemetrySink;
@@ -46,7 +49,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
         this(defaultDebugDirectory(), sessionIdProvider);
     }
 
-    DebugEventRecorder(Path debugDirectory, SessionIdProvider sessionIdProvider)
+    public DebugEventRecorder(Path debugDirectory, SessionIdProvider sessionIdProvider)
     {
         this.debugDirectory = Objects.requireNonNull(debugDirectory, "debugDirectory");
         this.sessionIdProvider = Objects.requireNonNull(sessionIdProvider, "sessionIdProvider");
@@ -102,6 +105,36 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
     public synchronized void record(DebugEventKind kind, String sessionId, String sourceEventType, com.ticksense.core.EventTime time, String payloadJson)
     {
         write(DebugEventRecord.of(kind, sessionId, sourceEventType, time, payloadJson));
+    }
+
+    public synchronized void recordActivityMarker(ActivityMarker marker)
+    {
+        write(DebugEventRecord.of(
+            DebugEventKind.ACTIVITY_MARKER,
+            marker.getActivityId().getValue(),
+            marker.getMarkerType(),
+            marker.getTime(),
+            gson.toJson(marker)));
+    }
+
+    public synchronized void recordOpportunityMarker(OpportunityMarker marker)
+    {
+        write(DebugEventRecord.of(
+            DebugEventKind.OPPORTUNITY_MARKER,
+            marker.getActivityId().getValue(),
+            marker.getOpportunityType(),
+            marker.getTime(),
+            gson.toJson(marker)));
+    }
+
+    public synchronized void recordActivityDiagnostic(String sessionId, ActivityDiagnostic diagnostic)
+    {
+        write(DebugEventRecord.of(
+            DebugEventKind.ACTIVITY_DIAGNOSTIC,
+            sessionId,
+            diagnostic.getActivityType().name(),
+            diagnostic.getTime(),
+            gson.toJson(diagnostic)));
     }
 
     private void write(DebugEventRecord record)

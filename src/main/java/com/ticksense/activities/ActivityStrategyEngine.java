@@ -22,10 +22,12 @@ public final class ActivityStrategyEngine implements TelemetrySink
 {
     private static final ActivityMarkerSink NO_OP_ACTIVITY_MARKER_SINK = marker -> { };
     private static final OpportunitySink NO_OP_OPPORTUNITY_SINK = marker -> { };
+    private static final ActivityDiagnosticSink NO_OP_DIAGNOSTIC_SINK = (sessionId, diagnostic) -> { };
 
     private final ActivityRegistry registry;
     private final ActivityMarkerSink activityMarkerSink;
     private final OpportunitySink opportunitySink;
+    private final ActivityDiagnosticSink diagnosticSink;
     private final boolean diagnosticsEnabled;
     private final AtomicLong markerSequence = new AtomicLong();
     private final ActivityDiagnosticBuffer diagnostics = new ActivityDiagnosticBuffer(50);
@@ -41,9 +43,20 @@ public final class ActivityStrategyEngine implements TelemetrySink
         OpportunitySink opportunitySink,
         boolean diagnosticsEnabled)
     {
+        this(registry, activityMarkerSink, opportunitySink, NO_OP_DIAGNOSTIC_SINK, diagnosticsEnabled);
+    }
+
+    public ActivityStrategyEngine(
+        ActivityRegistry registry,
+        ActivityMarkerSink activityMarkerSink,
+        OpportunitySink opportunitySink,
+        ActivityDiagnosticSink diagnosticSink,
+        boolean diagnosticsEnabled)
+    {
         this.registry = Objects.requireNonNull(registry, "registry");
         this.activityMarkerSink = activityMarkerSink == null ? NO_OP_ACTIVITY_MARKER_SINK : activityMarkerSink;
         this.opportunitySink = opportunitySink == null ? NO_OP_OPPORTUNITY_SINK : opportunitySink;
+        this.diagnosticSink = diagnosticSink == null ? NO_OP_DIAGNOSTIC_SINK : diagnosticSink;
         this.diagnosticsEnabled = diagnosticsEnabled;
     }
 
@@ -58,7 +71,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
         if (activeStrategy != null && activeSession != null)
         {
             activeStrategy.onEvent(context, activeSession, event, opportunitySink);
-            emitSuppressedDiagnostics(evaluations, event.getTime(), activeStrategy.getDefinition().getActivityType(), "Active strategy persists");
+            emitSuppressedDiagnostics(context, evaluations, event.getTime(), activeStrategy.getDefinition().getActivityType(), "Active strategy persists");
 
             final Optional<FinishReason> finishReason = activeStrategy.evaluateTermination(context, activeSession, event);
             if (finishReason.isPresent())
@@ -76,7 +89,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
         final Optional<CandidateEvaluation> winner = chooseWinner(evaluations);
         if (!winner.isPresent())
         {
-            emitNoStartDiagnostics(evaluations, event.getTime());
+            emitNoStartDiagnostics(context, evaluations, event.getTime());
             return;
         }
 
@@ -84,12 +97,12 @@ public final class ActivityStrategyEngine implements TelemetrySink
         final List<CandidateEvaluation> conflicting = conflictingCandidates(selected, evaluations);
         if (!conflicting.isEmpty())
         {
-            emitAmbiguousDiagnostics(selected, conflicting, event.getTime());
+            emitAmbiguousDiagnostics(context, selected, conflicting, event.getTime());
             return;
         }
 
         startActivity(context, selected);
-        emitSuppressedDiagnostics(evaluations, event.getTime(), selected.strategy.getDefinition().getActivityType(), "Lower-ranked candidate");
+        emitSuppressedDiagnostics(context, evaluations, event.getTime(), selected.strategy.getDefinition().getActivityType(), "Lower-ranked candidate");
     }
 
     public synchronized Optional<ActivitySession> getActiveSession()
@@ -200,6 +213,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
             candidate.getFirstEvidenceTime(),
             metadata);
         emitDiagnostic(
+            context,
             definition.getActivityType(),
             candidate.getConfidence(),
             ActivityMarkerTypes.STARTED,
@@ -236,6 +250,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
             finishReason.getTime(),
             metadata);
         emitDiagnostic(
+            context,
             finishedSession.getActivityType(),
             finishReason.getConfidence(),
             "TERMINATED",
@@ -248,6 +263,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
     }
 
     private void emitSuppressedDiagnostics(
+        ActivityContext context,
         List<CandidateEvaluation> evaluations,
         EventTime time,
         com.ticksense.core.ActivityType selectedType,
@@ -258,6 +274,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
             if (evaluation.strategy.getDefinition().getActivityType() != selectedType)
             {
                 emitDiagnostic(
+                    context,
                     evaluation.strategy.getDefinition().getActivityType(),
                     evaluation.candidate.getConfidence(),
                     "SUPPRESSED",
@@ -268,9 +285,10 @@ public final class ActivityStrategyEngine implements TelemetrySink
         }
     }
 
-    private void emitAmbiguousDiagnostics(CandidateEvaluation selected, List<CandidateEvaluation> conflicts, EventTime time)
+    private void emitAmbiguousDiagnostics(ActivityContext context, CandidateEvaluation selected, List<CandidateEvaluation> conflicts, EventTime time)
     {
         emitDiagnostic(
+            context,
             selected.strategy.getDefinition().getActivityType(),
             selected.candidate.getConfidence(),
             "AMBIGUOUS",
@@ -280,6 +298,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
         for (CandidateEvaluation conflict : conflicts)
         {
             emitDiagnostic(
+                context,
                 conflict.strategy.getDefinition().getActivityType(),
                 conflict.candidate.getConfidence(),
                 "AMBIGUOUS",
@@ -289,7 +308,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
         }
     }
 
-    private void emitNoStartDiagnostics(List<CandidateEvaluation> evaluations, EventTime time)
+    private void emitNoStartDiagnostics(ActivityContext context, List<CandidateEvaluation> evaluations, EventTime time)
     {
         for (CandidateEvaluation evaluation : evaluations)
         {
@@ -297,6 +316,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
                 ? evaluation.candidate.getSuppressionReason()
                 : "Candidate below activation threshold";
             emitDiagnostic(
+                context,
                 evaluation.strategy.getDefinition().getActivityType(),
                 evaluation.candidate.getConfidence(),
                 evaluation.candidate.isSuppressed() ? "SUPPRESSED" : "NO_CONFIDENCE",
@@ -323,6 +343,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
     }
 
     private void emitDiagnostic(
+        ActivityContext context,
         com.ticksense.core.ActivityType activityType,
         double confidence,
         String decision,
@@ -334,7 +355,9 @@ public final class ActivityStrategyEngine implements TelemetrySink
         {
             return;
         }
-        diagnostics.add(new ActivityDiagnostic(activityType, confidence, decision, reason, time, evidence));
+        final ActivityDiagnostic diagnostic = new ActivityDiagnostic(activityType, confidence, decision, reason, time, evidence);
+        diagnostics.add(diagnostic);
+        diagnosticSink.accept(context.getSessionId(), diagnostic);
     }
 
     private ActivityContext contextFor(TelemetryEnvelope envelope)

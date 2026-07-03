@@ -5,6 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
+import com.ticksense.activities.ActivityDiagnostic;
+import com.ticksense.activities.ActivityMarker;
+import com.ticksense.activities.ActivityMarkerTypes;
+import com.ticksense.activities.OpportunityMarker;
+import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.core.ActivityId;
+import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
@@ -115,6 +122,50 @@ public class DebugEventRecorderTest
         assertEquals("ProjectileMoved", debugRecord.getSourceEventType());
         assertEquals(303, debugRecord.getTime().getGameTick());
         assertEquals("{\"projectileId\":1234}", debugRecord.getPayloadJson());
+    }
+
+    @Test
+    public void writesActivityOpportunityAndDiagnosticRecords() throws IOException
+    {
+        final Path tempDir = Files.createTempDirectory("ticksense-debug-activity");
+        final DebugEventRecorder recorder = new DebugEventRecorder(tempDir, () -> "session-activity");
+        final ActivityId activityId = ActivityId.of("activity-debug");
+
+        recorder.startSession(true, 25, 5);
+        recorder.recordActivityMarker(new ActivityMarker(
+            "activity-marker-1",
+            activityId,
+            ActivityType.ARAXXOR,
+            ActivityMarkerTypes.STARTED,
+            new EventTime(110L, 220L, 330, 440L, 550),
+            Collections.singletonMap("confidence", "0.9")));
+        recorder.recordOpportunityMarker(new OpportunityMarker(
+            "opportunity-marker-1",
+            "opportunity-1",
+            activityId,
+            "TEST_OPPORTUNITY",
+            OpportunityStatus.OPEN,
+            new EventTime(111L, 222L, 333, 444L, 555),
+            Collections.singletonMap("source", "test"),
+            Collections.emptyList()));
+        recorder.recordActivityDiagnostic(
+            "session-activity",
+            new ActivityDiagnostic(
+                ActivityType.ARAXXOR,
+                0.90D,
+                "STARTED",
+                "",
+                new EventTime(112L, 224L, 336, 448L, 560),
+                Collections.singletonList("boss present")));
+        recorder.close();
+
+        final List<String> jsonLines = Files.readAllLines(jsonlFiles(tempDir).get(0), StandardCharsets.UTF_8);
+        assertEquals(DebugEventKind.ACTIVITY_MARKER, GSON.fromJson(jsonLines.get(0), DebugEventRecord.class).getKind());
+        assertEquals("activity-debug", GSON.fromJson(jsonLines.get(0), DebugEventRecord.class).getSessionId());
+        assertEquals(DebugEventKind.OPPORTUNITY_MARKER, GSON.fromJson(jsonLines.get(1), DebugEventRecord.class).getKind());
+        assertEquals("TEST_OPPORTUNITY", GSON.fromJson(jsonLines.get(1), DebugEventRecord.class).getSourceEventType());
+        assertEquals(DebugEventKind.ACTIVITY_DIAGNOSTIC, GSON.fromJson(jsonLines.get(2), DebugEventRecord.class).getKind());
+        assertEquals("ARAXXOR", GSON.fromJson(jsonLines.get(2), DebugEventRecord.class).getSourceEventType());
     }
 
     private static List<Path> jsonlFiles(Path directory) throws IOException

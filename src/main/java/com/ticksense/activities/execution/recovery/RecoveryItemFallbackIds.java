@@ -2,9 +2,10 @@ package com.ticksense.activities.execution.recovery;
 
 import java.util.Set;
 
-final class RecoveryItemIds
+final class RecoveryItemFallbackIds
 {
-    private RecoveryItemIds()
+    // TODO: Replace these fallback ids with item-action metadata once replayed telemetry reliably carries consumable semantics.
+    private RecoveryItemFallbackIds()
     {
     }
 

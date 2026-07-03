@@ -197,6 +197,10 @@ public final class TelemetryJson
                 deltaMap.put("beforeQuantity", delta.getBeforeQuantity());
                 deltaMap.put("afterItemId", delta.getAfterItemId());
                 deltaMap.put("afterQuantity", delta.getAfterQuantity());
+                if (!delta.getBeforeInventoryActions().isEmpty())
+                {
+                    deltaMap.put("beforeInventoryActions", delta.getBeforeInventoryActions());
+                }
                 deltas.add(deltaMap);
             }
             payload.put("containerId", e.getContainerId());
@@ -525,7 +529,8 @@ public final class TelemetryJson
                 intField(map, "beforeItemId"),
                 intField(map, "beforeQuantity"),
                 intField(map, "afterItemId"),
-                intField(map, "afterQuantity")));
+                intField(map, "afterQuantity"),
+                stringList(map.get("beforeInventoryActions"))));
         }
         return deltas;
     }

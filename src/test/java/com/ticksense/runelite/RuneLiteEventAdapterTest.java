@@ -22,11 +22,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import net.runelite.api.Client;
 import net.runelite.api.Actor;
 import net.runelite.api.GameState;
 import net.runelite.api.Hitsplat;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
@@ -130,7 +132,7 @@ public class RuneLiteEventAdapterTest
     @Test
     public void mapsItemContainerChangedToInventoryDelta()
     {
-        final RuneLiteEventAdapter adapter = adapter();
+        final RuneLiteEventAdapter adapter = new RuneLiteEventAdapter(new RuneLiteSnapshotter(client(itemComposition("Eat", null, ""))), "test-session");
         adapter.mapItemContainerChanged(
             new ItemContainerChanged(93, itemContainer(new Item[] { new Item(100, 1) })),
             envelope("ItemContainerChanged"));
@@ -149,6 +151,8 @@ public class RuneLiteEventAdapterTest
         assertEquals(1, delta.getBeforeQuantity());
         assertEquals(101, delta.getAfterItemId());
         assertEquals(2, delta.getAfterQuantity());
+        assertEquals(Collections.singletonList("Eat"), delta.getBeforeInventoryActions());
+        assertTrue(delta.hasBeforeInventoryAction("Eat"));
     }
 
     @Test
@@ -277,6 +281,16 @@ public class RuneLiteEventAdapterTest
     private static RuneLiteEventAdapter adapter()
     {
         return new RuneLiteEventAdapter(new RuneLiteSnapshotter(), "test-session");
+    }
+
+    private static Client client(ItemComposition itemComposition)
+    {
+        return proxy(Client.class, values("getItemDefinition", itemComposition));
+    }
+
+    private static ItemComposition itemComposition(String... actions)
+    {
+        return proxy(ItemComposition.class, values("getInventoryActions", actions));
     }
 
     private static RuneLiteEventEnvelope envelope(String source)

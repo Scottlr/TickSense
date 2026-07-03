@@ -16,6 +16,7 @@ import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.WorldView;
@@ -240,7 +241,8 @@ public final class RuneLiteSnapshotter
                     beforeItem.id,
                     beforeItem.quantity,
                     afterItem.id,
-                    afterItem.quantity));
+                    afterItem.quantity,
+                    itemActions(beforeItem.id)));
             }
         }
         return RuneliteCollections.immutableList(deltas);
@@ -260,6 +262,47 @@ public final class RuneLiteSnapshotter
             snapshots[i] = item == null ? ItemSnapshot.EMPTY : new ItemSnapshot(item.getId(), item.getQuantity());
         }
         return snapshots;
+    }
+
+    private List<String> itemActions(int itemId)
+    {
+        final ItemComposition itemDefinition = itemDefinition(itemId);
+        if (itemDefinition == null)
+        {
+            return Collections.emptyList();
+        }
+
+        final String[] sourceActions = itemDefinition.getInventoryActions();
+        if (sourceActions == null)
+        {
+            return Collections.emptyList();
+        }
+
+        final List<String> actions = new ArrayList<>(sourceActions.length);
+        for (String action : sourceActions)
+        {
+            if (action != null && !action.trim().isEmpty())
+            {
+                actions.add(action.trim());
+            }
+        }
+        return RuneliteCollections.immutableList(actions);
+    }
+
+    private ItemComposition itemDefinition(int itemId)
+    {
+        if (client == null || itemId < 0)
+        {
+            return null;
+        }
+        try
+        {
+            return client.getItemDefinition(itemId);
+        }
+        catch (RuntimeException ignored)
+        {
+            return null;
+        }
     }
 
     private static int firstRegionId(int[] mapRegions)

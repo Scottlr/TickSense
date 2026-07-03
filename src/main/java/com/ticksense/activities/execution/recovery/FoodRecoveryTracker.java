@@ -82,7 +82,7 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
 
     private void completeOnFoodConsumption(ActivitySession session, InventoryDeltaTelemetryEvent event)
     {
-        final Integer consumedItemId = consumedFoodItemId(event);
+        final Integer consumedItemId = RecoveryItemConsumption.consumedItemId(event, FOOD_ACTION, fallbackFoodItemIds, false);
         if (consumedItemId == null)
         {
             return;
@@ -106,22 +106,5 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
             InventoryDeltaTelemetryEvent.TYPE,
             "Food item " + consumedItemId + " was consumed during the recovery window.");
         recoveryWindow = null;
-    }
-
-    private Integer consumedFoodItemId(InventoryDeltaTelemetryEvent event)
-    {
-        for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
-        {
-            if (isFoodConsumption(delta) && delta.getAfterQuantity() < delta.getBeforeQuantity())
-            {
-                return delta.getBeforeItemId();
-            }
-        }
-        return null;
-    }
-
-    private boolean isFoodConsumption(InventoryDeltaTelemetryEvent.ItemDelta delta)
-    {
-        return delta.hasBeforeInventoryAction(FOOD_ACTION) || fallbackFoodItemIds.contains(delta.getBeforeItemId());
     }
 }

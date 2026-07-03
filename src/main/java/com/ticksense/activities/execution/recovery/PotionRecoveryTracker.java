@@ -40,7 +40,7 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
 
     private void completeOnPotionConsumption(ActivitySession session, InventoryDeltaTelemetryEvent event)
     {
-        final Integer consumedItemId = consumedPotionItemId(event);
+        final Integer consumedItemId = RecoveryItemConsumption.consumedItemId(event, POTION_ACTION, fallbackPotionItemIds, true);
         if (consumedItemId == null)
         {
             return;
@@ -65,26 +65,5 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
             event.getTime(),
             InventoryDeltaTelemetryEvent.TYPE,
             "Potion item " + consumedItemId + " was consumed or dosed down.");
-    }
-
-    private Integer consumedPotionItemId(InventoryDeltaTelemetryEvent event)
-    {
-        for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
-        {
-            if (!isPotionConsumption(delta))
-            {
-                continue;
-            }
-            if (delta.getAfterQuantity() < delta.getBeforeQuantity() || delta.getAfterItemId() != delta.getBeforeItemId())
-            {
-                return delta.getBeforeItemId();
-            }
-        }
-        return null;
-    }
-
-    private boolean isPotionConsumption(InventoryDeltaTelemetryEvent.ItemDelta delta)
-    {
-        return delta.hasBeforeInventoryAction(POTION_ACTION) || fallbackPotionItemIds.contains(delta.getBeforeItemId());
     }
 }

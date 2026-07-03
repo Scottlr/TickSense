@@ -18,7 +18,6 @@ import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
 import com.ticksense.core.WorldLocation;
-import com.ticksense.runelite.TickSenseConfig;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.events.GameTickTelemetryEvent;
 import java.io.IOException;
@@ -72,7 +71,7 @@ public class ExportBundleWriterTest
             paths,
             reportRepository,
             new Gson(),
-            debugConfig(),
+            debugConfigSnapshot(),
             () -> Collections.singletonList(new ActivityDiagnostic(
                 ActivityType.GEM_MINING,
                 0.80D,
@@ -129,7 +128,7 @@ public class ExportBundleWriterTest
             paths,
             reportRepository,
             new Gson(),
-            debugConfig(),
+            debugConfigSnapshot(),
             Collections::emptyList,
             Clock.fixed(Instant.parse("2026-07-03T01:00:00Z"), ZoneOffset.UTC));
 
@@ -153,7 +152,7 @@ public class ExportBundleWriterTest
             paths,
             reportRepository,
             new Gson(),
-            debugConfig(),
+            debugConfigSnapshot(),
             Collections::emptyList,
             Clock.fixed(Instant.parse("2026-07-03T01:00:00Z"), ZoneOffset.UTC));
 
@@ -183,21 +182,16 @@ public class ExportBundleWriterTest
                 tick));
     }
 
-    private static TickSenseConfig debugConfig()
+    private static ExportConfigSnapshotProvider debugConfigSnapshot()
     {
-        return new TickSenseConfig()
+        return () ->
         {
-            @Override
-            public boolean debugEventRecorder()
-            {
-                return true;
-            }
-
-            @Override
-            public boolean debugActivityDiagnostics()
-            {
-                return true;
-            }
+            final Map<String, Object> snapshot = new LinkedHashMap<>();
+            snapshot.put("debugEventRecorder", true);
+            snapshot.put("debugActivityDiagnostics", true);
+            snapshot.put("maxDebugFileSizeMb", 25);
+            snapshot.put("maxDebugSessions", 5);
+            return snapshot;
         };
     }
 

@@ -9,6 +9,7 @@ import com.ticksense.core.EntityRef;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
 import com.ticksense.storage.ExportBundleWriter;
+import com.ticksense.storage.ExportConfigSnapshotProvider;
 import com.ticksense.storage.JsonReportRepository;
 import com.ticksense.storage.ReportIndexMaintenanceService;
 import com.ticksense.storage.ReportRepository;
@@ -24,7 +25,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import lombok.extern.slf4j.Slf4j;
@@ -207,9 +210,22 @@ public class TickSensePlugin extends Plugin
             com.ticksense.storage.TickSenseDataPaths.defaultPaths(),
             reportRepository,
             new com.google.gson.Gson(),
-            tickSenseConfig,
+            configSnapshotProvider(tickSenseConfig),
             () -> services == null ? Collections.emptyList() : services.getStrategyEngine().getDiagnostics(),
             java.time.Clock.systemUTC());
+    }
+
+    private static ExportConfigSnapshotProvider configSnapshotProvider(TickSenseConfig tickSenseConfig)
+    {
+        return () ->
+        {
+            final Map<String, Object> snapshot = new LinkedHashMap<>();
+            snapshot.put("debugEventRecorder", tickSenseConfig.debugEventRecorder());
+            snapshot.put("debugActivityDiagnostics", tickSenseConfig.debugActivityDiagnostics());
+            snapshot.put("maxDebugFileSizeMb", tickSenseConfig.maxDebugFileSizeMb());
+            snapshot.put("maxDebugSessions", tickSenseConfig.maxDebugSessions());
+            return snapshot;
+        };
     }
 
     @Provides

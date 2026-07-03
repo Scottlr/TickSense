@@ -4,19 +4,20 @@ import com.ticksense.common.IntIdSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.NpcID;
 
 public final class AraxxorIds
 {
     private static final int[] ARAXXOR_NPC_IDS = {
-        13668, // Official RuneLite NpcID.ARAXXOR
-        13669 // Official RuneLite NpcID.ARAXXOR_13669
+        NpcID.ARAXXOR,
+        NpcID.ARAXXOR_13669
     };
 
     private static final int[] SPIDER_NPC_IDS = {
-        13671, // Official RuneLite NpcID.MIRRORBACK_ARAXYTE
-        13673, // Official RuneLite NpcID.RUPTURA_ARAXYTE
-        13675, // Official RuneLite NpcID.ACIDIC_ARAXYTE
-        13680 // Official RuneLite NpcID.DREADBORN_ARAXYTE
+        NpcID.MIRRORBACK_ARAXYTE,
+        NpcID.RUPTURA_ARAXYTE,
+        NpcID.ACIDIC_ARAXYTE,
+        NpcID.DREADBORN_ARAXYTE
     };
 
     private static final int[] RELEVANT_GRAPHIC_IDS = {
@@ -42,7 +43,7 @@ public final class AraxxorIds
     private static final List<String> VERIFIED_EVIDENCE = Collections.unmodifiableList(Arrays.asList(
         "Official RuneLite NpcID constants expose Araxxor boss IDs 13668 and 13669.",
         "Official RuneLite NpcID constants expose named Araxyte spider IDs 13671, 13673, 13675, and 13680.",
-        "The activity package keeps these values as source-owned primitive ints without importing net.runelite classes."
+        "Activity callers consume these IDs through catalog intent methods rather than direct NpcID references."
     ));
 
     private static final List<String> BLOCKERS = Collections.unmodifiableList(Arrays.asList(

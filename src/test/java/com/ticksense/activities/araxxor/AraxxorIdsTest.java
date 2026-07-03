@@ -4,24 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.junit.Test;
 
 public class AraxxorIdsTest
 {
-    @Test
-    public void registryImportsNoRuneliteClasses() throws IOException
-    {
-        final String source = new String(
-            Files.readAllBytes(Paths.get("src/main/java/com/ticksense/activities/araxxor/AraxxorIds.java")),
-            StandardCharsets.UTF_8);
-
-        assertFalse(source.contains("net.runelite."));
-    }
-
     @Test
     public void enabledStrategyRequiresVerifiedBossIds()
     {

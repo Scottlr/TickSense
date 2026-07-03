@@ -1,23 +1,24 @@
 package com.ticksense.activities.hunllef;
 
 import com.ticksense.common.IntIdSet;
+import net.runelite.api.NpcID;
 
 public final class HunllefIds
 {
     private static final IntIdSet CRYSTALLINE_HUNLLEF_NPC_IDS = IntIdSet.of(
-        9021, // RuneLite NpcID.CRYSTALLINE_HUNLLEF
-        9022, // RuneLite NpcID.CRYSTALLINE_HUNLLEF_9022
-        9023, // RuneLite NpcID.CRYSTALLINE_HUNLLEF_9023
-        9024, // RuneLite NpcID.CRYSTALLINE_HUNLLEF_9024
-        12123, // RuneLite NpcID.CRYSTALLINE_HUNLLEF_12123
-        15613, // RuneLite NpcID.CRYSTALLINE_HUNLLEF_15613
-        15614); // RuneLite NpcID.CRYSTALLINE_HUNLLEF_15614
+        NpcID.CRYSTALLINE_HUNLLEF,
+        NpcID.CRYSTALLINE_HUNLLEF_9022,
+        NpcID.CRYSTALLINE_HUNLLEF_9023,
+        NpcID.CRYSTALLINE_HUNLLEF_9024,
+        NpcID.CRYSTALLINE_HUNLLEF_12123,
+        NpcID.CRYSTALLINE_HUNLLEF_15613,
+        NpcID.CRYSTALLINE_HUNLLEF_15614);
 
     private static final IntIdSet CORRUPTED_HUNLLEF_NPC_IDS = IntIdSet.of(
-        9035, // RuneLite NpcID.CORRUPTED_HUNLLEF
-        9036, // RuneLite NpcID.CORRUPTED_HUNLLEF_9036
-        9037, // RuneLite NpcID.CORRUPTED_HUNLLEF_9037
-        9038); // RuneLite NpcID.CORRUPTED_HUNLLEF_9038
+        NpcID.CORRUPTED_HUNLLEF,
+        NpcID.CORRUPTED_HUNLLEF_9036,
+        NpcID.CORRUPTED_HUNLLEF_9037,
+        NpcID.CORRUPTED_HUNLLEF_9038);
 
     private HunllefIds()
     {

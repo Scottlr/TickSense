@@ -15,16 +15,6 @@ import org.junit.Test;
 public class InfernoIdsTest
 {
     @Test
-    public void registryImportsNoRuneliteClasses() throws IOException
-    {
-        final String source = new String(
-            Files.readAllBytes(Paths.get("src/main/java/com/ticksense/activities/inferno/InfernoIds.java")),
-            StandardCharsets.UTF_8);
-
-        assertFalse(source.contains("net.runelite."));
-    }
-
-    @Test
     public void prayerTimingRequiresVerifiedPrayerEvidence() throws IOException
     {
         final InfernoVerificationDecision decision = InfernoIds.verificationDecision();

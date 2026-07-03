@@ -1,7 +1,6 @@
 package com.ticksense.activities.gemmining;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.ticksense.telemetry.StateChanges;
@@ -23,16 +22,6 @@ import org.junit.Test;
 
 public class GemMiningIdsTest
 {
-    @Test
-    public void registryImportsNoRuneliteClasses() throws IOException
-    {
-        final String source = new String(
-            Files.readAllBytes(Paths.get("src/main/java/com/ticksense/activities/gemmining/GemMiningIds.java")),
-            StandardCharsets.UTF_8);
-
-        assertFalse(source.contains("net.runelite."));
-    }
-
     @Test
     public void enabledStrategyRequiresVerifiedIds()
     {

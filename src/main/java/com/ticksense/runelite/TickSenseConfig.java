@@ -7,6 +7,9 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("ticksense")
 public interface TickSenseConfig extends Config
 {
+    int DEFAULT_MAX_DEBUG_FILE_SIZE_MB = 25;
+    int DEFAULT_MAX_DEBUG_SESSIONS = 5;
+
     @ConfigItem(
         keyName = "debugEventRecorder",
         name = "Debug event recorder",
@@ -34,7 +37,7 @@ public interface TickSenseConfig extends Config
     )
     default int maxDebugFileSizeMb()
     {
-        return 25;
+        return DEFAULT_MAX_DEBUG_FILE_SIZE_MB;
     }
 
     @ConfigItem(
@@ -44,6 +47,6 @@ public interface TickSenseConfig extends Config
     )
     default int maxDebugSessions()
     {
-        return 5;
+        return DEFAULT_MAX_DEBUG_SESSIONS;
     }
 }

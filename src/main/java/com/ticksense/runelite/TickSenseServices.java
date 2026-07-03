@@ -1,6 +1,7 @@
 package com.ticksense.runelite;
 
 import com.ticksense.activities.ActivityMarker;
+import com.ticksense.activities.ActivityMarkerTypes;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.ActivityStrategyFactory;
@@ -226,7 +227,7 @@ public final class TickSenseServices implements AutoCloseable
             try
             {
                 timelineRepository.appendActivityMarker(marker);
-                if ("FINISHED".equals(marker.getMarkerType()) && reportGenerationService != null)
+                if (ActivityMarkerTypes.isFinished(marker) && reportGenerationService != null)
                 {
                     final Optional<ActivityReport> report = reportGenerationService.generateForFinishedMarker(marker);
                     if (!report.isPresent())

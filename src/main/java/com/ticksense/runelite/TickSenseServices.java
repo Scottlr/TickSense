@@ -19,7 +19,6 @@ import com.ticksense.telemetry.TelemetrySink;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,12 +127,12 @@ public final class TickSenseServices implements AutoCloseable
 
     public synchronized List<TelemetryEnvelope> getRecentTelemetry()
     {
-        return Collections.unmodifiableList(new ArrayList<>(recentTelemetry));
+        return RuneliteCollections.immutableList(recentTelemetry);
     }
 
     public synchronized List<OpportunityMarker> getOpenOpportunityMarkers()
     {
-        return Collections.unmodifiableList(new ArrayList<>(openOpportunityMarkers.values()));
+        return RuneliteCollections.immutableList(openOpportunityMarkers.values());
     }
 
     public synchronized Optional<FinishReason> getLastFinishReason()

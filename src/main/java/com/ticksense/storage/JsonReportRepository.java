@@ -14,6 +14,8 @@ import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
+import com.ticksense.common.ImmutableCollections;
+import com.ticksense.common.TextValues;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -61,7 +63,7 @@ public final class JsonReportRepository implements ReportRepository
     @Override
     public synchronized Optional<ActivityReport> findById(String reportId) throws IOException
     {
-        final Path path = reportPath(StorageTexts.requireText(reportId, "reportId"));
+        final Path path = reportPath(TextValues.requireText(reportId, "reportId"));
         if (Files.notExists(path))
         {
             return Optional.empty();
@@ -82,7 +84,7 @@ public final class JsonReportRepository implements ReportRepository
         }
 
         final List<ReportSummary> reports = loadIndex();
-        return StorageCollections.immutableHead(reports, limit);
+        return ImmutableCollections.immutableHead(reports, limit);
     }
 
     public synchronized List<ReportSummary> rebuildIndex() throws IOException
@@ -139,7 +141,7 @@ public final class JsonReportRepository implements ReportRepository
             summaries.sort(Comparator
                 .comparingLong(ReportSummary::getCreatedAtMillis).reversed()
                 .thenComparing(ReportSummary::getReportId));
-            return StorageCollections.immutableList(summaries);
+            return ImmutableCollections.immutableList(summaries);
         }
     }
 
@@ -163,7 +165,7 @@ public final class JsonReportRepository implements ReportRepository
                 summaries.add(Objects.requireNonNull(summary, "report summary").toReportSummary());
             }
         }
-        return StorageCollections.immutableList(summaries);
+        return ImmutableCollections.immutableList(summaries);
     }
 
     private ActivityReport readReport(Path path) throws IOException

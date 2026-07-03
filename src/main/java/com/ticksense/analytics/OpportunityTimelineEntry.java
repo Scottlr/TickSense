@@ -32,7 +32,7 @@ public final class OpportunityTimelineEntry
         this.wallTimeMillis = requireNonNegative(wallTimeMillis, "wallTimeMillis");
         this.latencyTicks = latencyTicks == null ? null : requireNonNegative(latencyTicks, "latencyTicks");
         this.latencyMillis = latencyMillis == null ? null : requireNonNegative(latencyMillis, "latencyMillis");
-        this.evidenceSummary = immutableStrings(evidenceSummary);
+        this.evidenceSummary = AnalyticsCollections.immutableTextList(evidenceSummary, "evidenceSummary");
     }
 
     public String getOpportunityType()
@@ -91,20 +91,5 @@ public final class OpportunityTimelineEntry
             throw new IllegalArgumentException(fieldName + " must not be negative");
         }
         return value;
-    }
-
-    private static List<String> immutableStrings(List<String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<String> copied = new ArrayList<>(values.size());
-        for (String value : values)
-        {
-            copied.add(AnalyticsTexts.requireText(value, "evidenceSummary value"));
-        }
-        return Collections.unmodifiableList(copied);
     }
 }

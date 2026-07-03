@@ -4,6 +4,7 @@ import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.execution.AbstractExecutionTracker;
+import com.ticksense.activities.ids.ConsumableItemIds;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
@@ -19,7 +20,7 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
 
     public PotionRecoveryTracker()
     {
-        this(RecoveryItemFallbackIds.potionItemIds());
+        this(ConsumableItemIds.potionItemIds());
     }
 
     public PotionRecoveryTracker(Set<Integer> fallbackPotionItemIds)

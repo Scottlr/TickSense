@@ -1,10 +1,10 @@
-package com.ticksense.activities.execution.recovery;
+package com.ticksense.activities.ids;
 
 import java.util.Set;
 
-final class RecoveryItemFallbackIds
+public final class ConsumableItemIds
 {
-    // TODO: Replace these fallback ids with item-action or item-tag metadata once replayed telemetry reliably carries consumable semantics.
+    // Fallback item IDs remain secondary to inventory action metadata when telemetry carries it.
     private static final int LOBSTER_ITEM_ID = 379;
     private static final int SHARK_ITEM_ID = 385;
     private static final int MANTA_RAY_ITEM_ID = 391;
@@ -35,16 +35,16 @@ final class RecoveryItemFallbackIds
         BASTION_POTION4_ITEM_ID,
         DIVINE_RANGING_POTION4_ITEM_ID);
 
-    private RecoveryItemFallbackIds()
+    private ConsumableItemIds()
     {
     }
 
-    static Set<Integer> foodItemIds()
+    public static Set<Integer> foodItemIds()
     {
         return FOOD_ITEM_IDS;
     }
 
-    static Set<Integer> potionItemIds()
+    public static Set<Integer> potionItemIds()
     {
         return POTION_ITEM_IDS;
     }

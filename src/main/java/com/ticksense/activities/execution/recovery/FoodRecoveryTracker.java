@@ -4,6 +4,7 @@ import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.execution.AbstractExecutionTracker;
+import com.ticksense.activities.ids.ConsumableItemIds;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.telemetry.TelemetryEvent;
@@ -24,7 +25,7 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
 
     public FoodRecoveryTracker()
     {
-        this(RecoveryItemFallbackIds.foodItemIds());
+        this(ConsumableItemIds.foodItemIds());
     }
 
     public FoodRecoveryTracker(Set<Integer> fallbackFoodItemIds)

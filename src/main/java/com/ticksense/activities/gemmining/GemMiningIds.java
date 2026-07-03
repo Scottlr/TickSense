@@ -2,12 +2,15 @@ package com.ticksense.activities.gemmining;
 
 import com.ticksense.common.IntIdSet;
 import java.util.List;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ItemID;
+import net.runelite.api.ObjectID;
 
 public final class GemMiningIds
 {
     private static final int[] GEM_ROCK_OBJECT_IDS = {
-        11380, // RuneLite ObjectID.GEMROCK1, verified in src/test/resources/replays/gem-mining-basic.jsonl
-        11381 // RuneLite ObjectID.GEMROCK, verified in src/test/resources/replays/gem-mining-basic.jsonl
+        ObjectID.GEM_ROCKS,
+        ObjectID.GEM_ROCKS_11381
     };
 
     private static final int[] GEM_MINING_REGION_IDS = {
@@ -15,31 +18,31 @@ public final class GemMiningIds
     };
 
     private static final int[] MINING_ANIMATION_IDS = {
-        625, // RuneLite AnimationID.MINING_BRONZE_PICKAXE
-        626, // RuneLite AnimationID.MINING_IRON_PICKAXE
-        627, // RuneLite AnimationID.MINING_STEEL_PICKAXE
-        3873, // RuneLite AnimationID.MINING_BLACK_PICKAXE
-        629, // RuneLite AnimationID.MINING_MITHRIL_PICKAXE
-        628, // RuneLite AnimationID.MINING_ADAMANT_PICKAXE
-        624, // RuneLite AnimationID.MINING_RUNE_PICKAXE
-        8313, // RuneLite AnimationID.MINING_GILDED_PICKAXE
-        7139, // RuneLite AnimationID.MINING_DRAGON_PICKAXE
-        642, // RuneLite AnimationID.MINING_DRAGON_PICKAXE_UPGRADED
-        8346, // RuneLite AnimationID.MINING_DRAGON_PICKAXE_OR
-        8887, // RuneLite AnimationID.MINING_DRAGON_PICKAXE_OR_TRAILBLAZER
-        4482, // RuneLite AnimationID.MINING_INFERNAL_PICKAXE
-        7283, // RuneLite AnimationID.MINING_3A_PICKAXE
-        8347, // RuneLite AnimationID.MINING_CRYSTAL_PICKAXE
-        8787, // RuneLite AnimationID.MINING_TRAILBLAZER_PICKAXE
-        8788, // RuneLite AnimationID.MINING_TRAILBLAZER_PICKAXE_2
-        8789 // RuneLite AnimationID.MINING_TRAILBLAZER_PICKAXE_3
+        AnimationID.MINING_BRONZE_PICKAXE,
+        AnimationID.MINING_IRON_PICKAXE,
+        AnimationID.MINING_STEEL_PICKAXE,
+        AnimationID.MINING_BLACK_PICKAXE,
+        AnimationID.MINING_MITHRIL_PICKAXE,
+        AnimationID.MINING_ADAMANT_PICKAXE,
+        AnimationID.MINING_RUNE_PICKAXE,
+        AnimationID.MINING_GILDED_PICKAXE,
+        AnimationID.MINING_DRAGON_PICKAXE,
+        AnimationID.MINING_DRAGON_PICKAXE_UPGRADED,
+        AnimationID.MINING_DRAGON_PICKAXE_OR,
+        AnimationID.MINING_DRAGON_PICKAXE_OR_TRAILBLAZER,
+        AnimationID.MINING_INFERNAL_PICKAXE,
+        AnimationID.MINING_3A_PICKAXE,
+        AnimationID.MINING_CRYSTAL_PICKAXE,
+        AnimationID.MINING_TRAILBLAZER_PICKAXE,
+        AnimationID.MINING_TRAILBLAZER_PICKAXE_2,
+        AnimationID.MINING_TRAILBLAZER_PICKAXE_3
     };
 
     private static final int[] UNCUT_GEM_ITEM_IDS = {
-        1617, // RuneLite ItemID.UNCUT_DIAMOND
-        1619, // RuneLite ItemID.UNCUT_RUBY
-        1621, // RuneLite ItemID.UNCUT_EMERALD
-        1623 // RuneLite ItemID.UNCUT_SAPPHIRE
+        ItemID.UNCUT_DIAMOND,
+        ItemID.UNCUT_RUBY,
+        ItemID.UNCUT_EMERALD,
+        ItemID.UNCUT_SAPPHIRE
     };
 
     private static final IntIdSet GEM_ROCK_OBJECT_ID_SET = IntIdSet.of(GEM_ROCK_OBJECT_IDS);

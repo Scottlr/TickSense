@@ -344,8 +344,8 @@ Useful official docs:
 public final class AraxxorIds
 {
     private static final IntIdSet ARAXXOR_NPC_IDS = IntIdSet.of(
-        13668, // RuneLite NpcID.ARAXXOR
-        13669); // RuneLite NpcID.ARAXXOR_13669
+        NpcID.ARAXXOR,
+        NpcID.ARAXXOR_13669);
 
     private AraxxorIds() {}
 
@@ -358,8 +358,9 @@ public final class AraxxorIds
 
 Rules:
 
-- Each committed ID must include a source comment: RuneLite constant, Dev Tools verification date, or existing plugin source.
-- Keep activity ID catalogs source-owned: use primitive IDs with provenance comments rather than importing `net.runelite` constants into strategy/catalog code.
+- Each committed primitive ID must include a source comment: Dev Tools verification date, replay fixture evidence, or existing plugin source.
+- Use RuneLite constants such as `NpcID.ARAXXOR`, `ItemID.PRAYER_POTION4`, or `ObjectID.LARDER_SPACE` inside activity ID catalogs whenever the pinned RuneLite API exposes a named constant.
+- Keep primitive IDs only for source-owned replay/devtools evidence that does not have a suitable RuneLite constant, such as verified region IDs or fixture-specific widget children.
 - Prefer intent methods such as `isAraxxorNpcId(int)` or `hasVerifiedRegionIds()` over exposing collections for caller-side membership checks.
 - Keep raw arrays only for fixture snapshots, iteration, or injectable strategy seams.
 - Keep ID registries small and reviewed.

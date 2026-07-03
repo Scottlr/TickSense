@@ -15,7 +15,7 @@ import org.junit.Test;
 public class ActivityIdCatalogPolicyTest
 {
     @Test
-    public void activityIdCatalogsKeepRuneLiteConstantsAsSourceOwnedPrimitiveIds() throws IOException
+    public void activityIdCatalogsUseRuneliteConstantsInsteadOfRuneliteConstantComments() throws IOException
     {
         final List<String> violations = new ArrayList<>();
         try (Stream<Path> paths = Files.walk(Paths.get("src/main/java/com/ticksense/activities")))
@@ -23,11 +23,11 @@ public class ActivityIdCatalogPolicyTest
             paths
                 .filter(Files::isRegularFile)
                 .filter(ActivityIdCatalogPolicyTest::isIdCatalog)
-                .forEach(path -> collectRuneliteImportViolations(path, violations));
+                .forEach(path -> collectRuneliteConstantCommentViolations(path, violations));
         }
 
         assertTrue(
-            "Activity ID catalogs should use source-owned primitive IDs with provenance comments, not net.runelite imports: " + violations,
+            "Activity ID catalogs should import RuneLite constants rather than encode them as primitive IDs with RuneLite comments: " + violations,
             violations.isEmpty());
     }
 
@@ -37,12 +37,17 @@ public class ActivityIdCatalogPolicyTest
         return fileName.endsWith("Ids.java") || fileName.endsWith("ContainerIds.java");
     }
 
-    private static void collectRuneliteImportViolations(Path path, List<String> violations)
+    private static void collectRuneliteConstantCommentViolations(Path path, List<String> violations)
     {
         try
         {
             final String source = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-            if (source.contains("import net.runelite."))
+            if (source.contains("// RuneLite NpcID.")
+                || source.contains("// RuneLite ItemID.")
+                || source.contains("// RuneLite ObjectID.")
+                || source.contains("// RuneLite AnimationID.")
+                || source.contains("// RuneLite WidgetID.")
+                || source.contains("// Official RuneLite NpcID."))
             {
                 violations.add(path.toString());
             }

@@ -15,16 +15,6 @@ import org.junit.Test;
 public class VardorvisIdsTest
 {
     @Test
-    public void registryImportsNoRuneliteClasses() throws IOException
-    {
-        final String source = new String(
-            Files.readAllBytes(Paths.get("src/main/java/com/ticksense/activities/vardorvis/VardorvisIds.java")),
-            StandardCharsets.UTF_8);
-
-        assertFalse(source.contains("net.runelite."));
-    }
-
-    @Test
     public void normalReportsRequireVerifiedMechanicIds() throws IOException
     {
         final VardorvisVerificationDecision decision = VardorvisIds.verificationDecision();

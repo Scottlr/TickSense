@@ -1,36 +1,40 @@
 package com.ticksense.activities.construction;
 
 import com.ticksense.common.IntIdSet;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ItemID;
+import net.runelite.api.ObjectID;
+import net.runelite.api.widgets.WidgetID;
 
 public final class ConstructionIds
 {
     private static final String APPROVED_METHOD_NAME = "oak-larder";
 
     private static final int[] BUILD_SPOT_OBJECT_IDS = {
-        15403 // RuneLite ObjectID.LARDER_SPACE
+        ObjectID.LARDER_SPACE
     };
 
     private static final int[] BUILT_OBJECT_IDS = {
-        13565, // RuneLite ObjectID.LARDER_13565
-        13566, // RuneLite ObjectID.LARDER_13566
-        13567 // RuneLite ObjectID.LARDER_13567
+        ObjectID.LARDER_13565,
+        ObjectID.LARDER_13566,
+        ObjectID.LARDER_13567
     };
 
     private static final int[] METHOD_ITEM_IDS = {
-        8778, // RuneLite ItemID.OAK_PLANK
-        2347, // RuneLite ItemID.HAMMER
-        8794, // RuneLite ItemID.SAW
-        9625, // RuneLite ItemID.CRYSTAL_SAW
-        29774 // RuneLite ItemID.AMYS_SAW_OFFHAND
+        ItemID.OAK_PLANK,
+        ItemID.HAMMER,
+        ItemID.SAW,
+        ItemID.CRYSTAL_SAW,
+        ItemID.AMYS_SAW_OFFHAND
     };
     private static final int[] BUILD_ANIMATION_IDS = {
-        3676, // RuneLite AnimationID.CONSTRUCTION
-        8912 // RuneLite AnimationID.CONSTRUCTION_IMCANDO
+        AnimationID.CONSTRUCTION,
+        AnimationID.CONSTRUCTION_IMCANDO
     };
 
     private static final int[] BANK_WIDGET_GROUP_IDS = {
-        12, // RuneLite WidgetID.BANK_GROUP_ID
-        15 // RuneLite WidgetID.BANK_INVENTORY_GROUP_ID
+        WidgetID.BANK_GROUP_ID,
+        WidgetID.BANK_INVENTORY_GROUP_ID
     };
 
     private static final int[] CONSTRUCTION_WIDGET_GROUP_IDS = {

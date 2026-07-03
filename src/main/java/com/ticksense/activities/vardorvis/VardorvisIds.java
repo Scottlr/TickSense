@@ -1,20 +1,21 @@
 package com.ticksense.activities.vardorvis;
 
 import com.ticksense.common.IntIdSet;
+import net.runelite.api.NpcID;
 
 public final class VardorvisIds
 {
     private static final int[] BOSS_NPC_IDS = {
-        12223, // RuneLite NpcID.VARDORVIS
-        12224, // RuneLite NpcID.VARDORVIS_12224
-        12228, // RuneLite NpcID.VARDORVIS_12228
-        12425, // RuneLite NpcID.VARDORVIS_12425
-        12426, // RuneLite NpcID.VARDORVIS_12426
-        13656 // RuneLite NpcID.VARDORVIS_13656
+        NpcID.VARDORVIS,
+        NpcID.VARDORVIS_12224,
+        NpcID.VARDORVIS_12228,
+        NpcID.VARDORVIS_12425,
+        NpcID.VARDORVIS_12426,
+        NpcID.VARDORVIS_13656
     };
 
     private static final int[] HEAD_NPC_IDS = {
-        12226 // RuneLite NpcID.VARDORVIS_HEAD
+        NpcID.VARDORVIS_HEAD
     };
 
     private static final int[] RANGED_HEAD_PROJECTILE_IDS = {

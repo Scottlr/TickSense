@@ -17,7 +17,7 @@ public class CoreBoundaryTest
     {
         assertNoRuneliteImports(Paths.get("src/main/java/com/ticksense/core"));
         assertNoRuneliteImports(Paths.get("src/main/java/com/ticksense/telemetry"));
-        assertNoRuneliteImports(Paths.get("src/main/java/com/ticksense/activities"));
+        assertNoRuneliteImportsOutsideActivityIdCatalogs(Paths.get("src/main/java/com/ticksense/activities"));
         assertNoRuneliteImports(Paths.get("src/main/java/com/ticksense/analytics"));
         assertNoRuneliteImports(Paths.get("src/main/java/com/ticksense/storage"));
     }
@@ -36,5 +36,28 @@ public class CoreBoundaryTest
                 assertFalse(file + " imports RuneLite APIs", source.contains("net.runelite."));
             }
         }
+    }
+
+    private static void assertNoRuneliteImportsOutsideActivityIdCatalogs(Path root) throws IOException
+    {
+        if (!Files.exists(root))
+        {
+            return;
+        }
+        try (Stream<Path> files = Files.walk(root))
+        {
+            for (Path file : (Iterable<Path>) files.filter(path -> path.toString().endsWith(".java"))::iterator)
+            {
+                final String source = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+                assertFalse(file + " imports RuneLite APIs outside an activity ID catalog",
+                    source.contains("net.runelite.") && !isActivityIdCatalog(file));
+            }
+        }
+    }
+
+    private static boolean isActivityIdCatalog(Path file)
+    {
+        final String fileName = file.getFileName().toString();
+        return fileName.endsWith("Ids.java") || fileName.endsWith("ContainerIds.java");
     }
 }

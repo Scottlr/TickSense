@@ -1,7 +1,5 @@
 package com.ticksense.core;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -14,10 +12,10 @@ public final class ActivitySpan
 
     public ActivitySpan(String spanType, EventTime startTime, EventTime endTime, Map<String, String> metadata)
     {
-        this.spanType = requireText(spanType, "spanType");
+        this.spanType = CoreTexts.requireText(spanType, "spanType");
         this.startTime = Objects.requireNonNull(startTime, "startTime");
         this.endTime = endTime;
-        this.metadata = immutableCopy(metadata);
+        this.metadata = CoreCollections.immutableStringMap(metadata);
     }
 
     public ActivitySpan finish(EventTime endTime)
@@ -48,25 +46,6 @@ public final class ActivitySpan
     public Map<String, String> getMetadata()
     {
         return metadata;
-    }
-
-    private static Map<String, String> immutableCopy(Map<String, String> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(source));
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.ticksense.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +22,7 @@ public final class FinishReason
         this.time = Objects.requireNonNull(time, "time");
         this.confidence = requireConfidence(confidence);
         this.explanation = explanation == null ? "" : explanation;
-        this.evidence = immutableCopy(evidence);
+        this.evidence = CoreCollections.immutableList(evidence);
     }
 
     public FinishReasonType getType()
@@ -59,15 +57,6 @@ public final class FinishReason
             throw new IllegalArgumentException("confidence must be between 0.0 and 1.0");
         }
         return confidence;
-    }
-
-    private static List<String> immutableCopy(List<String> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(source));
     }
 
     @Override

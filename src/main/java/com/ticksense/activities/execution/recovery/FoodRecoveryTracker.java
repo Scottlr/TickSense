@@ -9,8 +9,6 @@ import com.ticksense.core.EntityRef;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public final class FoodRecoveryTracker extends AbstractExecutionTracker
@@ -19,21 +17,19 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
     public static final String OPPORTUNITY_FOOD_RECOVERY = "FOOD_RECOVERY";
 
     private static final long DEFAULT_TIMEOUT_MILLIS = 3_600L;
-    private static final Set<Integer> DEFAULT_FOOD_ITEM_IDS = new HashSet<>(Arrays.asList(
-        379, 385, 391, 3144, 13441));
 
     private final Set<Integer> foodItemIds;
     private OpportunityInstance recoveryWindow;
 
     public FoodRecoveryTracker()
     {
-        this(DEFAULT_FOOD_ITEM_IDS);
+        this(RecoveryItemIds.foodItemIds());
     }
 
     public FoodRecoveryTracker(Set<Integer> foodItemIds)
     {
         super(ID);
-        this.foodItemIds = new HashSet<>(foodItemIds);
+        this.foodItemIds = Set.copyOf(foodItemIds);
     }
 
     @Override

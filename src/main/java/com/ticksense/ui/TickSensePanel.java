@@ -278,136 +278,168 @@ public class TickSensePanel extends PluginPanel
             builder.append("Developer diagnostics are unavailable without live TickSense services.");
             return builder.toString();
         }
+        appendActiveStrategySection(builder);
+        appendCandidateStrategiesSection(builder);
+        appendRegionSection(builder);
+        appendOpenOpportunitiesSection(builder);
+        appendLastFinishReasonSection(builder);
+        appendUnknownIdsSection(builder);
+        appendRecentEventsSection(builder);
+        appendLowConfidenceReportsSection(builder);
+        return builder.toString().trim();
+    }
+
+    private void appendActiveStrategySection(StringBuilder builder)
+    {
         builder.append("Active strategy\n");
         builder.append("----------------\n");
-        if (services.getStrategyEngine().getActiveSession().isPresent())
-        {
-            builder.append(services.getStrategyEngine().getActiveSession().get().getActivityType().name())
-                .append(" / ")
-                .append(services.getStrategyEngine().getActiveSession().get().getActivityId().getValue())
-                .append("\n\n");
-        }
-        else
+        final Optional<com.ticksense.core.ActivitySession> activeSession = services.getStrategyEngine().getActiveSession();
+        if (!activeSession.isPresent())
         {
             builder.append("No active strategy.\n\n");
+            return;
         }
 
+        final com.ticksense.core.ActivitySession session = activeSession.get();
+        builder.append(session.getActivityType().name())
+            .append(" / ")
+            .append(session.getActivityId().getValue())
+            .append("\n\n");
+    }
+
+    private void appendCandidateStrategiesSection(StringBuilder builder)
+    {
         builder.append("Candidate strategies / confidence\n");
         builder.append("-------------------------------\n");
         final List<com.ticksense.activities.ActivityDiagnostic> diagnostics = services.getStrategyEngine().getDiagnostics();
         if (diagnostics.isEmpty())
         {
             builder.append("No activity diagnostics captured.\n\n");
+            return;
         }
-        else
+
+        for (com.ticksense.activities.ActivityDiagnostic diagnostic : diagnostics)
         {
-            for (com.ticksense.activities.ActivityDiagnostic diagnostic : diagnostics)
+            builder.append(diagnostic.getActivityType().name())
+                .append(" ")
+                .append(String.format("%.2f", diagnostic.getConfidence()))
+                .append(" ")
+                .append(diagnostic.getDecision());
+            if (!diagnostic.getReason().isEmpty())
             {
-                builder.append(diagnostic.getActivityType().name())
-                    .append(" ")
-                    .append(String.format("%.2f", diagnostic.getConfidence()))
-                    .append(" ")
-                    .append(diagnostic.getDecision());
-                if (!diagnostic.getReason().isEmpty())
-                {
-                    builder.append(" - ").append(diagnostic.getReason());
-                }
-                builder.append('\n');
+                builder.append(" - ").append(diagnostic.getReason());
             }
             builder.append('\n');
         }
+        builder.append('\n');
+    }
 
+    private void appendRegionSection(StringBuilder builder)
+    {
         builder.append("Current region / world view\n");
         builder.append("---------------------------\n");
-        final java.util.Optional<RegionInstanceTelemetryEvent> regionEvent = services.getLastRegionEvent();
-        if (regionEvent.isPresent())
-        {
-            builder.append("World ").append(regionEvent.get().getWorld())
-                .append(", region ").append(regionEvent.get().getRegionId())
-                .append(", view ").append(regionEvent.get().getWorldViewId())
-                .append(", state ").append(regionEvent.get().getGameState())
-                .append('\n')
-                .append('\n');
-        }
-        else
+        final Optional<RegionInstanceTelemetryEvent> regionEvent = services.getLastRegionEvent();
+        if (!regionEvent.isPresent())
         {
             builder.append("No region metadata captured yet.\n\n");
+            return;
         }
 
+        final RegionInstanceTelemetryEvent event = regionEvent.get();
+        builder.append("World ").append(event.getWorld())
+            .append(", region ").append(event.getRegionId())
+            .append(", view ").append(event.getWorldViewId())
+            .append(", state ").append(event.getGameState())
+            .append('\n')
+            .append('\n');
+    }
+
+    private void appendOpenOpportunitiesSection(StringBuilder builder)
+    {
         builder.append("Open opportunities\n");
         builder.append("------------------\n");
-        if (services.getOpenOpportunityMarkers().isEmpty())
+        final List<com.ticksense.activities.OpportunityMarker> openOpportunities = services.getOpenOpportunityMarkers();
+        if (openOpportunities.isEmpty())
         {
             builder.append("No open opportunities.\n\n");
-        }
-        else
-        {
-            for (com.ticksense.activities.OpportunityMarker marker : services.getOpenOpportunityMarkers())
-            {
-                builder.append(marker.getOpportunityType())
-                    .append(" / ")
-                    .append(marker.getStatus().name())
-                    .append('\n');
-            }
-            builder.append('\n');
+            return;
         }
 
-        builder.append("Last finish reason\n");
-        builder.append("------------------\n");
-        if (services.getLastFinishReason().isPresent())
+        for (com.ticksense.activities.OpportunityMarker marker : openOpportunities)
         {
-            builder.append(services.getLastFinishReason().get().getType().name())
-                .append(" - ")
-                .append(services.getLastFinishReason().get().getExplanation())
-                .append('\n')
+            builder.append(marker.getOpportunityType())
+                .append(" / ")
+                .append(marker.getStatus().name())
                 .append('\n');
         }
-        else
+        builder.append('\n');
+    }
+
+    private void appendLastFinishReasonSection(StringBuilder builder)
+    {
+        builder.append("Last finish reason\n");
+        builder.append("------------------\n");
+        final Optional<com.ticksense.core.FinishReason> finishReason = services.getLastFinishReason();
+        if (!finishReason.isPresent())
         {
             builder.append("No finished activity yet.\n\n");
+            return;
         }
 
+        final com.ticksense.core.FinishReason reason = finishReason.get();
+        builder.append(reason.getType().name())
+            .append(" - ")
+            .append(reason.getExplanation())
+            .append('\n')
+            .append('\n');
+    }
+
+    private void appendUnknownIdsSection(StringBuilder builder)
+    {
         builder.append("Unknown IDs\n");
         builder.append("-----------\n");
         builder.append("None captured.\n\n");
+    }
 
+    private void appendRecentEventsSection(StringBuilder builder)
+    {
         builder.append("Last 50 normalized events\n");
         builder.append("-------------------------\n");
         final List<TelemetryEnvelope> recentTelemetry = services.getRecentTelemetry();
         if (recentTelemetry.isEmpty())
         {
             builder.append("No normalized events captured yet.\n\n");
-        }
-        else
-        {
-            for (TelemetryEnvelope envelope : recentTelemetry)
-            {
-                builder.append(envelope.getEvent().getType())
-                    .append(" @ tick ")
-                    .append(envelope.getEvent().getTime().getGameTick())
-                    .append('\n');
-            }
-            builder.append('\n');
+            return;
         }
 
+        for (TelemetryEnvelope envelope : recentTelemetry)
+        {
+            builder.append(envelope.getEvent().getType())
+                .append(" @ tick ")
+                .append(envelope.getEvent().getTime().getGameTick())
+                .append('\n');
+        }
+        builder.append('\n');
+    }
+
+    private void appendLowConfidenceReportsSection(StringBuilder builder)
+    {
         builder.append("Hidden low-confidence reports\n");
         builder.append("---------------------------\n");
         if (lastLowConfidenceReports.isEmpty())
         {
             builder.append("No low-confidence reports are currently hidden from the normal recent reports list.");
+            return;
         }
-        else
+
+        for (ReportSummary report : lastLowConfidenceReports)
         {
-            for (ReportSummary report : lastLowConfidenceReports)
-            {
-                builder.append(ReportTextFormatter.formatSummaryLine(report))
-                    .append('\n')
-                    .append("Evidence: ")
-                    .append(report.getEvidenceSummaryText().isEmpty() ? "Unknown" : report.getEvidenceSummaryText())
-                    .append("\n\n");
-            }
+            builder.append(ReportTextFormatter.formatSummaryLine(report))
+                .append('\n')
+                .append("Evidence: ")
+                .append(report.getEvidenceSummaryText().isEmpty() ? "Unknown" : report.getEvidenceSummaryText())
+                .append("\n\n");
         }
-        return builder.toString().trim();
     }
 
     private void setDiagnosticsTabEnabled(boolean enabled)

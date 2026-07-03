@@ -1,11 +1,13 @@
 package com.ticksense.runelite;
 
+import com.google.gson.Gson;
 import com.google.inject.Provides;
 import com.ticksense.activities.ActivityModule;
 import com.ticksense.activities.ActivityModuleCatalog;
 import com.ticksense.activities.ActivityStrategyFactory;
 import com.ticksense.analytics.TrendAnalyzer;
 import com.ticksense.core.EntityRef;
+import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
 import com.ticksense.storage.ExportBundleWriter;
@@ -13,6 +15,7 @@ import com.ticksense.storage.ExportConfigSnapshotProvider;
 import com.ticksense.storage.JsonReportRepository;
 import com.ticksense.storage.ReportIndexMaintenanceService;
 import com.ticksense.storage.ReportRepository;
+import com.ticksense.storage.debug.DebugEventKind;
 import com.ticksense.storage.debug.DebugEventRecorder;
 import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryBus;
@@ -33,6 +36,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Actor;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameObjectDespawned;
@@ -58,6 +62,9 @@ import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.events.WorldViewLoaded;
 import net.runelite.api.events.WorldViewUnloaded;
 import net.runelite.api.Client;
+import net.runelite.api.Hitsplat;
+import net.runelite.api.NPC;
+import net.runelite.api.Projectile;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -74,6 +81,8 @@ import java.util.function.Function;
 public class TickSensePlugin extends Plugin
 {
     private static final int NAV_ICON_SIZE = 16;
+    private static final int UNKNOWN = -1;
+    private static final Gson DEBUG_GSON = new Gson();
 
     @Inject
     private ClientToolbar clientToolbar;
@@ -334,19 +343,25 @@ public class TickSensePlugin extends Plugin
     @Subscribe
     public void onNpcSpawned(NpcSpawned event)
     {
-        publish("NpcSpawned", envelope -> eventAdapter.mapNpcSpawned(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("NpcSpawned");
+        recordNpcObservation("NpcSpawned", envelope, event.getNpc(), "SPAWNED");
+        publish(envelope, captured -> eventAdapter.mapNpcSpawned(event, captured));
     }
 
     @Subscribe
     public void onNpcDespawned(NpcDespawned event)
     {
-        publish("NpcDespawned", envelope -> eventAdapter.mapNpcDespawned(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("NpcDespawned");
+        recordNpcObservation("NpcDespawned", envelope, event.getNpc(), "DESPAWNED");
+        publish(envelope, captured -> eventAdapter.mapNpcDespawned(event, captured));
     }
 
     @Subscribe
     public void onNpcChanged(NpcChanged event)
     {
-        publish("NpcChanged", envelope -> eventAdapter.mapNpcChanged(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("NpcChanged");
+        recordNpcObservation("NpcChanged", envelope, event.getNpc(), "CHANGED");
+        publish(envelope, captured -> eventAdapter.mapNpcChanged(event, captured));
     }
 
     @Subscribe
@@ -358,13 +373,17 @@ public class TickSensePlugin extends Plugin
     @Subscribe
     public void onAnimationChanged(AnimationChanged event)
     {
-        publish("AnimationChanged", envelope -> eventAdapter.mapAnimationChanged(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("AnimationChanged");
+        recordActorObservation("AnimationChanged", envelope, event.getActor(), "animationId", event.getActor() == null ? UNKNOWN : event.getActor().getAnimation());
+        publish(envelope, captured -> eventAdapter.mapAnimationChanged(event, captured));
     }
 
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event)
     {
-        publish("HitsplatApplied", envelope -> eventAdapter.mapHitsplatApplied(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("HitsplatApplied");
+        recordHitsplatObservation(envelope, event.getActor(), event.getHitsplat());
+        publish(envelope, captured -> eventAdapter.mapHitsplatApplied(event, captured));
     }
 
     @Subscribe
@@ -412,13 +431,17 @@ public class TickSensePlugin extends Plugin
     @Subscribe
     public void onProjectileMoved(ProjectileMoved event)
     {
-        publish("ProjectileMoved", envelope -> eventAdapter.mapProjectileMoved(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("ProjectileMoved");
+        recordProjectileObservation(envelope, event.getProjectile());
+        publish(envelope, captured -> eventAdapter.mapProjectileMoved(event, captured));
     }
 
     @Subscribe
     public void onGraphicChanged(GraphicChanged event)
     {
-        publish("GraphicChanged", envelope -> eventAdapter.mapGraphicChanged(event, envelope));
+        final RuneLiteEventEnvelope envelope = eventCapture.captureEnvelope("GraphicChanged");
+        recordActorObservation("GraphicChanged", envelope, event.getActor(), "graphicId", event.getActor() == null ? UNKNOWN : event.getActor().getGraphic());
+        publish(envelope, captured -> eventAdapter.mapGraphicChanged(event, captured));
     }
 
     @Subscribe
@@ -481,6 +504,7 @@ public class TickSensePlugin extends Plugin
         final List<String> actions = objectDefinition == null || objectDefinition.getActions() == null
             ? Collections.emptyList()
             : Arrays.asList(objectDefinition.getActions());
+        recordGameObjectObservation(sourceEventType, envelope, gameObject, objectName, filterActions(actions), stateChange);
 
         eventAdapter.mapObjectSnapshot(
             "ObjectSnapshot",
@@ -491,6 +515,122 @@ public class TickSensePlugin extends Plugin
             filterActions(actions),
             stateChange,
             envelope).ifPresent(telemetryBus::accept);
+    }
+
+    private void recordNpcObservation(String sourceEventType, RuneLiteEventEnvelope envelope, NPC npc, String stateChange)
+    {
+        final Map<String, Object> payload = baseObservationPayload(envelope);
+        payload.put("stateChange", stateChange);
+        payload.put("npcRef", entityRefPayload(snapshotter.npcRef(npc)));
+        payload.put("location", locationPayload(snapshotter.actorLocation(npc, envelope)));
+        payload.put("animationId", npc == null ? UNKNOWN : npc.getAnimation());
+        payload.put("graphicId", npc == null ? UNKNOWN : npc.getGraphic());
+        payload.put("interactingRef", npc == null ? entityRefPayload(EntityRef.unknown()) : entityRefPayload(snapshotter.actorRef(npc.getInteracting())));
+        payload.put("healthRatio", npc == null ? UNKNOWN : npc.getHealthRatio());
+        payload.put("healthScale", npc == null ? UNKNOWN : npc.getHealthScale());
+        recordAdapterObservation(sourceEventType, envelope, payload);
+    }
+
+    private void recordActorObservation(String sourceEventType, RuneLiteEventEnvelope envelope, Actor actor, String idFieldName, int id)
+    {
+        final Map<String, Object> payload = baseObservationPayload(envelope);
+        payload.put("actorRef", entityRefPayload(snapshotter.actorRef(actor)));
+        payload.put("location", locationPayload(snapshotter.actorLocation(actor, envelope)));
+        payload.put(idFieldName, id);
+        recordAdapterObservation(sourceEventType, envelope, payload);
+    }
+
+    private void recordHitsplatObservation(RuneLiteEventEnvelope envelope, Actor actor, Hitsplat hitsplat)
+    {
+        final Map<String, Object> payload = baseObservationPayload(envelope);
+        payload.put("targetRef", entityRefPayload(snapshotter.actorRef(actor)));
+        payload.put("location", locationPayload(snapshotter.actorLocation(actor, envelope)));
+        payload.put("hitsplatType", hitsplat == null ? UNKNOWN : hitsplat.getHitsplatType());
+        payload.put("amount", hitsplat == null ? 0 : hitsplat.getAmount());
+        payload.put("healthRatio", actor == null ? UNKNOWN : actor.getHealthRatio());
+        payload.put("healthScale", actor == null ? UNKNOWN : actor.getHealthScale());
+        recordAdapterObservation("HitsplatApplied", envelope, payload);
+    }
+
+    private void recordProjectileObservation(RuneLiteEventEnvelope envelope, Projectile projectile)
+    {
+        final Map<String, Object> payload = baseObservationPayload(envelope);
+        payload.put("projectileId", projectile == null ? UNKNOWN : projectile.getId());
+        payload.put("sourceRef", projectile == null ? entityRefPayload(EntityRef.unknown()) : entityRefPayload(snapshotter.actorRef(projectile.getSourceActor())));
+        payload.put("targetRef", projectile == null ? entityRefPayload(EntityRef.unknown()) : entityRefPayload(snapshotter.actorRef(projectile.getTargetActor())));
+        payload.put("targetLocation", projectile == null ? locationPayload(WorldLocation.unknown()) : locationPayload(snapshotter.worldLocation(projectile.getTargetPoint(), envelope, false)));
+        payload.put("startCycle", projectile == null ? UNKNOWN : projectile.getStartCycle());
+        payload.put("endCycle", projectile == null ? UNKNOWN : projectile.getEndCycle());
+        recordAdapterObservation("ProjectileMoved", envelope, payload);
+    }
+
+    private void recordGameObjectObservation(
+        String sourceEventType,
+        RuneLiteEventEnvelope envelope,
+        GameObject gameObject,
+        String objectName,
+        List<String> actions,
+        String stateChange)
+    {
+        final Map<String, Object> payload = baseObservationPayload(envelope);
+        payload.put("stateChange", stateChange);
+        payload.put("objectId", gameObject.getId());
+        payload.put("objectName", objectName);
+        payload.put("location", locationPayload(snapshotter.worldLocation(gameObject.getWorldLocation(), envelope, false)));
+        payload.put("objectType", "GAME_OBJECT");
+        payload.put("actions", actions);
+        recordAdapterObservation(sourceEventType, envelope, payload);
+    }
+
+    private void recordAdapterObservation(String sourceEventType, RuneLiteEventEnvelope envelope, Map<String, Object> payload)
+    {
+        if (!debugEventRecorder.isActive())
+        {
+            return;
+        }
+        final EventTime time = snapshotter.eventTime(envelope);
+        debugEventRecorder.record(
+            DebugEventKind.ADAPTER_OBSERVATION,
+            sessionTelemetryContext.getSessionId(),
+            sourceEventType,
+            time,
+            DEBUG_GSON.toJson(payload));
+    }
+
+    private static Map<String, Object> baseObservationPayload(RuneLiteEventEnvelope envelope)
+    {
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sourceEventType", envelope.getSourceEventType());
+        payload.put("world", envelope.getWorld());
+        payload.put("gameTick", envelope.getGameTick());
+        payload.put("clientCycle", envelope.getClientCycle());
+        payload.put("clientTickSequence", envelope.getClientTickSequence());
+        payload.put("gameState", envelope.getGameState());
+        return payload;
+    }
+
+    private static Map<String, Object> entityRefPayload(EntityRef ref)
+    {
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("type", ref.getType().name());
+        payload.put("runtimeIndex", ref.getRuntimeIndex());
+        payload.put("id", ref.getId());
+        payload.put("name", ref.getName());
+        payload.put("groupId", ref.getGroupId());
+        payload.put("childId", ref.getChildId());
+        return payload;
+    }
+
+    private static Map<String, Object> locationPayload(WorldLocation location)
+    {
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("world", location.getWorld());
+        payload.put("plane", location.getPlane());
+        payload.put("x", location.getX());
+        payload.put("y", location.getY());
+        payload.put("regionId", location.getRegionId());
+        payload.put("instanced", location.isInstanced());
+        return payload;
     }
 
     private ObjectComposition objectDefinition(int objectId)

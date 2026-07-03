@@ -36,6 +36,11 @@ public final class DebugEventRecord
         return new DebugEventRecord(SCHEMA_VERSION, DebugEventKind.NORMALIZED_TELEMETRY, sessionId, sourceEventType, time, payloadJson);
     }
 
+    public static DebugEventRecord of(DebugEventKind kind, String sessionId, String sourceEventType, EventTime time, String payloadJson)
+    {
+        return new DebugEventRecord(SCHEMA_VERSION, kind, sessionId, sourceEventType, time, payloadJson);
+    }
+
     public int getDebugSchemaVersion()
     {
         return debugSchemaVersion;

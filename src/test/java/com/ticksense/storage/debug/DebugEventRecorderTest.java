@@ -93,6 +93,30 @@ public class DebugEventRecorderTest
         assertTrue(allFileNames.contains("-session-3.jsonl"));
     }
 
+    @Test
+    public void writesAdapterObservationRecord() throws IOException
+    {
+        final Path tempDir = Files.createTempDirectory("ticksense-debug-observation");
+        final DebugEventRecorder recorder = new DebugEventRecorder(tempDir, () -> "session-observation");
+
+        recorder.startSession(true, 25, 5);
+        recorder.record(
+            DebugEventKind.ADAPTER_OBSERVATION,
+            "session-observation",
+            "ProjectileMoved",
+            new EventTime(101L, 202L, 303, 404L, 505),
+            "{\"projectileId\":1234}");
+        recorder.close();
+
+        final String jsonLine = Files.readAllLines(jsonlFiles(tempDir).get(0), StandardCharsets.UTF_8).get(0);
+        final DebugEventRecord debugRecord = GSON.fromJson(jsonLine, DebugEventRecord.class);
+        assertEquals(DebugEventKind.ADAPTER_OBSERVATION, debugRecord.getKind());
+        assertEquals("session-observation", debugRecord.getSessionId());
+        assertEquals("ProjectileMoved", debugRecord.getSourceEventType());
+        assertEquals(303, debugRecord.getTime().getGameTick());
+        assertEquals("{\"projectileId\":1234}", debugRecord.getPayloadJson());
+    }
+
     private static List<Path> jsonlFiles(Path directory) throws IOException
     {
         try (Stream<Path> files = Files.list(directory))

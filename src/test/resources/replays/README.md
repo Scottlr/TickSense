@@ -78,3 +78,22 @@ Vardorvis capture instructions for T025/T034 follow-up:
 - `vardorvis-basic.jsonl` should prove boss presence, detached head presence, ranged-head projectile timing, blood-splat graphic timing, axe mechanic timing, prayer-response evidence if visible, damage during mechanic windows, and enough region/instance context to keep later reports scoped to Vardorvis.
 - Preserve event ordering and timestamps so downstream mechanic-latency analysis stays auditable.
 - Refresh the fixture notes whenever Vardorvis mechanic IDs or RuneLite-visible cues change.
+
+Reserved post-MVP Inferno fixture name for T026/T036 follow-up:
+
+- `inferno-wave-basic.jsonl`
+
+Inferno verification review:
+
+- Review date: `2026-07-03`
+- Current decision: `PARTIALLY_VERIFIED`
+- Verified source so far: official RuneLite `NpcID` constants in the pinned `runelite-api` dependency for nibblers and core Inferno wave NPCs, plus official `ItemID` constants for common Inferno supply items.
+- Missing evidence: sanitized normalized wave/region boundaries, prayer-state/timing proof, supply-usage timing, and death-timeline evidence.
+
+Inferno capture instructions for T026/T036 follow-up:
+
+- Record normalized TickSense telemetry only; do not commit raw RuneLite objects, screenshots, or video.
+- Remove or replace player names, account identifiers, and unrelated chat before commit.
+- `inferno-wave-basic.jsonl` should prove wave/attempt boundaries, nibbler presence, prayer state changes if available, supply usage, and death or wave-complete timing in normalized telemetry.
+- Preserve event ordering and timestamps so downstream wave-duration and response analysis stays auditable.
+- Refresh the fixture notes whenever Inferno NPC IDs, prayer evidence, or supply assumptions change.

@@ -14,6 +14,7 @@ import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickValueFormatter;
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
@@ -149,7 +150,7 @@ public final class GemMiningAnalyzer
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
         final List<String> evidence = new ArrayList<>();
-        final String startEvidence = safeText(session.getMetadata().get("evidenceSummary"));
+        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
         if (!startEvidence.isEmpty())
         {
             for (String part : startEvidence.split("\\|"))
@@ -162,7 +163,7 @@ public final class GemMiningAnalyzer
             }
         }
         evidence.add("Idle ticks count only verified rock-available windows; depleted-rock wait stays in the RNG caveat, not execution loss.");
-        evidence.add("Verification status: " + safeText(activityData.getAttributes().get("verificationStatus")));
+        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
         return Collections.unmodifiableList(evidence);
     }
 
@@ -207,13 +208,13 @@ public final class GemMiningAnalyzer
 
     private static String displayName(ActivitySession session)
     {
-        final String displayName = safeText(session.getMetadata().get("displayName"));
+        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
         return displayName.isEmpty() ? "Gem Mining" : displayName;
     }
 
     private static double confidence(ActivitySession session)
     {
-        final String raw = safeText(session.getMetadata().get("confidence"));
+        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
         if (raw.isEmpty())
         {
             return 0.0D;
@@ -223,7 +224,7 @@ public final class GemMiningAnalyzer
 
     private static int intAttribute(ActivityReportData activityData, String key)
     {
-        final String raw = safeText(activityData.getAttributes().get(key));
+        final String raw = TextValues.trimmedOrEmpty(activityData.getAttributes().get(key));
         if (raw.isEmpty())
         {
             return 0;
@@ -297,11 +298,6 @@ public final class GemMiningAnalyzer
             total += Math.abs(value - average);
         }
         return total / values.size();
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
     }
 
 }

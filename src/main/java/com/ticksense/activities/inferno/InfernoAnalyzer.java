@@ -12,6 +12,7 @@ import com.ticksense.analytics.OpportunityTimelineEntry;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickValueFormatter;
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,7 +133,7 @@ public final class InfernoAnalyzer
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
         final List<String> evidence = new ArrayList<>();
-        final String startEvidence = safeText(session.getMetadata().get("evidenceSummary"));
+        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
         if (!startEvidence.isEmpty())
         {
             for (String part : startEvidence.split("\\|"))
@@ -144,14 +145,14 @@ public final class InfernoAnalyzer
                 }
             }
         }
-        final String prayerStatus = safeText(activityData.getAttributes().get("prayerEvidenceStatus"));
+        final String prayerStatus = TextValues.trimmedOrEmpty(activityData.getAttributes().get("prayerEvidenceStatus"));
         evidence.add("Prayer timing omitted because prayer evidence is " + prayerStatus + ".");
-        final String deathTimeline = safeText(activityData.getAttributes().get("deathTimelineEvidence"));
+        final String deathTimeline = TextValues.trimmedOrEmpty(activityData.getAttributes().get("deathTimelineEvidence"));
         if (!deathTimeline.isEmpty())
         {
             evidence.add("Death timeline: " + deathTimeline);
         }
-        evidence.add("Verification status: " + safeText(activityData.getAttributes().get("verificationStatus")));
+        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
         return Collections.unmodifiableList(evidence);
     }
 
@@ -171,13 +172,13 @@ public final class InfernoAnalyzer
 
     private static String displayName(ActivitySession session)
     {
-        final String displayName = safeText(session.getMetadata().get("displayName"));
+        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
         return displayName.isEmpty() ? "Inferno" : displayName;
     }
 
     private static double confidence(ActivitySession session)
     {
-        final String raw = safeText(session.getMetadata().get("confidence"));
+        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
         if (raw.isEmpty())
         {
             return 0.0D;
@@ -187,7 +188,7 @@ public final class InfernoAnalyzer
 
     private static int intAttribute(ActivityReportData activityData, String key)
     {
-        final String raw = safeText(activityData.getAttributes().get(key));
+        final String raw = TextValues.trimmedOrEmpty(activityData.getAttributes().get(key));
         if (raw.isEmpty())
         {
             return 0;
@@ -256,11 +257,6 @@ public final class InfernoAnalyzer
             minimum = Math.min(minimum, value);
         }
         return minimum;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
     }
 
 }

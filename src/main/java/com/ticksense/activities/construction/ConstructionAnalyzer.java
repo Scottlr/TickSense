@@ -14,6 +14,7 @@ import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickValueFormatter;
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -172,7 +173,7 @@ public final class ConstructionAnalyzer
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
         final List<String> evidence = new ArrayList<>();
-        final String startEvidence = safeText(session.getMetadata().get("evidenceSummary"));
+        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
         if (!startEvidence.isEmpty())
         {
             for (String part : startEvidence.split("\\|"))
@@ -185,8 +186,8 @@ public final class ConstructionAnalyzer
             }
         }
         evidence.add("Observe-only Construction analytics: menu, widget, animation, inventory, XP, and bank evidence are retrospective only.");
-        evidence.add("Verification status: " + safeText(activityData.getAttributes().get("verificationStatus")));
-        evidence.add("Verified method: " + safeText(activityData.getAttributes().get("methodName")));
+        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
+        evidence.add("Verified method: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("methodName")));
         return Collections.unmodifiableList(evidence);
     }
 
@@ -224,13 +225,13 @@ public final class ConstructionAnalyzer
 
     private static String displayName(ActivitySession session)
     {
-        final String displayName = safeText(session.getMetadata().get("displayName"));
+        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
         return displayName.isEmpty() ? "Construction" : displayName;
     }
 
     private static double confidence(ActivitySession session)
     {
-        final String raw = safeText(session.getMetadata().get("confidence"));
+        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
         if (raw.isEmpty())
         {
             return 0.0D;
@@ -313,11 +314,6 @@ public final class ConstructionAnalyzer
             maximum = Math.max(maximum, value);
         }
         return maximum;
-    }
-
-    private static String safeText(String value)
-    {
-        return value == null ? "" : value.trim();
     }
 
 }

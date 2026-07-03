@@ -15,6 +15,6 @@ final class ActivityTexts
 
     static String safeText(String value)
     {
-        return value == null ? "" : value.trim();
+        return TextValues.trimmedOrEmpty(value);
     }
 }

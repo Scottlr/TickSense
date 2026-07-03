@@ -27,7 +27,7 @@ public class ReportListPanel extends JPanel
     private final JList<ReportSummary> reportList = PanelLists.readOnlyList(reportModel, ColorScheme.TEXT_COLOR);
     private final CardLayout contentLayout = new CardLayout();
     private final JPanel content = new JPanel(contentLayout);
-    private final JScrollPane reportScrollPane = PanelScrollPanes.borderless(reportList);
+    private final JScrollPane reportScrollPane = new JScrollPane(reportList);
 
     public ReportListPanel()
     {
@@ -38,6 +38,7 @@ public class ReportListPanel extends JPanel
         content.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         emptyState.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         reportList.setCellRenderer(new ReportSummaryRenderer());
+        reportScrollPane.setBorder(null);
 
         content.add(emptyState, EMPTY_CARD);
         content.add(reportScrollPane, REPORTS_CARD);

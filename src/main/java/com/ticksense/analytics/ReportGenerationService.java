@@ -17,7 +17,6 @@ import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.TimelineRepository;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +24,11 @@ import java.util.Optional;
 
 public final class ReportGenerationService
 {
-    private static final Map<ActivityType, ReportBuilder> REPORT_BUILDERS = reportBuilders();
+    private static final Map<ActivityType, ReportBuilder> REPORT_BUILDERS = Map.of(
+        ActivityType.GEM_MINING, new GemMiningAnalyzer()::buildReport,
+        ActivityType.CONSTRUCTION, new ConstructionAnalyzer()::buildReport,
+        ActivityType.VARDORVIS, new VardorvisAnalyzer()::buildReport,
+        ActivityType.INFERNO, new InfernoAnalyzer()::buildReport);
 
     private final TimelineRepository timelineRepository;
     private final ReportRepository reportRepository;
@@ -99,20 +102,6 @@ public final class ReportGenerationService
             }
         }
         return Optional.empty();
-    }
-
-    private static Map<ActivityType, ReportBuilder> reportBuilders()
-    {
-        final Map<ActivityType, ReportBuilder> builders = new EnumMap<>(ActivityType.class);
-        builders.put(ActivityType.GEM_MINING, (session, activityData, opportunityMarkers) ->
-            new GemMiningAnalyzer().buildReport(session, activityData, opportunityMarkers));
-        builders.put(ActivityType.CONSTRUCTION, (session, activityData, opportunityMarkers) ->
-            new ConstructionAnalyzer().buildReport(session, activityData, opportunityMarkers));
-        builders.put(ActivityType.VARDORVIS, (session, activityData, opportunityMarkers) ->
-            new VardorvisAnalyzer().buildReport(session, activityData, opportunityMarkers));
-        builders.put(ActivityType.INFERNO, (session, activityData, opportunityMarkers) ->
-            new InfernoAnalyzer().buildReport(session, activityData, opportunityMarkers));
-        return Collections.unmodifiableMap(builders);
     }
 
     private interface ReportBuilder

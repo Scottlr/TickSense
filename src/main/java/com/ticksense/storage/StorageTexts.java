@@ -1,6 +1,6 @@
 package com.ticksense.storage;
 
-import java.util.Objects;
+import com.ticksense.common.TextValues;
 
 final class StorageTexts
 {
@@ -10,11 +10,6 @@ final class StorageTexts
 
     static String requireText(String value, String fieldName)
     {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
+        return TextValues.requireText(value, fieldName);
     }
 }

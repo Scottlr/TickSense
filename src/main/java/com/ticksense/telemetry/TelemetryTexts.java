@@ -1,6 +1,6 @@
 package com.ticksense.telemetry;
 
-import java.util.Objects;
+import com.ticksense.common.TextValues;
 
 final class TelemetryTexts
 {
@@ -10,12 +10,7 @@ final class TelemetryTexts
 
     static String requireText(String value, String fieldName)
     {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
+        return TextValues.requireText(value, fieldName);
     }
 
     static String safeText(String value)

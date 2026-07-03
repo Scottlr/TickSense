@@ -4,6 +4,7 @@ import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
+import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
@@ -38,7 +39,7 @@ public final class VardorvisAnalyzer
     private static final MetricDefinition MECHANIC_CONFIDENCE =
         new MetricDefinition("mechanicConfidence", "Mechanic confidence", MetricUnit.PERCENT, "Explicit confidence for the verified mechanic attribution in this report.", false);
 
-    public VardorvisReportData analyze(
+    public ActivityAnalysisData analyze(
         ActivitySession session,
         ActivityReportData activityData,
         List<OpportunityMarker> opportunityMarkers)
@@ -65,7 +66,7 @@ public final class VardorvisAnalyzer
         tickLossCategories.put("Failed response windows", failedWindowTicks);
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(completedLatencyTicks + failedWindowTicks, tickLossCategories);
 
-        return new VardorvisReportData(
+        return new ActivityAnalysisData(
             metrics,
             buildTimeline(opportunities),
             tickLossBreakdown,
@@ -79,7 +80,7 @@ public final class VardorvisAnalyzer
         List<OpportunityMarker> opportunityMarkers)
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
-        final VardorvisReportData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
+        final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
         return new ActivityReport(
             ActivityReport.SCHEMA_VERSION,

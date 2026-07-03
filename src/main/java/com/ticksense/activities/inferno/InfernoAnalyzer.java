@@ -3,6 +3,7 @@ package com.ticksense.activities.inferno;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
+import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
@@ -33,7 +34,7 @@ public final class InfernoAnalyzer
     private static final MetricDefinition DEATH_TIMELINE_EVENTS =
         new MetricDefinition("deathTimelineEvents", "Death timeline events", MetricUnit.COUNT, "Bounded retrospective events captured for the Inferno death timeline.");
 
-    public InfernoReportData analyze(
+    public ActivityAnalysisData analyze(
         ActivitySession session,
         ActivityReportData activityData,
         List<OpportunityMarker> opportunityMarkers)
@@ -60,7 +61,7 @@ public final class InfernoAnalyzer
             tickLossCategories.get("Wave duration") + tickLossCategories.get("Nibbler response"),
             tickLossCategories);
 
-        return new InfernoReportData(
+        return new ActivityAnalysisData(
             metrics,
             buildTimeline(opportunities),
             tickLossBreakdown,
@@ -74,7 +75,7 @@ public final class InfernoAnalyzer
         List<OpportunityMarker> opportunityMarkers)
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
-        final InfernoReportData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
+        final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
         return new ActivityReport(
             ActivityReport.SCHEMA_VERSION,

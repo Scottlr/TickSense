@@ -1,6 +1,6 @@
 package com.ticksense.activities.inferno;
 
-import com.ticksense.activities.VerificationTexts;
+import com.ticksense.common.TextValues;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -49,15 +49,15 @@ public final class InfernoVerificationDecision
         List<String> notes)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedOnDate = VerificationTexts.normalizedValue(verifiedOnDate, "verifiedOnDate");
+        this.verifiedOnDate = TextValues.requireText(verifiedOnDate, "verifiedOnDate");
         this.waveEvidenceStatus = Objects.requireNonNull(waveEvidenceStatus, "waveEvidenceStatus");
         this.nibblerEvidenceStatus = Objects.requireNonNull(nibblerEvidenceStatus, "nibblerEvidenceStatus");
         this.prayerEvidenceStatus = Objects.requireNonNull(prayerEvidenceStatus, "prayerEvidenceStatus");
         this.supplyEvidenceStatus = Objects.requireNonNull(supplyEvidenceStatus, "supplyEvidenceStatus");
         this.deathEvidenceStatus = Objects.requireNonNull(deathEvidenceStatus, "deathEvidenceStatus");
-        this.evidence = VerificationTexts.immutableCopy(evidence, "evidence");
-        this.blockers = VerificationTexts.immutableCopy(blockers, "blockers");
-        this.notes = VerificationTexts.immutableCopy(notes, "notes");
+        this.evidence = TextValues.immutableTextList(evidence, "evidence");
+        this.blockers = TextValues.immutableTextList(blockers, "blockers");
+        this.notes = TextValues.immutableTextList(notes, "notes");
     }
 
     public static InfernoVerificationDecision current()

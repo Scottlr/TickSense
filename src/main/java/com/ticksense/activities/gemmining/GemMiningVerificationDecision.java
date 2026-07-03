@@ -1,6 +1,6 @@
 package com.ticksense.activities.gemmining;
 
-import com.ticksense.activities.VerificationTexts;
+import com.ticksense.common.TextValues;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -19,9 +19,9 @@ public final class GemMiningVerificationDecision
         List<String> notes)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedEvidence = VerificationTexts.immutableCopy(verifiedEvidence, "verifiedEvidence");
-        this.blockers = VerificationTexts.immutableCopy(blockers, "blockers");
-        this.notes = VerificationTexts.immutableCopy(notes, "notes");
+        this.verifiedEvidence = TextValues.immutableTextList(verifiedEvidence, "verifiedEvidence");
+        this.blockers = TextValues.immutableTextList(blockers, "blockers");
+        this.notes = TextValues.immutableTextList(notes, "notes");
     }
 
     public static GemMiningVerificationDecision verified(List<String> verifiedEvidence, List<String> notes)

@@ -14,11 +14,11 @@ import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.common.IntIdSet;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,10 +52,10 @@ final class GemMiningState
         0L,
         Collections.singletonList("Move into mining range"));
 
-    private static final int[] VERIFIED_REGION_IDS = GemMiningIds.gemMiningRegionIds();
-    private static final int[] VERIFIED_OBJECT_IDS = GemMiningIds.gemRockObjectIds();
-    private static final int[] VERIFIED_ANIMATION_IDS = GemMiningIds.miningAnimationIds();
-    private static final int[] VERIFIED_GEM_ITEM_IDS = GemMiningIds.uncutGemItemIds();
+    private static final IntIdSet VERIFIED_REGION_IDS = IntIdSet.of(GemMiningIds.gemMiningRegionIds());
+    private static final IntIdSet VERIFIED_OBJECT_IDS = IntIdSet.of(GemMiningIds.gemRockObjectIds());
+    private static final IntIdSet VERIFIED_ANIMATION_IDS = IntIdSet.of(GemMiningIds.miningAnimationIds());
+    private static final IntIdSet VERIFIED_GEM_ITEM_IDS = IntIdSet.of(GemMiningIds.uncutGemItemIds());
 
     private int currentRegionId = -1;
     private WorldLocation currentPlayerLocation = WorldLocation.unknown();
@@ -83,27 +83,27 @@ final class GemMiningState
 
     boolean hasVerifiedRegion()
     {
-        return contains(VERIFIED_REGION_IDS, currentRegionId);
+        return VERIFIED_REGION_IDS.contains(currentRegionId);
     }
 
     boolean isVerifiedRegion(int regionId)
     {
-        return contains(VERIFIED_REGION_IDS, regionId);
+        return VERIFIED_REGION_IDS.contains(regionId);
     }
 
     boolean isVerifiedObject(int objectId)
     {
-        return contains(VERIFIED_OBJECT_IDS, objectId);
+        return VERIFIED_OBJECT_IDS.contains(objectId);
     }
 
     boolean isVerifiedMiningAnimation(int animationId)
     {
-        return contains(VERIFIED_ANIMATION_IDS, animationId);
+        return VERIFIED_ANIMATION_IDS.contains(animationId);
     }
 
     boolean isVerifiedGemItem(int itemId)
     {
-        return contains(VERIFIED_GEM_ITEM_IDS, itemId);
+        return VERIFIED_GEM_ITEM_IDS.contains(itemId);
     }
 
     boolean matchesAvailableRock(WorldLocation location)
@@ -256,8 +256,8 @@ final class GemMiningState
     {
         final Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("verificationStatus", GemMiningIds.verificationDecision().getStatus().name());
-        attributes.put("verifiedRegionIds", joinInts(VERIFIED_REGION_IDS));
-        attributes.put("verifiedObjectIds", joinInts(VERIFIED_OBJECT_IDS));
+        attributes.put("verifiedRegionIds", VERIFIED_REGION_IDS.joinCsv());
+        attributes.put("verifiedObjectIds", VERIFIED_OBJECT_IDS.joinCsv());
         attributes.put("mineClicks", String.valueOf(totalMineClicks));
         attributes.put("redundantClicks", String.valueOf(redundantClicks));
         attributes.put("idleTicks", String.valueOf(totalIdleTicks));
@@ -400,25 +400,6 @@ final class GemMiningState
     private static int chebyshevDistance(WorldLocation left, WorldLocation right)
     {
         return Math.max(Math.abs(left.getX() - right.getX()), Math.abs(left.getY() - right.getY()));
-    }
-
-    private static String joinInts(int[] values)
-    {
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < values.length; i++)
-        {
-            if (i > 0)
-            {
-                builder.append(',');
-            }
-            builder.append(values[i]);
-        }
-        return builder.toString();
-    }
-
-    private static boolean contains(int[] values, int needle)
-    {
-        return Arrays.stream(values).anyMatch(value -> value == needle);
     }
 
     private static String normalize(String text)

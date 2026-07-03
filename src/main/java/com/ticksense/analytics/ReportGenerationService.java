@@ -16,12 +16,16 @@ import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.TimelineRepository;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 public final class ReportGenerationService
 {
+    private static final Map<ActivityType, ReportBuilder> REPORT_BUILDERS = reportBuilders();
+
     private final TimelineRepository timelineRepository;
     private final ReportRepository reportRepository;
     private final ActivityStrategyEngine strategyEngine;
@@ -61,23 +65,12 @@ public final class ReportGenerationService
         ActivityReportData activityData,
         List<OpportunityMarker> opportunityMarkers)
     {
-        if (session.getActivityType() == ActivityType.GEM_MINING)
+        final ReportBuilder reportBuilder = REPORT_BUILDERS.get(session.getActivityType());
+        if (reportBuilder == null)
         {
-            return new GemMiningAnalyzer().buildReport(session, activityData, opportunityMarkers);
+            throw new IllegalArgumentException("No report generator registered for " + session.getActivityType());
         }
-        if (session.getActivityType() == ActivityType.CONSTRUCTION)
-        {
-            return new ConstructionAnalyzer().buildReport(session, activityData, opportunityMarkers);
-        }
-        if (session.getActivityType() == ActivityType.VARDORVIS)
-        {
-            return new VardorvisAnalyzer().buildReport(session, activityData, opportunityMarkers);
-        }
-        if (session.getActivityType() == ActivityType.INFERNO)
-        {
-            return new InfernoAnalyzer().buildReport(session, activityData, opportunityMarkers);
-        }
-        throw new IllegalArgumentException("No report generator registered for " + session.getActivityType());
+        return reportBuilder.build(session, activityData, opportunityMarkers);
     }
 
     private Optional<ActivitySession> findCompletedSession(ActivityId activityId)
@@ -105,5 +98,27 @@ public final class ReportGenerationService
             }
         }
         return Optional.empty();
+    }
+
+    private static Map<ActivityType, ReportBuilder> reportBuilders()
+    {
+        final Map<ActivityType, ReportBuilder> builders = new EnumMap<>(ActivityType.class);
+        builders.put(ActivityType.GEM_MINING, (session, activityData, opportunityMarkers) ->
+            new GemMiningAnalyzer().buildReport(session, activityData, opportunityMarkers));
+        builders.put(ActivityType.CONSTRUCTION, (session, activityData, opportunityMarkers) ->
+            new ConstructionAnalyzer().buildReport(session, activityData, opportunityMarkers));
+        builders.put(ActivityType.VARDORVIS, (session, activityData, opportunityMarkers) ->
+            new VardorvisAnalyzer().buildReport(session, activityData, opportunityMarkers));
+        builders.put(ActivityType.INFERNO, (session, activityData, opportunityMarkers) ->
+            new InfernoAnalyzer().buildReport(session, activityData, opportunityMarkers));
+        return Collections.unmodifiableMap(builders);
+    }
+
+    private interface ReportBuilder
+    {
+        ActivityReport build(
+            ActivitySession session,
+            ActivityReportData activityData,
+            List<OpportunityMarker> opportunityMarkers);
     }
 }

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.ticksense.activities.ActivityDiagnostic;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.common.TextValues;
-import com.ticksense.runelite.TickSenseConfig;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -32,31 +31,31 @@ public final class ExportBundleWriter
     private final TickSenseDataPaths dataPaths;
     private final ReportRepository reportRepository;
     private final Gson gson;
-    private final TickSenseConfig config;
+    private final ExportConfigSnapshotProvider configSnapshotProvider;
     private final Supplier<List<ActivityDiagnostic>> diagnosticsSupplier;
     private final Clock clock;
 
     @Inject
     public ExportBundleWriter(
         ReportRepository reportRepository,
-        TickSenseConfig config,
+        ExportConfigSnapshotProvider configSnapshotProvider,
         Supplier<List<ActivityDiagnostic>> diagnosticsSupplier)
     {
-        this(TickSenseDataPaths.defaultPaths(), reportRepository, new Gson(), config, diagnosticsSupplier, Clock.systemUTC());
+        this(TickSenseDataPaths.defaultPaths(), reportRepository, new Gson(), configSnapshotProvider, diagnosticsSupplier, Clock.systemUTC());
     }
 
     public ExportBundleWriter(
         TickSenseDataPaths dataPaths,
         ReportRepository reportRepository,
         Gson gson,
-        TickSenseConfig config,
+        ExportConfigSnapshotProvider configSnapshotProvider,
         Supplier<List<ActivityDiagnostic>> diagnosticsSupplier,
         Clock clock)
     {
         this.dataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
         this.reportRepository = Objects.requireNonNull(reportRepository, "reportRepository");
         this.gson = Objects.requireNonNull(gson, "gson");
-        this.config = Objects.requireNonNull(config, "config");
+        this.configSnapshotProvider = Objects.requireNonNull(configSnapshotProvider, "configSnapshotProvider");
         this.diagnosticsSupplier = Objects.requireNonNull(diagnosticsSupplier, "diagnosticsSupplier");
         this.clock = Objects.requireNonNull(clock, "clock");
     }
@@ -123,12 +122,7 @@ public final class ExportBundleWriter
 
     private Map<String, Object> pluginConfigSnapshot()
     {
-        final Map<String, Object> snapshot = new LinkedHashMap<>();
-        snapshot.put("debugEventRecorder", config.debugEventRecorder());
-        snapshot.put("debugActivityDiagnostics", config.debugActivityDiagnostics());
-        snapshot.put("maxDebugFileSizeMb", config.maxDebugFileSizeMb());
-        snapshot.put("maxDebugSessions", config.maxDebugSessions());
-        return snapshot;
+        return new LinkedHashMap<>(Objects.requireNonNull(configSnapshotProvider.snapshot(), "configSnapshot"));
     }
 
     private Map<String, Object> activitySnapshot(ActivityReport report)

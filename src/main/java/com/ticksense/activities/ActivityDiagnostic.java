@@ -2,8 +2,6 @@ package com.ticksense.activities;
 
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +27,7 @@ public final class ActivityDiagnostic
         this.decision = ActivityTexts.requireText(decision, "decision");
         this.reason = ActivityTexts.safeText(reason);
         this.time = Objects.requireNonNull(time, "time");
-        this.evidence = immutableList(evidence);
+        this.evidence = ActivityCollections.immutableList(evidence);
     }
 
     public ActivityType getActivityType()
@@ -69,14 +67,5 @@ public final class ActivityDiagnostic
             throw new IllegalArgumentException("confidence must be between 0.0 and 1.0");
         }
         return value;
-    }
-
-    private static List<String> immutableList(List<String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(values));
     }
 }

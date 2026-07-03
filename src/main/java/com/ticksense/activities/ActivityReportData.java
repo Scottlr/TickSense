@@ -2,8 +2,6 @@ package com.ticksense.activities;
 
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -17,7 +15,7 @@ public final class ActivityReportData
     {
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.attributes = immutableMap(attributes);
+        this.attributes = ActivityCollections.immutableStringMap(attributes);
     }
 
     public ActivityId getActivityId()
@@ -33,14 +31,5 @@ public final class ActivityReportData
     public Map<String, String> getAttributes()
     {
         return attributes;
-    }
-
-    private static Map<String, String> immutableMap(Map<String, String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(values));
     }
 }

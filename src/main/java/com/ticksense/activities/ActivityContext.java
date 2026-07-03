@@ -1,8 +1,7 @@
 package com.ticksense.activities;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
 public final class ActivityContext
 {
     private final String sessionId;
@@ -15,7 +14,7 @@ public final class ActivityContext
         this.sessionId = ActivityTexts.requireText(sessionId, "sessionId");
         this.world = world;
         this.debugActivityDiagnostics = debugActivityDiagnostics;
-        this.metadata = immutableMap(metadata);
+        this.metadata = ActivityCollections.immutableStringMap(metadata);
     }
 
     public String getSessionId()
@@ -36,14 +35,5 @@ public final class ActivityContext
     public Map<String, String> getMetadata()
     {
         return metadata;
-    }
-
-    private static Map<String, String> immutableMap(Map<String, String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(values));
     }
 }

@@ -193,6 +193,17 @@ public class TelemetryJsonTest
         TelemetryJson.fromJsonLine(json.replace("\"schemaVersion\":1", "\"schemaVersion\":999"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void rejectsUnknownEventType()
+    {
+        final String json = TelemetryJson.toJsonLine(TelemetryEnvelope.create(
+            "event-unknown",
+            "session-1",
+            new GameTickTelemetryEvent(time(), tags("GameTick"), 1)));
+
+        TelemetryJson.fromJsonLine(json.replace("\"type\":\"game.tick\"", "\"type\":\"event.unknown\""));
+    }
+
     private static TelemetryEnvelope roundTrip(TelemetryEvent event)
     {
         final TelemetryEnvelope envelope = TelemetryEnvelope.create("event-" + event.getType(), "session-1", event);

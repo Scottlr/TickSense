@@ -1,12 +1,14 @@
 package com.ticksense.core;
 
+import com.ticksense.common.TextValues;
+
 public final class ActivityId
 {
     private final String value;
 
     public ActivityId(String value)
     {
-        this.value = CoreTexts.requireText(value, "value");
+        this.value = TextValues.requireText(value, "value");
     }
 
     public static ActivityId of(String value)

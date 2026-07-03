@@ -1,21 +1,12 @@
 package com.ticksense.activities.execution.equipment;
 
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 final class GearSwitchDetector
 {
-    static final int DEFAULT_EQUIPMENT_CONTAINER_ID = 94;
-
     private GearSwitchDetector()
     {
-    }
-
-    static Set<Integer> defaultEquipmentContainerIds()
-    {
-        return new HashSet<>(Arrays.asList(DEFAULT_EQUIPMENT_CONTAINER_ID));
     }
 
     static boolean isLikelyGearSwitch(InventoryDeltaTelemetryEvent event, Set<Integer> equipmentContainerIds)

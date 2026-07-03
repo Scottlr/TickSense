@@ -9,8 +9,6 @@ import com.ticksense.core.EntityRef;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public final class GearSwitchAttackTracker extends AbstractExecutionTracker
@@ -25,18 +23,18 @@ public final class GearSwitchAttackTracker extends AbstractExecutionTracker
 
     public GearSwitchAttackTracker()
     {
-        this(GearSwitchDetector.defaultEquipmentContainerIds());
+        this(GearSwitchContainerIds.defaultIds());
     }
 
     public GearSwitchAttackTracker(Set<Integer> equipmentContainerIds)
     {
         super(ID);
-        this.equipmentContainerIds = new HashSet<>(equipmentContainerIds);
+        this.equipmentContainerIds = GearSwitchContainerIds.of(equipmentContainerIds);
     }
 
     public static GearSwitchAttackTracker forEquipmentContainers(Integer... containerIds)
     {
-        return new GearSwitchAttackTracker(new HashSet<>(Arrays.asList(containerIds)));
+        return new GearSwitchAttackTracker(GearSwitchContainerIds.of(containerIds));
     }
 
     @Override

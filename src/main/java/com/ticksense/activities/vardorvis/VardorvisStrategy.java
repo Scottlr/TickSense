@@ -40,7 +40,7 @@ public final class VardorvisStrategy implements ActivityStrategy
             VardorvisIds.verifiedRegionIds());
     }
 
-    VardorvisStrategy(
+    public VardorvisStrategy(
         VardorvisVerificationDecision verificationDecision,
         int[] bossNpcIds,
         int[] headNpcIds,

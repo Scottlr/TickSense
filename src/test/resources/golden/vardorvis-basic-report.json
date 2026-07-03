@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "activityType": "VARDORVIS",
+  "detectedActivityName": "Vardorvis",
+  "durationTicks": 19,
+  "durationMillis": 11400,
+  "finishReason": {
+    "type": "LEFT_REGION",
+    "confidence": 0.92,
+    "explanation": "Vardorvis ended because the player left the verified Vardorvis region.",
+    "evidence": [
+      "Region changed from verified Vardorvis context to 12345."
+    ],
+    "gameTick": 520
+  },
+  "confidence": 0.94,
+  "evidenceSummary": [
+    "Vardorvis verification status is VERIFIED.",
+    "Verified region 4405 contains the ranged-head cue.",
+    "Verified ranged-head projectile 9911 targeted the local player from NPC 12226.",
+    "Vardorvis damage attribution counts only local-player damage inside verified mechanic windows.",
+    "Verification status: VERIFIED",
+    "Verified mechanics: ranged-head-response"
+  ],
+  "metrics": {
+    "responseLatency": {
+      "displayName": "Response latency",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 2.0
+    },
+    "damageDuringOpportunities": {
+      "displayName": "Damage during opportunities",
+      "unit": "COUNT",
+      "lowerValueBetter": true,
+      "value": 18.0
+    },
+    "downtime": {
+      "displayName": "Downtime",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 5.0
+    },
+    "mechanicConfidence": {
+      "displayName": "Mechanic confidence",
+      "unit": "PERCENT",
+      "lowerValueBetter": false,
+      "value": 94.0
+    }
+  },
+  "opportunities": [
+    {
+      "type": "VARDORVIS_RANGED_HEAD_RESPONSE",
+      "label": "Ranged head response",
+      "status": "COMPLETED",
+      "gameTick": 503,
+      "latencyTicks": 2,
+      "latencyMillis": 1200,
+      "evidenceSummary": [
+        "Local player movement responded to the verified Vardorvis ranged-head cue."
+      ]
+    },
+    {
+      "type": "VARDORVIS_RANGED_HEAD_RESPONSE",
+      "label": "Ranged head response",
+      "status": "FAILED",
+      "gameTick": 513,
+      "latencyTicks": 3,
+      "latencyMillis": 1800,
+      "evidenceSummary": [
+        "Local player took 18 damage during the verified Vardorvis ranged-head window."
+      ]
+    }
+  ],
+  "tickLossBreakdown": {
+    "totalTickLoss": 5,
+    "categories": {
+      "Response latency": 2,
+      "Failed response windows": 3
+    }
+  },
+  "summaryLines": [
+    "Best execution: Ranged head response 2 ticks",
+    "Damage during opportunities: 18"
+  ]
+}

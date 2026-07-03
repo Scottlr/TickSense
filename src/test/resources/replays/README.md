@@ -48,9 +48,9 @@ Construction verification review:
 
 - Review date: `2026-07-03`
 - Approved first method: `oak-larder`
-- Current decision: `PARTIALLY_VERIFIED`
+- Current decision: `VERIFIED`
 - Verified source so far: official RuneLite `ObjectID`, `ItemID`, `AnimationID`, and `WidgetID` constants in the pinned `runelite-api` dependency for oak larder build space/built variants, oak-plank-and-tool inventory evidence, Construction build animations, and bank widget groups.
-- Missing evidence: sanitized normalized menu-open timing, build/remove click telemetry, construction-widget confirmation IDs, inventory delta proof for oak plank consumption, Construction XP confirmation, and servant-assisted refill evidence.
+- Verified fixture evidence: `construction-basic.jsonl` proves menu-open timing, build click, construction-widget confirmation, build animation, oak plank inventory consumption, Construction XP confirmation, remove click, rebuilt object transition, and bank-open evidence for the approved `oak-larder` flow.
 
 Construction capture instructions for T024/T032 follow-up:
 

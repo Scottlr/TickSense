@@ -9,6 +9,8 @@ import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.construction.ConstructionAnalyzer;
 import com.ticksense.activities.construction.ConstructionIds;
 import com.ticksense.activities.construction.ConstructionStrategy;
+import com.ticksense.activities.inferno.InfernoIds;
+import com.ticksense.activities.inferno.InfernoStrategy;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.gemmining.GemMiningAnalyzer;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
@@ -216,6 +218,10 @@ public final class TimelineReplayRunner
         if (VardorvisIds.verificationDecision().allowsNormalReports())
         {
             builder.register(new VardorvisStrategy());
+        }
+        if (InfernoIds.verificationDecision().allowsStrategyEnablement() && InfernoIds.verifiedRegionIds().length > 0)
+        {
+            builder.register(new InfernoStrategy());
         }
         return builder.build();
     }

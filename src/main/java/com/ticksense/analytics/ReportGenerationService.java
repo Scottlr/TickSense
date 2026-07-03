@@ -3,6 +3,7 @@ package com.ticksense.analytics;
 import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.construction.ConstructionAnalyzer;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.gemmining.GemMiningAnalyzer;
 import com.ticksense.core.ActivityId;
@@ -61,6 +62,10 @@ public final class ReportGenerationService
         if (session.getActivityType() == ActivityType.GEM_MINING)
         {
             return new GemMiningAnalyzer().buildReport(session, activityData, opportunityMarkers);
+        }
+        if (session.getActivityType() == ActivityType.CONSTRUCTION)
+        {
+            return new ConstructionAnalyzer().buildReport(session, activityData, opportunityMarkers);
         }
         throw new IllegalArgumentException("No report generator registered for " + session.getActivityType());
     }

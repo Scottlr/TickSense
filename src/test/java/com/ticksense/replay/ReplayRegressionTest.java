@@ -39,6 +39,16 @@ public class ReplayRegressionTest
     }
 
     @Test
+    public void constructionBasicMatchesGoldenReport() throws IOException
+    {
+        final TimelineReplayRunner replayRunner = new TimelineReplayRunner();
+
+        final ActivityReport report = replayRunner.run("replays/construction-basic.jsonl");
+
+        GoldenReportAssert.matches("golden/construction-basic-report.json", report);
+    }
+
+    @Test
     public void ambiguousEvidenceDoesNotCreateNormalReport() throws IOException
     {
         final TimelineReplayRunner replayRunner = new TimelineReplayRunner();

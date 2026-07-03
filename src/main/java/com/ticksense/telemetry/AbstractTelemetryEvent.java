@@ -1,5 +1,6 @@
 package com.ticksense.telemetry;
 
+import com.ticksense.common.ImmutableCollections;
 import com.ticksense.common.TextValues;
 import com.ticksense.core.EventTime;
 import java.util.List;
@@ -18,7 +19,7 @@ public abstract class AbstractTelemetryEvent implements TelemetryEvent
         this.type = TextValues.requireText(type, "type");
         this.category = Objects.requireNonNull(category, "category");
         this.time = Objects.requireNonNull(time, "time");
-        this.tags = TelemetryCollections.immutableStringMap(tags);
+        this.tags = ImmutableCollections.immutableMap(tags);
     }
 
     @Override
@@ -57,11 +58,11 @@ public abstract class AbstractTelemetryEvent implements TelemetryEvent
 
     protected static <T> List<T> immutableList(List<T> source)
     {
-        return TelemetryCollections.immutableList(source);
+        return ImmutableCollections.immutableList(source);
     }
 
     protected static Map<String, String> immutableMap(Map<String, String> source)
     {
-        return TelemetryCollections.immutableStringMap(source);
+        return ImmutableCollections.immutableMap(source);
     }
 }

@@ -7,5 +7,9 @@ public enum ActivityType
     CONSTRUCTION,
     VARDORVIS,
     INFERNO,
+    SCURRIUS,
+    PHANTOM_MUSPAH,
+    HUNLLEF,
+    CORRUPTED_GAUNTLET,
     UNKNOWN
 }

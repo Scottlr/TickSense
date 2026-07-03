@@ -10,6 +10,8 @@ import com.ticksense.activities.ActivityDefinition;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategy;
+import com.ticksense.activities.inferno.InfernoStrategy;
+import com.ticksense.activities.inferno.InfernoVerificationDecision;
 import com.ticksense.activities.OpportunitySink;
 import com.ticksense.activities.vardorvis.VardorvisStrategy;
 import com.ticksense.activities.vardorvis.VardorvisVerificationDecision;
@@ -58,6 +60,16 @@ public class ReplayRegressionTest
         final ActivityReport report = replayRunner.run("replays/vardorvis-basic.jsonl");
 
         GoldenReportAssert.matches("golden/vardorvis-basic-report.json", report);
+    }
+
+    @Test
+    public void infernoWaveBasicMatchesGoldenReport() throws IOException
+    {
+        final TimelineReplayRunner replayRunner = new TimelineReplayRunner(infernoRegistry());
+
+        final ActivityReport report = replayRunner.run("replays/inferno-wave-basic.jsonl");
+
+        GoldenReportAssert.matches("golden/inferno-wave-basic-report.json", report);
     }
 
     @Test
@@ -242,6 +254,26 @@ public class ReplayRegressionTest
                 new int[0],
                 new int[0],
                 new int[] {4405}))
+            .build();
+    }
+
+    private static ActivityRegistry infernoRegistry()
+    {
+        return ActivityRegistry.builder()
+            .register(new InfernoStrategy(
+                InfernoVerificationDecision.verified(
+                    "2026-07-03",
+                    InfernoVerificationDecision.EvidenceStatus.VERIFIED,
+                    InfernoVerificationDecision.EvidenceStatus.VERIFIED,
+                    InfernoVerificationDecision.EvidenceStatus.BLOCKED,
+                    InfernoVerificationDecision.EvidenceStatus.VERIFIED,
+                    InfernoVerificationDecision.EvidenceStatus.VERIFIED,
+                    Collections.singletonList("Synthetic verified Inferno wave fixture."),
+                    Collections.singletonList("Replay-only verified Inferno strategy fixture.")),
+                new int[] {7674, 7675},
+                new int[] {7691},
+                new int[] {2434},
+                new int[] {9043}))
             .build();
     }
 }

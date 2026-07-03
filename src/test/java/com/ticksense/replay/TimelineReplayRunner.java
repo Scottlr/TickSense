@@ -9,6 +9,7 @@ import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.construction.ConstructionAnalyzer;
 import com.ticksense.activities.construction.ConstructionIds;
 import com.ticksense.activities.construction.ConstructionStrategy;
+import com.ticksense.activities.inferno.InfernoAnalyzer;
 import com.ticksense.activities.inferno.InfernoIds;
 import com.ticksense.activities.inferno.InfernoStrategy;
 import com.ticksense.activities.OpportunityMarker;
@@ -134,6 +135,10 @@ public final class TimelineReplayRunner
         if (session.getActivityType() == ActivityType.VARDORVIS)
         {
             return new VardorvisAnalyzer().buildReport(session, reportData, opportunityMarkers);
+        }
+        if (session.getActivityType() == ActivityType.INFERNO)
+        {
+            return new InfernoAnalyzer().buildReport(session, reportData, opportunityMarkers);
         }
         throw new IllegalArgumentException("No replay analyzer registered for " + session.getActivityType());
     }

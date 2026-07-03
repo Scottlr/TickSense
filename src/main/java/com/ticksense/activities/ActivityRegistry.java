@@ -3,7 +3,6 @@ package com.ticksense.activities;
 import com.ticksense.core.ActivityType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -19,7 +18,7 @@ public final class ActivityRegistry
 
     private ActivityRegistry(List<ActivityStrategy> strategies)
     {
-        this.strategies = Collections.unmodifiableList(new ArrayList<>(strategies));
+        this.strategies = ActivityCollections.immutableList(strategies);
         this.strategiesByType = indexByType(strategies);
     }
 

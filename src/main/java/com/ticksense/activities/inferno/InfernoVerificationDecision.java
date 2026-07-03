@@ -170,6 +170,33 @@ public final class InfernoVerificationDecision
         return prayerEvidenceStatus == EvidenceStatus.VERIFIED;
     }
 
+    public boolean allowsWaveSpans()
+    {
+        return waveEvidenceStatus == EvidenceStatus.VERIFIED;
+    }
+
+    public boolean allowsNibblerWindows()
+    {
+        return nibblerEvidenceStatus == EvidenceStatus.VERIFIED;
+    }
+
+    public boolean allowsSupplyUsageTracking()
+    {
+        return supplyEvidenceStatus == EvidenceStatus.VERIFIED;
+    }
+
+    public boolean allowsDeathTimelineEvidence()
+    {
+        return deathEvidenceStatus == EvidenceStatus.VERIFIED;
+    }
+
+    public boolean allowsStrategyEnablement()
+    {
+        return status == Status.VERIFIED
+            && allowsWaveSpans()
+            && allowsNibblerWindows();
+    }
+
     private static List<String> immutableCopy(List<String> values, String fieldName)
     {
         Objects.requireNonNull(values, fieldName);

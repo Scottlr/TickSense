@@ -142,7 +142,7 @@
 | T034 | [x] | Vardorvis Strategy and Opportunities | Detect verified Vardorvis mechanic opportunities without live solving. |  | T008, T011, T016, T025 | [`tasks/T034.md`](tasks/T034.md) |
 | T035 | [x] | Vardorvis Metrics and Golden Report | Generate Vardorvis reports and golden replay coverage. |  | T017, T019, T034 | [`tasks/T035.md`](tasks/T035.md) |
 | T026 | [x] | Inferno Registry and Verification Fixtures | Verify Inferno wave, NPC, prayer, supply, and death evidence. |  | T006, T010, T020 | [`tasks/T026.md`](tasks/T026.md) |
-| T036 | [ ] | Inferno Strategy and Spans | Detect verified Inferno waves, nested spans, and opportunities without live solving. |  | T008, T011, T016, T026 | [`tasks/T036.md`](tasks/T036.md) |
+| T036 | [x] | Inferno Strategy and Spans | Detect verified Inferno waves, nested spans, and opportunities without live solving. |  | T008, T011, T016, T026 | [`tasks/T036.md`](tasks/T036.md) |
 | T037 | [ ] | Inferno Metrics and Golden Report | Generate Inferno wave/attempt reports and golden replay coverage. |  | T017, T019, T036 | [`tasks/T037.md`](tasks/T037.md) |
 
 ## Dependency Graph

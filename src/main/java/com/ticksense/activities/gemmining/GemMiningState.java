@@ -15,6 +15,8 @@ import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.telemetry.TelemetryEvent;
+import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -246,7 +248,7 @@ final class GemMiningState
         opportunityLifecycle.cancelOpenOpportunities(
             activeActivityId,
             endTime,
-            Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+            Collections.singletonList(new OpportunityEvidence(endTime, RegionInstanceTelemetryEvent.TYPE, EvidenceStrength.CONFIRMING, detail)));
         reusableExecutionTrackers.cancelOpenOpportunities(endTime, detail);
     }
 
@@ -296,7 +298,7 @@ final class GemMiningState
             RESPAWN_TO_CLICK,
             availableRock.availableSince,
             cycleContext(availableRock));
-        opportunityLifecycle.complete(respawn.getInstanceId(), pendingClick.time, cycleEvidence("player.action", "Mine click on available gem rock."));
+        opportunityLifecycle.complete(respawn.getInstanceId(), pendingClick.time, cycleEvidence(PlayerActionTelemetryEvent.TYPE, "Mine click on available gem rock."));
 
         final int idleTicks = Math.max(0, pendingClick.time.getGameTick() - availableRock.availableSince.getGameTick());
         if (idleTicks > 0)
@@ -305,7 +307,7 @@ final class GemMiningState
                 IDLE,
                 availableRock.availableSince,
                 cycleContext(availableRock));
-            opportunityLifecycle.complete(idle.getInstanceId(), pendingClick.time, cycleEvidence("player.action", "Rock stayed available before the next mine click."));
+            opportunityLifecycle.complete(idle.getInstanceId(), pendingClick.time, cycleEvidence(PlayerActionTelemetryEvent.TYPE, "Rock stayed available before the next mine click."));
             totalIdleTicks += idleTicks;
         }
 

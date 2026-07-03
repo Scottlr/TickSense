@@ -10,6 +10,7 @@ import com.ticksense.activities.execution.ExecutionTracker;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -196,7 +197,7 @@ final class AraxxorExecutionTracker implements ExecutionTracker
         {
             return;
         }
-        opportunityLifecycle.cancelOpenOpportunities(activeActivityId, time, evidence("region.instance", time, detail));
+        opportunityLifecycle.cancelOpenOpportunities(activeActivityId, time, evidence(RegionInstanceTelemetryEvent.TYPE, time, detail));
         spiderEngagement = null;
         bossReengagement = null;
         targetReengagement = null;

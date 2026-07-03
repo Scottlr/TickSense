@@ -3,6 +3,7 @@ package com.ticksense.replay;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
@@ -43,7 +44,7 @@ public final class TestEvents
                 location,
                 "GAME_OBJECT",
                 Arrays.asList("Mine", "Prospect"),
-                "AVAILABLE"));
+                StateChanges.AVAILABLE));
     }
 
     public TelemetryEnvelope depletedRock(int tick, int objectId, WorldLocation location)
@@ -58,7 +59,7 @@ public final class TestEvents
                 location,
                 "GAME_OBJECT",
                 Arrays.asList("Mine", "Prospect"),
-                "DEPLETED"));
+                StateChanges.DEPLETED));
     }
 
     public TelemetryEnvelope mineClick(int tick, WorldLocation location)

@@ -169,7 +169,7 @@ final class AraxxorState
         {
             executionTracker.completeSpiderEngagement(
                 event.getTime(),
-                "player.action",
+                PlayerActionTelemetryEvent.TYPE,
                 "Local player attacked the verified Araxxor spider.");
             lastLocalTarget = TargetType.SPIDER;
             lastLocalTargetNpcId = npcId;
@@ -185,11 +185,11 @@ final class AraxxorState
         lastBossSeenTick = event.getTime().getGameTick();
         executionTracker.completeBossReengagement(
             event.getTime(),
-            "player.action",
+            PlayerActionTelemetryEvent.TYPE,
             "Local player re-engaged verified Araxxor with an attack click.");
         executionTracker.completeTargetReengagement(
             event.getTime(),
-            "player.action",
+            PlayerActionTelemetryEvent.TYPE,
             "Local player recovered Araxxor target with an attack click.");
         lastLocalTarget = TargetType.BOSS;
         lastLocalTargetNpcId = npcId;

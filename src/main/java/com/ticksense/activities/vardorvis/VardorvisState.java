@@ -19,6 +19,7 @@ import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.MovementTelemetryEvent;
 import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
 import com.ticksense.telemetry.events.ProjectileTelemetryEvent;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -182,7 +183,7 @@ final class VardorvisState
             event.getTime(),
             Collections.singletonList(new OpportunityEvidence(
                 event.getTime(),
-                "player.action",
+                PlayerActionTelemetryEvent.TYPE,
                 EvidenceStrength.CONFIRMING,
                 "Player action responded to the verified Vardorvis ranged-head cue.")));
         rangedHeadResponseCount++;
@@ -216,7 +217,7 @@ final class VardorvisState
         opportunityLifecycle.cancelOpenOpportunities(
             activeActivityId,
             endTime,
-            Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+            Collections.singletonList(new OpportunityEvidence(endTime, RegionInstanceTelemetryEvent.TYPE, EvidenceStrength.CONFIRMING, detail)));
         reusableExecutionTrackers.cancelOpenOpportunities(endTime, detail);
         rangedHeadOpportunity = null;
     }

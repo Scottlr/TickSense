@@ -13,6 +13,7 @@ import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
@@ -37,7 +38,7 @@ public class ConstructionStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(400, playerLocation()));
-        harness.accept(buildSpotEvent(400, "AVAILABLE"));
+        harness.accept(buildSpotEvent(400, StateChanges.AVAILABLE));
         harness.accept(menuOpenedEvent(401, "Build", "Larder space", buildLocation()));
         harness.accept(buildClickEvent(402));
         harness.accept(constructionWidgetEvent(403, 458, 12, "Oak larder"));
@@ -54,7 +55,7 @@ public class ConstructionStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(400, playerLocation()));
-        harness.accept(buildSpotEvent(400, "AVAILABLE"));
+        harness.accept(buildSpotEvent(400, StateChanges.AVAILABLE));
         harness.accept(menuOpenedEvent(401, "Build", "Larder space", buildLocation()));
         harness.accept(buildClickEvent(402));
         harness.accept(constructionWidgetEvent(403, 458, 12, "Oak larder"));
@@ -64,7 +65,7 @@ public class ConstructionStrategyTest
         harness.accept(builtLarderEvent(407));
         harness.accept(menuOpenedEvent(415, "Remove", "Oak larder", buildLocation()));
         harness.accept(removeClickEvent(416));
-        harness.accept(buildSpotEvent(417, "AVAILABLE"));
+        harness.accept(buildSpotEvent(417, StateChanges.AVAILABLE));
         harness.accept(bankWidgetEvent(439));
 
         assertFalse(harness.engine.getActiveSession().isPresent());
@@ -91,7 +92,7 @@ public class ConstructionStrategyTest
         entries.add("Build <col=ff9040>Oak larder");
 
         harness.accept(regionEvent(400, playerLocation()));
-        harness.accept(buildSpotEvent(400, "AVAILABLE"));
+        harness.accept(buildSpotEvent(400, StateChanges.AVAILABLE));
         harness.accept(envelope(
             "menu-open-mutable",
             new MenuInteractionTelemetryEvent(
@@ -176,7 +177,7 @@ public class ConstructionStrategyTest
                 buildLocation(),
                 "GAME_OBJECT",
                 Collections.singletonList("Remove"),
-                "BUILT"));
+                StateChanges.BUILT));
     }
 
     private static TelemetryEnvelope menuOpenedEvent(int tick, String option, String target, WorldLocation location)

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
@@ -260,7 +261,7 @@ public class RuneLiteEventAdapterTest
             from,
             "GAME_OBJECT",
             Arrays.asList("Mine", "Prospect"),
-            "AVAILABLE",
+            StateChanges.AVAILABLE,
             envelope("ObjectSnapshot")).get().getEvent();
         assertEquals(1001, object.getObjectId());
         assertEquals(Arrays.asList("Mine", "Prospect"), object.getActions());

@@ -14,6 +14,7 @@ import com.ticksense.activities.execution.equipment.GearSwitchTracker;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
@@ -165,7 +166,7 @@ public class GemMiningStrategyTest
                 location,
                 "GAME_OBJECT",
                 Arrays.asList("Mine", "Prospect"),
-                "AVAILABLE"));
+                StateChanges.AVAILABLE));
     }
 
     private static TelemetryEnvelope depletedRockEvent(int tick, int objectId, WorldLocation location)
@@ -180,7 +181,7 @@ public class GemMiningStrategyTest
                 location,
                 "GAME_OBJECT",
                 Arrays.asList("Mine", "Prospect"),
-                "DEPLETED"));
+                StateChanges.DEPLETED));
     }
 
     private static TelemetryEnvelope mineClickEvent(int tick, WorldLocation location)

@@ -23,6 +23,7 @@ import com.ticksense.telemetry.events.ProjectileTelemetryEvent;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import com.ticksense.telemetry.events.StatChangedTelemetryEvent;
 import com.ticksense.telemetry.events.WidgetTelemetryEvent;
+import com.ticksense.telemetry.StateChanges;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -114,7 +115,7 @@ public class TelemetryJsonTest
                 location(),
                 "GAME_OBJECT",
                 Arrays.asList("Mine", "Prospect"),
-                "AVAILABLE"),
+                StateChanges.AVAILABLE),
             new NpcStateTelemetryEvent(
                 time(),
                 tags("NpcChanged"),

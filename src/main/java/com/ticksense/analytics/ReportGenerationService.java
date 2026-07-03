@@ -4,11 +4,7 @@ import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.ActivityMarkerTypes;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
-import com.ticksense.activities.construction.ConstructionAnalyzer;
-import com.ticksense.activities.inferno.InfernoAnalyzer;
 import com.ticksense.activities.OpportunityMarker;
-import com.ticksense.activities.gemmining.GemMiningAnalyzer;
-import com.ticksense.activities.vardorvis.VardorvisAnalyzer;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
@@ -24,24 +20,21 @@ import java.util.Optional;
 
 public final class ReportGenerationService
 {
-    private static final Map<ActivityType, ReportBuilder> REPORT_BUILDERS = Map.of(
-        ActivityType.GEM_MINING, new GemMiningAnalyzer()::buildReport,
-        ActivityType.CONSTRUCTION, new ConstructionAnalyzer()::buildReport,
-        ActivityType.VARDORVIS, new VardorvisAnalyzer()::buildReport,
-        ActivityType.INFERNO, new InfernoAnalyzer()::buildReport);
-
     private final TimelineRepository timelineRepository;
     private final ReportRepository reportRepository;
     private final ActivityStrategyEngine strategyEngine;
+    private final Map<ActivityType, ReportBuilder> reportBuilders;
 
     public ReportGenerationService(
         TimelineRepository timelineRepository,
         ReportRepository reportRepository,
-        ActivityStrategyEngine strategyEngine)
+        ActivityStrategyEngine strategyEngine,
+        Map<ActivityType, ReportBuilder> reportBuilders)
     {
         this.timelineRepository = Objects.requireNonNull(timelineRepository, "timelineRepository");
         this.reportRepository = Objects.requireNonNull(reportRepository, "reportRepository");
         this.strategyEngine = Objects.requireNonNull(strategyEngine, "strategyEngine");
+        this.reportBuilders = Collections.unmodifiableMap(new java.util.LinkedHashMap<>(Objects.requireNonNull(reportBuilders, "reportBuilders")));
     }
 
     public Optional<ActivityReport> generateForFinishedMarker(ActivityMarker marker) throws IOException
@@ -69,7 +62,7 @@ public final class ReportGenerationService
         ActivityReportData activityData,
         List<OpportunityMarker> opportunityMarkers)
     {
-        final ReportBuilder reportBuilder = REPORT_BUILDERS.get(session.getActivityType());
+        final ReportBuilder reportBuilder = reportBuilders.get(session.getActivityType());
         if (reportBuilder == null)
         {
             throw new IllegalArgumentException("No report generator registered for " + session.getActivityType());
@@ -102,13 +95,5 @@ public final class ReportGenerationService
             }
         }
         return Optional.empty();
-    }
-
-    private interface ReportBuilder
-    {
-        ActivityReport build(
-            ActivitySession session,
-            ActivityReportData activityData,
-            List<OpportunityMarker> opportunityMarkers);
     }
 }

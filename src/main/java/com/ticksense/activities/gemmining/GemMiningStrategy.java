@@ -26,15 +26,12 @@ import java.util.Optional;
 
 public final class GemMiningStrategy implements ActivityStrategy
 {
-    private static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.GEM_MINING, "Gem Mining", 25, 0.75D, false);
-
     private final GemMiningState state = new GemMiningState();
 
     @Override
     public ActivityDefinition getDefinition()
     {
-        return DEFINITION;
+        return GemMiningModule.DEFINITION;
     }
 
     @Override

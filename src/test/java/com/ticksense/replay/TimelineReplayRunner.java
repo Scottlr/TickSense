@@ -2,26 +2,15 @@ package com.ticksense.replay;
 
 import com.ticksense.activities.ActivityDiagnostic;
 import com.ticksense.activities.ActivityMarker;
+import com.ticksense.activities.ActivityModule;
+import com.ticksense.activities.ActivityModuleCatalog;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategy;
 import com.ticksense.activities.ActivityStrategyEngine;
-import com.ticksense.activities.araxxor.AraxxorIds;
-import com.ticksense.activities.araxxor.AraxxorStrategy;
-import com.ticksense.activities.araxxor.AraxxorVerificationDecision;
-import com.ticksense.activities.construction.ConstructionAnalyzer;
-import com.ticksense.activities.construction.ConstructionIds;
-import com.ticksense.activities.construction.ConstructionStrategy;
-import com.ticksense.activities.inferno.InfernoAnalyzer;
-import com.ticksense.activities.inferno.InfernoIds;
-import com.ticksense.activities.inferno.InfernoStrategy;
 import com.ticksense.activities.OpportunityMarker;
-import com.ticksense.activities.gemmining.GemMiningAnalyzer;
-import com.ticksense.activities.gemmining.GemMiningStrategy;
-import com.ticksense.activities.vardorvis.VardorvisAnalyzer;
-import com.ticksense.activities.vardorvis.VardorvisIds;
-import com.ticksense.activities.vardorvis.VardorvisStrategy;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.analytics.ReportBuilder;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
@@ -43,15 +32,27 @@ import java.util.Optional;
 public final class TimelineReplayRunner
 {
     private final ActivityRegistry registry;
+    private final Map<ActivityType, ReportBuilder> reportBuilders;
 
     public TimelineReplayRunner()
     {
-        this(defaultRegistry());
+        this(ActivityModuleCatalog.enabledModules(ActivityModuleCatalog.productionModules()));
+    }
+
+    public TimelineReplayRunner(List<ActivityModule> modules)
+    {
+        this(registryFor(modules), ActivityModuleCatalog.reportBuilders(modules));
     }
 
     public TimelineReplayRunner(ActivityRegistry registry)
     {
+        this(registry, ActivityModuleCatalog.reportBuilders(ActivityModuleCatalog.productionModules()));
+    }
+
+    public TimelineReplayRunner(ActivityRegistry registry, Map<ActivityType, ReportBuilder> reportBuilders)
+    {
         this.registry = Objects.requireNonNull(registry, "registry");
+        this.reportBuilders = new LinkedHashMap<>(Objects.requireNonNull(reportBuilders, "reportBuilders"));
     }
 
     public ActivityReport run(String resourcePath) throws IOException
@@ -127,23 +128,12 @@ public final class TimelineReplayRunner
         ActivityReportData reportData,
         List<OpportunityMarker> opportunityMarkers)
     {
-        if (session.getActivityType() == ActivityType.GEM_MINING)
+        final ReportBuilder builder = reportBuilders.get(session.getActivityType());
+        if (builder == null)
         {
-            return new GemMiningAnalyzer().buildReport(session, reportData, opportunityMarkers);
+            throw new IllegalArgumentException("No replay report builder registered for " + session.getActivityType());
         }
-        if (session.getActivityType() == ActivityType.CONSTRUCTION)
-        {
-            return new ConstructionAnalyzer().buildReport(session, reportData, opportunityMarkers);
-        }
-        if (session.getActivityType() == ActivityType.VARDORVIS)
-        {
-            return new VardorvisAnalyzer().buildReport(session, reportData, opportunityMarkers);
-        }
-        if (session.getActivityType() == ActivityType.INFERNO)
-        {
-            return new InfernoAnalyzer().buildReport(session, reportData, opportunityMarkers);
-        }
-        throw new IllegalArgumentException("No replay analyzer registered for " + session.getActivityType());
+        return builder.build(session, reportData, opportunityMarkers);
     }
 
     private static List<OpportunityMarker> markersFor(ActivityId activityId, List<OpportunityMarker> allMarkers)
@@ -215,27 +205,11 @@ public final class TimelineReplayRunner
         return Collections.unmodifiableList(copied);
     }
 
-    private static ActivityRegistry defaultRegistry()
+    private static ActivityRegistry registryFor(List<ActivityModule> modules)
     {
-        final ActivityRegistry.Builder builder = ActivityRegistry.builder()
-            .register(new GemMiningStrategy());
-        if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
-        {
-            builder.register(new ConstructionStrategy());
-        }
-        if (AraxxorVerificationDecision.current().allowsNormalStrategyEnablement() && AraxxorIds.verifiedRegionIds().length > 0)
-        {
-            builder.register(new AraxxorStrategy());
-        }
-        if (VardorvisIds.verificationDecision().allowsNormalReports())
-        {
-            builder.register(new VardorvisStrategy());
-        }
-        if (InfernoIds.verificationDecision().allowsStrategyEnablement() && InfernoIds.verifiedRegionIds().length > 0)
-        {
-            builder.register(new InfernoStrategy());
-        }
-        return builder.build();
+        return ActivityRegistry.builder()
+            .registerFactory(ActivityModuleCatalog.strategyFactory(modules))
+            .build();
     }
 
     public static final class ReplayResult

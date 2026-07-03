@@ -23,9 +23,6 @@ import java.util.Optional;
 
 public final class AraxxorStrategy implements ActivityStrategy
 {
-    private static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.ARAXXOR, "Araxxor", 40, 0.75D, true);
-
     private final AraxxorState state;
 
     public AraxxorStrategy()
@@ -53,7 +50,7 @@ public final class AraxxorStrategy implements ActivityStrategy
     @Override
     public ActivityDefinition getDefinition()
     {
-        return DEFINITION;
+        return AraxxorModule.DEFINITION;
     }
 
     @Override

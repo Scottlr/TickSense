@@ -2,14 +2,18 @@ package com.ticksense.runelite;
 
 import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.ActivityMarkerTypes;
+import com.ticksense.activities.ActivityModule;
+import com.ticksense.activities.ActivityModuleCatalog;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.ActivityStrategyFactory;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.common.ImmutableCollections;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.analytics.ReportBuilder;
 import com.ticksense.analytics.ReportGenerationService;
 import com.ticksense.core.ActivitySession;
+import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
 import com.ticksense.storage.JsonlTimelineRepository;
 import com.ticksense.storage.ReportRepository;
@@ -45,14 +49,30 @@ public final class TickSenseServices implements AutoCloseable
         TelemetryBus telemetryBus,
         String sessionId,
         ReportRepository reportRepository,
-        ActivityStrategyFactory strategyFactory,
+        List<ActivityModule> activityModules,
         boolean diagnosticsEnabled) throws IOException
     {
         return create(
             telemetryBus,
             new JsonlTimelineRepository(sessionId),
             reportRepository,
-            strategyFactory,
+            activityModules,
+            diagnosticsEnabled);
+    }
+
+    public static TickSenseServices create(
+        TelemetryBus telemetryBus,
+        TimelineRepository timelineRepository,
+        ReportRepository reportRepository,
+        List<ActivityModule> activityModules,
+        boolean diagnosticsEnabled)
+    {
+        return create(
+            telemetryBus,
+            timelineRepository,
+            reportRepository,
+            ActivityModuleCatalog.strategyFactory(activityModules),
+            ActivityModuleCatalog.reportBuilders(activityModules),
             diagnosticsEnabled);
     }
 
@@ -61,6 +81,7 @@ public final class TickSenseServices implements AutoCloseable
         TimelineRepository timelineRepository,
         ReportRepository reportRepository,
         ActivityStrategyFactory strategyFactory,
+        Map<ActivityType, ReportBuilder> reportBuilders,
         boolean diagnosticsEnabled)
     {
         final TelemetryBus normalizedTelemetryBus = Objects.requireNonNull(telemetryBus, "telemetryBus");
@@ -77,7 +98,7 @@ public final class TickSenseServices implements AutoCloseable
             markerSinks::appendOpportunityMarker,
             diagnosticsEnabled);
         final ReportGenerationService reportGenerationService =
-            new ReportGenerationService(normalizedTimelineRepository, normalizedReportRepository, strategyEngine);
+            new ReportGenerationService(normalizedTimelineRepository, normalizedReportRepository, strategyEngine, reportBuilders);
         markerSinks.setReportGenerationService(reportGenerationService);
 
         final TickSenseServices services = new TickSenseServices(

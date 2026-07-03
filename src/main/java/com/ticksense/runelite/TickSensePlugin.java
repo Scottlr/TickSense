@@ -1,19 +1,10 @@
 package com.ticksense.runelite;
 
 import com.google.inject.Provides;
+import com.ticksense.activities.ActivityModule;
+import com.ticksense.activities.ActivityModuleCatalog;
 import com.ticksense.activities.ActivityStrategyFactory;
-import com.ticksense.activities.araxxor.AraxxorIds;
-import com.ticksense.activities.araxxor.AraxxorStrategy;
-import com.ticksense.activities.araxxor.AraxxorVerificationDecision;
 import com.ticksense.analytics.TrendAnalyzer;
-import com.ticksense.activities.construction.ConstructionIds;
-import com.ticksense.activities.construction.ConstructionStrategy;
-import com.ticksense.activities.gemmining.GemMiningIds;
-import com.ticksense.activities.gemmining.GemMiningStrategy;
-import com.ticksense.activities.inferno.InfernoIds;
-import com.ticksense.activities.inferno.InfernoStrategy;
-import com.ticksense.activities.vardorvis.VardorvisIds;
-import com.ticksense.activities.vardorvis.VardorvisStrategy;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
@@ -238,33 +229,15 @@ public class TickSensePlugin extends Plugin
     }
 
     @Provides
-    ActivityStrategyFactory provideActivityStrategyFactory()
+    List<ActivityModule> provideActivityModules()
     {
-        return () ->
-        {
-            final List<com.ticksense.activities.ActivityStrategy> strategies = new java.util.ArrayList<>();
-            if (GemMiningIds.verificationDecision().allowsStrategyEnablement())
-            {
-                strategies.add(new GemMiningStrategy());
-            }
-            if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
-            {
-                strategies.add(new ConstructionStrategy());
-            }
-            if (AraxxorVerificationDecision.current().allowsNormalStrategyEnablement() && AraxxorIds.verifiedRegionIds().length > 0)
-            {
-                strategies.add(new AraxxorStrategy());
-            }
-            if (VardorvisIds.verificationDecision().allowsNormalReports())
-            {
-                strategies.add(new VardorvisStrategy());
-            }
-            if (InfernoIds.verificationDecision().allowsStrategyEnablement() && InfernoIds.verifiedRegionIds().length > 0)
-            {
-                strategies.add(new InfernoStrategy());
-            }
-            return strategies;
-        };
+        return ActivityModuleCatalog.productionModules();
+    }
+
+    @Provides
+    ActivityStrategyFactory provideActivityStrategyFactory(List<ActivityModule> activityModules)
+    {
+        return ActivityModuleCatalog.strategyFactory(activityModules);
     }
 
     @Provides
@@ -272,7 +245,7 @@ public class TickSensePlugin extends Plugin
         TelemetryBus telemetryBus,
         SessionTelemetryContext sessionTelemetryContext,
         ReportRepository reportRepository,
-        ActivityStrategyFactory strategyFactory,
+        List<ActivityModule> activityModules,
         TickSenseConfig tickSenseConfig)
     {
         try
@@ -281,7 +254,7 @@ public class TickSensePlugin extends Plugin
                 telemetryBus,
                 sessionTelemetryContext.getSessionId(),
                 reportRepository,
-                strategyFactory,
+                activityModules,
                 tickSenseConfig.debugActivityDiagnostics());
         }
         catch (IOException ex)

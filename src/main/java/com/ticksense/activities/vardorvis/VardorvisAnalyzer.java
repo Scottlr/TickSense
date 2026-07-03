@@ -10,17 +10,18 @@ import com.ticksense.analytics.AnalysisMath;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
+import com.ticksense.analytics.MetricValueMap;
 import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,15 +58,17 @@ public final class VardorvisAnalyzer
         final double downtimeValue = completedLatencyTicks + failedWindowTicks;
         final double mechanicConfidenceValue = ReportMetadata.confidence(normalizedSession) * 100.0D;
 
-        final Map<String, MetricValue> metrics = new LinkedHashMap<>();
-        metrics.put(RESPONSE_LATENCY.getKey(), new MetricValue(RESPONSE_LATENCY, AnalysisMath.average(responseLatencies)));
-        metrics.put(DAMAGE_DURING_OPPORTUNITIES.getKey(), new MetricValue(DAMAGE_DURING_OPPORTUNITIES, damageDuringOpportunities));
-        metrics.put(DOWNTIME.getKey(), new MetricValue(DOWNTIME, downtimeValue));
-        metrics.put(MECHANIC_CONFIDENCE.getKey(), new MetricValue(MECHANIC_CONFIDENCE, mechanicConfidenceValue));
+        final Map<String, MetricValue> metrics = MetricValueMap.builder()
+            .put(RESPONSE_LATENCY, AnalysisMath.average(responseLatencies))
+            .put(DAMAGE_DURING_OPPORTUNITIES, damageDuringOpportunities)
+            .put(DOWNTIME, downtimeValue)
+            .put(MECHANIC_CONFIDENCE, mechanicConfidenceValue)
+            .build();
 
-        final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
-        tickLossCategories.put("Response latency", completedLatencyTicks);
-        tickLossCategories.put("Failed response windows", failedWindowTicks);
+        final Map<String, Integer> tickLossCategories = TickLossCategories.builder()
+            .put("Response latency", completedLatencyTicks)
+            .put("Failed response windows", failedWindowTicks)
+            .build();
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(completedLatencyTicks + failedWindowTicks, tickLossCategories);
 
         return new ActivityAnalysisData(

@@ -10,12 +10,14 @@ import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
+import com.ticksense.analytics.MetricValueMap;
 import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
@@ -24,7 +26,6 @@ import com.ticksense.core.FinishReasonType;
 import com.ticksense.core.EventTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,18 +65,20 @@ public final class GemMiningAnalyzer
         final double cycleConsistencyValue = averageDeviation(rockResponseLatencies);
         final ExecutionScore executionScore = buildExecutionScore(idleTicks, redundantClicks, rockResponseValue, movementLatencyValue, cycleConsistencyValue);
 
-        final Map<String, MetricValue> metrics = new LinkedHashMap<>();
-        metrics.put(ROCK_RESPONSE.getKey(), new MetricValue(ROCK_RESPONSE, rockResponseValue));
-        metrics.put(IDLE_TICKS.getKey(), new MetricValue(IDLE_TICKS, idleTicks));
-        metrics.put(REDUNDANT_CLICKS.getKey(), new MetricValue(REDUNDANT_CLICKS, redundantClicks));
-        metrics.put(MOVEMENT_LATENCY.getKey(), new MetricValue(MOVEMENT_LATENCY, movementLatencyValue));
-        metrics.put(CYCLE_CONSISTENCY.getKey(), new MetricValue(CYCLE_CONSISTENCY, cycleConsistencyValue));
-        metrics.put(EXECUTION_SCORE.getKey(), new MetricValue(EXECUTION_SCORE, executionScore.getValue()));
+        final Map<String, MetricValue> metrics = MetricValueMap.builder()
+            .put(ROCK_RESPONSE, rockResponseValue)
+            .put(IDLE_TICKS, idleTicks)
+            .put(REDUNDANT_CLICKS, redundantClicks)
+            .put(MOVEMENT_LATENCY, movementLatencyValue)
+            .put(CYCLE_CONSISTENCY, cycleConsistencyValue)
+            .put(EXECUTION_SCORE, executionScore.getValue())
+            .build();
 
-        final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
-        tickLossCategories.put("Idle ticks", idleTicks);
-        tickLossCategories.put("Redundant clicks", redundantClicks);
-        tickLossCategories.put("Movement latency", (int) Math.round(AnalysisMath.sum(movementLatencies)));
+        final Map<String, Integer> tickLossCategories = TickLossCategories.builder()
+            .put("Idle ticks", idleTicks)
+            .put("Redundant clicks", redundantClicks)
+            .putRounded("Movement latency", AnalysisMath.sum(movementLatencies))
+            .build();
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(
             idleTicks + redundantClicks + (int) Math.round(AnalysisMath.sum(movementLatencies)),
             tickLossCategories);

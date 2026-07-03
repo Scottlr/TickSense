@@ -10,18 +10,19 @@ import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
+import com.ticksense.analytics.MetricValueMap;
 import com.ticksense.analytics.OpportunityMarkerResolver;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
+import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
 import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -60,17 +61,19 @@ public final class ConstructionAnalyzer
         final double inventoryCycleValue = AnalysisMath.average(inventoryCycleLatencies);
         final ExecutionScore executionScore = buildExecutionScore(menuLatencyValue, cadenceValue, bankingValue, inventoryCycleValue);
 
-        final Map<String, MetricValue> metrics = new LinkedHashMap<>();
-        metrics.put(MENU_LATENCY.getKey(), new MetricValue(MENU_LATENCY, menuLatencyValue));
-        metrics.put(BUILD_REMOVE_CADENCE.getKey(), new MetricValue(BUILD_REMOVE_CADENCE, cadenceValue));
-        metrics.put(BANKING_DOWNTIME.getKey(), new MetricValue(BANKING_DOWNTIME, bankingValue));
-        metrics.put(INVENTORY_CYCLE.getKey(), new MetricValue(INVENTORY_CYCLE, inventoryCycleValue));
-        metrics.put(EXECUTION_SCORE.getKey(), new MetricValue(EXECUTION_SCORE, executionScore.getValue()));
+        final Map<String, MetricValue> metrics = MetricValueMap.builder()
+            .put(MENU_LATENCY, menuLatencyValue)
+            .put(BUILD_REMOVE_CADENCE, cadenceValue)
+            .put(BANKING_DOWNTIME, bankingValue)
+            .put(INVENTORY_CYCLE, inventoryCycleValue)
+            .put(EXECUTION_SCORE, executionScore.getValue())
+            .build();
 
-        final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
-        tickLossCategories.put("Menu latency", (int) Math.round(AnalysisMath.sum(menuLatencies)));
-        tickLossCategories.put("Build/remove cadence", (int) Math.round(AnalysisMath.sum(cadenceLatencies)));
-        tickLossCategories.put("Banking downtime", (int) Math.round(AnalysisMath.sum(bankingLatencies)));
+        final Map<String, Integer> tickLossCategories = TickLossCategories.builder()
+            .putRounded("Menu latency", AnalysisMath.sum(menuLatencies))
+            .putRounded("Build/remove cadence", AnalysisMath.sum(cadenceLatencies))
+            .putRounded("Banking downtime", AnalysisMath.sum(bankingLatencies))
+            .build();
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(
             tickLossCategories.get("Menu latency") + tickLossCategories.get("Build/remove cadence") + tickLossCategories.get("Banking downtime"),
             tickLossCategories);

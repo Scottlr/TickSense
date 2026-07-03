@@ -18,6 +18,8 @@ import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.storage.debug.DebugEventKind;
+import com.ticksense.storage.debug.DebugEventRecord;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.events.GameTickTelemetryEvent;
 import java.io.IOException;
@@ -66,6 +68,24 @@ public class ExportBundleWriterTest
             new EventTime(2_000L, 2_000_000L, 12, 12L, 2),
             Collections.singletonMap("finishReasonType", "LEFT_REGION")));
         timelineRepository.close();
+        final Path debugDirectory = paths.getTickSenseRoot().resolve("debug");
+        Files.createDirectories(debugDirectory);
+        Files.write(
+            debugDirectory.resolve("session-export.jsonl"),
+            Arrays.asList(
+                new Gson().toJson(DebugEventRecord.of(
+                    DebugEventKind.ADAPTER_OBSERVATION,
+                    "session-export",
+                    "ProjectileMoved",
+                    new EventTime(1_500L, 1_500_000L, 11, 11L, 1),
+                    "{\"projectileId\":1234}")),
+                new Gson().toJson(DebugEventRecord.of(
+                    DebugEventKind.ADAPTER_OBSERVATION,
+                    "session-export",
+                    "ProjectileMoved",
+                    new EventTime(3_000L, 3_000_000L, 30, 30L, 3),
+                    "{\"projectileId\":9999}"))),
+            StandardCharsets.UTF_8);
 
         final ExportBundleWriter writer = new ExportBundleWriter(
             paths,
@@ -92,6 +112,10 @@ public class ExportBundleWriterTest
             assertTrue(zipFile.getEntry("activity.json") != null);
             assertTrue(zipFile.getEntry("timeline.jsonl") != null);
             assertTrue(zipFile.getEntry("diagnostics.jsonl") != null);
+            assertTrue(zipFile.getEntry("debug-events.jsonl") != null);
+            final String debugEvents = zipEntryText(zipFile, "debug-events.jsonl");
+            assertTrue(debugEvents.contains("1234"));
+            assertFalse(debugEvents.contains("9999"));
         }
     }
 
@@ -180,6 +204,26 @@ public class ExportBundleWriterTest
                 new EventTime(1_000L, 1_000_000L, tick, tick, tick),
                 Collections.singletonMap("fixture", "export"),
                 tick));
+    }
+
+    private static String zipEntryText(ZipFile zipFile, String entryName) throws IOException
+    {
+        final java.io.InputStream inputStream = zipFile.getInputStream(zipFile.getEntry(entryName));
+        try
+        {
+            final java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
+            final byte[] buffer = new byte[1024];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1)
+            {
+                outputStream.write(buffer, 0, read);
+            }
+            return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        }
+        finally
+        {
+            inputStream.close();
+        }
     }
 
     private static ExportConfigSnapshotProvider debugConfigSnapshot()

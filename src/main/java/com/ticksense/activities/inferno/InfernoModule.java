@@ -21,7 +21,7 @@ public final class InfernoModule implements ActivityModule
     public boolean isEnabled()
     {
         return InfernoIds.verificationDecision().allowsStrategyEnablement()
-            && InfernoIds.verifiedRegionIds().length > 0;
+            && InfernoIds.hasVerifiedRegionIds();
     }
 
     @Override

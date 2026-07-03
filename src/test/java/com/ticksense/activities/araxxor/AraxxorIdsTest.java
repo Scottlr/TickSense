@@ -59,6 +59,10 @@ public class AraxxorIdsTest
         assertFalse(AraxxorIds.allowsStrategyEnablement());
         assertTrue(AraxxorIds.araxxorNpcIds().length > 0);
         assertTrue(AraxxorIds.spiderNpcIds().length > 0);
+        assertTrue(AraxxorIds.isAraxxorNpcId(13668));
+        assertTrue(AraxxorIds.isSpiderNpcId(13671));
+        assertFalse(AraxxorIds.hasVerifiedRegionIds());
+        assertFalse(AraxxorIds.isVerifiedRegionId(12345));
         assertTrue(AraxxorIds.blockers().stream().anyMatch(blocker -> blocker.contains("T029")));
     }
 }

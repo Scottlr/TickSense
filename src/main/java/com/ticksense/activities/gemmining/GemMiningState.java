@@ -14,7 +14,6 @@ import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
-import com.ticksense.common.IntIdSet;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
 import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
@@ -52,11 +51,6 @@ final class GemMiningState
         0L,
         Collections.singletonList("Move into mining range"));
 
-    private static final IntIdSet VERIFIED_REGION_IDS = IntIdSet.of(GemMiningIds.gemMiningRegionIds());
-    private static final IntIdSet VERIFIED_OBJECT_IDS = IntIdSet.of(GemMiningIds.gemRockObjectIds());
-    private static final IntIdSet VERIFIED_ANIMATION_IDS = IntIdSet.of(GemMiningIds.miningAnimationIds());
-    private static final IntIdSet VERIFIED_GEM_ITEM_IDS = IntIdSet.of(GemMiningIds.uncutGemItemIds());
-
     private int currentRegionId = -1;
     private WorldLocation currentPlayerLocation = WorldLocation.unknown();
     private RockAvailability availableRock;
@@ -83,27 +77,27 @@ final class GemMiningState
 
     boolean hasVerifiedRegion()
     {
-        return VERIFIED_REGION_IDS.contains(currentRegionId);
+        return GemMiningIds.isGemMiningRegionId(currentRegionId);
     }
 
     boolean isVerifiedRegion(int regionId)
     {
-        return VERIFIED_REGION_IDS.contains(regionId);
+        return GemMiningIds.isGemMiningRegionId(regionId);
     }
 
     boolean isVerifiedObject(int objectId)
     {
-        return VERIFIED_OBJECT_IDS.contains(objectId);
+        return GemMiningIds.isGemRockObjectId(objectId);
     }
 
     boolean isVerifiedMiningAnimation(int animationId)
     {
-        return VERIFIED_ANIMATION_IDS.contains(animationId);
+        return GemMiningIds.isMiningAnimationId(animationId);
     }
 
     boolean isVerifiedGemItem(int itemId)
     {
-        return VERIFIED_GEM_ITEM_IDS.contains(itemId);
+        return GemMiningIds.isUncutGemItemId(itemId);
     }
 
     boolean matchesAvailableRock(WorldLocation location)
@@ -256,8 +250,8 @@ final class GemMiningState
     {
         final Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("verificationStatus", GemMiningIds.verificationDecision().getStatus().name());
-        attributes.put("verifiedRegionIds", VERIFIED_REGION_IDS.joinCsv());
-        attributes.put("verifiedObjectIds", VERIFIED_OBJECT_IDS.joinCsv());
+        attributes.put("verifiedRegionIds", GemMiningIds.verifiedRegionIdsCsv());
+        attributes.put("verifiedObjectIds", GemMiningIds.verifiedObjectIdsCsv());
         attributes.put("mineClicks", String.valueOf(totalMineClicks));
         attributes.put("redundantClicks", String.valueOf(redundantClicks));
         attributes.put("idleTicks", String.valueOf(totalIdleTicks));

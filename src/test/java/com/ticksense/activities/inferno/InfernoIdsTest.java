@@ -45,6 +45,11 @@ public class InfernoIdsTest
         assertArrayEquals(new int[0], InfernoIds.verifiedRegionIds());
         assertArrayEquals(new int[0], InfernoIds.prayerStateIds());
         assertArrayEquals(new int[0], InfernoIds.deathTimelineIds());
+        assertTrue(InfernoIds.isNibblerNpcId(7674));
+        assertTrue(InfernoIds.isWaveNpcId(7691));
+        assertTrue(InfernoIds.isSupplyItemId(2434));
+        assertFalse(InfernoIds.hasVerifiedRegionIds());
+        assertFalse(InfernoIds.isPrayerStateId(12345));
 
         final List<String> readmeLines = Files.readAllLines(
             Paths.get("src/test/resources/replays/README.md"),

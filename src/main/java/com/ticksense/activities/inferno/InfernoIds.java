@@ -1,5 +1,7 @@
 package com.ticksense.activities.inferno;
 
+import com.ticksense.common.IntIdSet;
+
 public final class InfernoIds
 {
     private static final int[] NIBBLER_NPC_IDS = {
@@ -43,6 +45,13 @@ public final class InfernoIds
         // Intentionally empty until source-owned normalized fixtures verify death cue IDs or markers.
     };
 
+    private static final IntIdSet NIBBLER_NPC_ID_SET = IntIdSet.of(NIBBLER_NPC_IDS);
+    private static final IntIdSet WAVE_NPC_ID_SET = IntIdSet.of(WAVE_NPC_IDS);
+    private static final IntIdSet SUPPLY_ITEM_ID_SET = IntIdSet.of(SUPPLY_ITEM_IDS);
+    private static final IntIdSet VERIFIED_REGION_ID_SET = IntIdSet.of(VERIFIED_REGION_IDS);
+    private static final IntIdSet PRAYER_STATE_ID_SET = IntIdSet.of(PRAYER_STATE_IDS);
+    private static final IntIdSet DEATH_TIMELINE_ID_SET = IntIdSet.of(DEATH_TIMELINE_IDS);
+
     private static final InfernoVerificationDecision VERIFICATION_DECISION =
         InfernoVerificationDecision.current();
 
@@ -78,6 +87,41 @@ public final class InfernoIds
     public static int[] deathTimelineIds()
     {
         return DEATH_TIMELINE_IDS.clone();
+    }
+
+    public static boolean isNibblerNpcId(int npcId)
+    {
+        return NIBBLER_NPC_ID_SET.contains(npcId);
+    }
+
+    public static boolean isWaveNpcId(int npcId)
+    {
+        return WAVE_NPC_ID_SET.contains(npcId);
+    }
+
+    public static boolean isSupplyItemId(int itemId)
+    {
+        return SUPPLY_ITEM_ID_SET.contains(itemId);
+    }
+
+    public static boolean isVerifiedRegionId(int regionId)
+    {
+        return VERIFIED_REGION_ID_SET.contains(regionId);
+    }
+
+    public static boolean hasVerifiedRegionIds()
+    {
+        return !VERIFIED_REGION_ID_SET.isEmpty();
+    }
+
+    public static boolean isPrayerStateId(int stateId)
+    {
+        return PRAYER_STATE_ID_SET.contains(stateId);
+    }
+
+    public static boolean isDeathTimelineId(int timelineId)
+    {
+        return DEATH_TIMELINE_ID_SET.contains(timelineId);
     }
 
     public static InfernoVerificationDecision verificationDecision()

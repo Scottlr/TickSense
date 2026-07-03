@@ -1,5 +1,6 @@
 package com.ticksense.activities.gemmining;
 
+import com.ticksense.common.IntIdSet;
 import java.util.List;
 
 public final class GemMiningIds
@@ -41,6 +42,11 @@ public final class GemMiningIds
         1623 // RuneLite ItemID.UNCUT_SAPPHIRE
     };
 
+    private static final IntIdSet GEM_ROCK_OBJECT_ID_SET = IntIdSet.of(GEM_ROCK_OBJECT_IDS);
+    private static final IntIdSet GEM_MINING_REGION_ID_SET = IntIdSet.of(GEM_MINING_REGION_IDS);
+    private static final IntIdSet MINING_ANIMATION_ID_SET = IntIdSet.of(MINING_ANIMATION_IDS);
+    private static final IntIdSet UNCUT_GEM_ITEM_ID_SET = IntIdSet.of(UNCUT_GEM_ITEM_IDS);
+
     private static final List<String> VERIFIED_EVIDENCE = List.of(
         "Gem rock object IDs are sourced from official RuneLite ObjectID constants and exercised in the source-owned normalized verification fixture for the underground Shilo gem mine.",
         "Gem mining region 11410 is verified in the source-owned normalized verification fixture via local player and gem rock world locations at 2840,9388.",
@@ -76,6 +82,36 @@ public final class GemMiningIds
     public static int[] uncutGemItemIds()
     {
         return UNCUT_GEM_ITEM_IDS.clone();
+    }
+
+    public static boolean isGemRockObjectId(int objectId)
+    {
+        return GEM_ROCK_OBJECT_ID_SET.contains(objectId);
+    }
+
+    public static boolean isGemMiningRegionId(int regionId)
+    {
+        return GEM_MINING_REGION_ID_SET.contains(regionId);
+    }
+
+    public static boolean isMiningAnimationId(int animationId)
+    {
+        return MINING_ANIMATION_ID_SET.contains(animationId);
+    }
+
+    public static boolean isUncutGemItemId(int itemId)
+    {
+        return UNCUT_GEM_ITEM_ID_SET.contains(itemId);
+    }
+
+    public static String verifiedRegionIdsCsv()
+    {
+        return GEM_MINING_REGION_ID_SET.joinCsv();
+    }
+
+    public static String verifiedObjectIdsCsv()
+    {
+        return GEM_ROCK_OBJECT_ID_SET.joinCsv();
     }
 
     public static GemMiningVerificationDecision verificationDecision()

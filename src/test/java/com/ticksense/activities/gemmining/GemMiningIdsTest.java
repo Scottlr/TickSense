@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Test;
@@ -42,6 +41,10 @@ public class GemMiningIdsTest
         assertEquals(decision.getStatus() == GemMiningVerificationDecision.Status.VERIFIED, decision.allowsStrategyEnablement());
         assertEquals(GemMiningVerificationDecision.Status.VERIFIED, decision.getStatus());
         assertTrue(decision.getBlockers().isEmpty());
+        assertTrue(GemMiningIds.isGemMiningRegionId(11410));
+        assertTrue(GemMiningIds.isGemRockObjectId(11380));
+        assertTrue(GemMiningIds.isMiningAnimationId(625));
+        assertTrue(GemMiningIds.isUncutGemItemId(1619));
     }
 
     @Test
@@ -61,7 +64,7 @@ public class GemMiningIdsTest
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent
-                && Arrays.stream(GemMiningIds.gemRockObjectIds()).anyMatch(id -> id == ((ObjectStateTelemetryEvent) envelope.getEvent()).getObjectId())
+                && GemMiningIds.isGemRockObjectId(((ObjectStateTelemetryEvent) envelope.getEvent()).getObjectId())
                 && StateChanges.AVAILABLE.equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
 
         assertTrue(events.stream().anyMatch(envelope ->
@@ -71,7 +74,7 @@ public class GemMiningIdsTest
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof AnimationTelemetryEvent
-                && Arrays.stream(GemMiningIds.miningAnimationIds()).anyMatch(id -> id == ((AnimationTelemetryEvent) envelope.getEvent()).getAnimationId())));
+                && GemMiningIds.isMiningAnimationId(((AnimationTelemetryEvent) envelope.getEvent()).getAnimationId())));
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof StatChangedTelemetryEvent
@@ -81,7 +84,7 @@ public class GemMiningIdsTest
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof InventoryDeltaTelemetryEvent
                 && ((InventoryDeltaTelemetryEvent) envelope.getEvent()).getDeltas().stream()
-                .anyMatch(delta -> Arrays.stream(GemMiningIds.uncutGemItemIds()).anyMatch(id -> id == delta.getAfterItemId()))));
+                .anyMatch(delta -> GemMiningIds.isUncutGemItemId(delta.getAfterItemId()))));
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent

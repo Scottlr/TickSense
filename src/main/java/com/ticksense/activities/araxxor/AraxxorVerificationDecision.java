@@ -1,8 +1,6 @@
 package com.ticksense.activities.araxxor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import com.ticksense.activities.VerificationTexts;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,12 +8,12 @@ public final class AraxxorVerificationDecision
 {
     private static final AraxxorVerificationDecision CURRENT = blocked(
         "2026-07-03",
-        Arrays.asList(
+        VerificationTexts.listOf(
             "Official RuneLite NpcID constants confirm Araxxor boss IDs 13668 and 13669.",
             "Official RuneLite NpcID constants confirm named spider IDs 13671, 13673, 13675, and 13680.",
             "Araxxor fixture placeholders are reserved under src/test/resources/replays/ for future source-owned normalized captures."
         ),
-        Arrays.asList(
+        VerificationTexts.listOf(
             "No source-owned normalized Araxxor replay fixture currently proves spider spawn or spider availability evidence.",
             "No source-owned normalized Araxxor replay fixture currently proves attack click, interaction-changed, or damage evidence during a spider window.",
             "Teleport-mid-kill termination evidence is still unverified and must be captured in sanitized normalized telemetry before Araxxor can move beyond BLOCKED."
@@ -33,9 +31,9 @@ public final class AraxxorVerificationDecision
         List<String> unresolvedQuestions)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedOnDate = normalizedValue(verifiedOnDate, "verifiedOnDate");
-        this.evidence = immutableCopy(evidence, "evidence");
-        this.unresolvedQuestions = immutableCopy(unresolvedQuestions, "unresolvedQuestions");
+        this.verifiedOnDate = VerificationTexts.normalizedValue(verifiedOnDate, "verifiedOnDate");
+        this.evidence = VerificationTexts.immutableCopy(evidence, "evidence");
+        this.unresolvedQuestions = VerificationTexts.immutableCopy(unresolvedQuestions, "unresolvedQuestions");
     }
 
     public static AraxxorVerificationDecision verified(
@@ -90,27 +88,6 @@ public final class AraxxorVerificationDecision
     public boolean allowsNormalStrategyEnablement()
     {
         return status == Status.VERIFIED;
-    }
-
-    private static List<String> immutableCopy(List<String> values, String fieldName)
-    {
-        Objects.requireNonNull(values, fieldName);
-        final List<String> copy = new ArrayList<>(values.size());
-        for (String value : values)
-        {
-            copy.add(normalizedValue(value, fieldName + " entry"));
-        }
-        return Collections.unmodifiableList(copy);
-    }
-
-    private static String normalizedValue(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
     }
 
     public enum Status

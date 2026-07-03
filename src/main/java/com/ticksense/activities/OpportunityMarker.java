@@ -1,7 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.common.ImmutableCollections;
-
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
 import java.util.List;
@@ -29,10 +29,10 @@ public final class OpportunityMarker
         Map<String, String> context,
         List<OpportunityEvidence> evidence)
     {
-        this.markerId = ActivityTexts.requireText(markerId, "markerId");
-        this.opportunityInstanceId = ActivityTexts.requireText(opportunityInstanceId, "opportunityInstanceId");
+        this.markerId = TextValues.requireText(markerId, "markerId");
+        this.opportunityInstanceId = TextValues.requireText(opportunityInstanceId, "opportunityInstanceId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
-        this.opportunityType = ActivityTexts.requireText(opportunityType, "opportunityType");
+        this.opportunityType = TextValues.requireText(opportunityType, "opportunityType");
         this.status = Objects.requireNonNull(status, "status");
         this.time = Objects.requireNonNull(time, "time");
         this.context = ImmutableCollections.immutableMap(context);

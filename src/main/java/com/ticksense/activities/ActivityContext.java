@@ -1,7 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.common.ImmutableCollections;
-
 import java.util.Map;
 
 public final class ActivityContext
@@ -13,7 +13,7 @@ public final class ActivityContext
 
     public ActivityContext(String sessionId, int world, boolean debugActivityDiagnostics, Map<String, String> metadata)
     {
-        this.sessionId = ActivityTexts.requireText(sessionId, "sessionId");
+        this.sessionId = TextValues.requireText(sessionId, "sessionId");
         this.world = world;
         this.debugActivityDiagnostics = debugActivityDiagnostics;
         this.metadata = ImmutableCollections.immutableMap(metadata);

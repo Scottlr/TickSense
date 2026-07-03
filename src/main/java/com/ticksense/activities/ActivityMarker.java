@@ -1,7 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.common.ImmutableCollections;
-
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
@@ -25,10 +25,10 @@ public final class ActivityMarker
         EventTime time,
         Map<String, String> metadata)
     {
-        this.markerId = ActivityTexts.requireText(markerId, "markerId");
+        this.markerId = TextValues.requireText(markerId, "markerId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.markerType = ActivityTexts.requireText(markerType, "markerType");
+        this.markerType = TextValues.requireText(markerType, "markerType");
         this.time = Objects.requireNonNull(time, "time");
         this.metadata = ImmutableCollections.immutableMap(metadata);
     }

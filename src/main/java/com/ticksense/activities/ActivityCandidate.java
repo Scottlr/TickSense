@@ -1,7 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.common.ImmutableCollections;
-
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
@@ -33,7 +33,7 @@ public final class ActivityCandidate
         this.evidenceSummary = ImmutableCollections.immutableList(evidenceSummary);
         this.firstEvidenceTime = Objects.requireNonNull(firstEvidenceTime, "firstEvidenceTime");
         this.suppressed = suppressed;
-        this.suppressionReason = ActivityTexts.safeText(suppressionReason);
+        this.suppressionReason = TextValues.trimmedOrEmpty(suppressionReason);
     }
 
     public ActivityId getActivityId()

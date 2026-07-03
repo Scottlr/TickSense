@@ -1,5 +1,6 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivityType;
 import java.util.Objects;
 
@@ -19,7 +20,7 @@ public final class ActivityDefinition
         boolean bossActivity)
     {
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.displayName = ActivityTexts.requireText(displayName, "displayName");
+        this.displayName = TextValues.requireText(displayName, "displayName");
         this.priority = priority;
         this.activationThreshold = requireThreshold(activationThreshold);
         this.bossActivity = bossActivity;

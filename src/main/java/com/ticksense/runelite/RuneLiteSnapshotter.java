@@ -26,6 +26,7 @@ import net.runelite.api.widgets.Widget;
 public final class RuneLiteSnapshotter
 {
     private static final int UNKNOWN = -1;
+    private static final ItemSnapshot[] NO_ITEM_SNAPSHOTS = new ItemSnapshot[0];
 
     private final Client client;
     private final Map<Integer, ItemSnapshot[]> previousContainers = new HashMap<>();
@@ -151,14 +152,12 @@ public final class RuneLiteSnapshotter
         {
             return localPlayerLocation(envelope);
         }
-        final int[] mapRegions = worldView.getMapRegions();
-        final int regionId = mapRegions == null || mapRegions.length == 0 ? UNKNOWN : mapRegions[0];
         return new WorldLocation(
             envelope.getWorld(),
             worldView.getPlane(),
             worldView.getBaseX(),
             worldView.getBaseY(),
-            regionId,
+            regionId(worldView),
             worldView.isInstance());
     }
 
@@ -168,8 +167,7 @@ public final class RuneLiteSnapshotter
         {
             return UNKNOWN;
         }
-        final int[] mapRegions = worldView.getMapRegions();
-        return mapRegions == null || mapRegions.length == 0 ? UNKNOWN : mapRegions[0];
+        return firstRegionId(worldView.getMapRegions());
     }
 
     String worldViewId(WorldView worldView)
@@ -183,7 +181,7 @@ public final class RuneLiteSnapshotter
         {
             return Collections.emptyList();
         }
-        final List<String> labels = new ArrayList<>();
+        final List<String> labels = new ArrayList<>(menuEntries.length);
         for (MenuEntry menuEntry : menuEntries)
         {
             if (menuEntry != null)
@@ -191,7 +189,7 @@ public final class RuneLiteSnapshotter
                 labels.add(menuEntryLabel(menuEntry));
             }
         }
-        return Collections.unmodifiableList(labels);
+        return immutableList(labels);
     }
 
     String menuEntryLabel(MenuEntry menuEntry)
@@ -211,15 +209,16 @@ public final class RuneLiteSnapshotter
         {
             return Collections.emptyList();
         }
-        final List<String> actions = new ArrayList<>();
-        for (String action : widget.getActions())
+        final String[] widgetActions = widget.getActions();
+        final List<String> actions = new ArrayList<>(widgetActions.length);
+        for (String action : widgetActions)
         {
             if (action != null && !action.isEmpty())
             {
                 actions.add(action);
             }
         }
-        return Collections.unmodifiableList(actions);
+        return immutableList(actions);
     }
 
     List<InventoryDeltaTelemetryEvent.ItemDelta> itemDeltas(int containerId, ItemContainer itemContainer)
@@ -232,8 +231,8 @@ public final class RuneLiteSnapshotter
         final List<InventoryDeltaTelemetryEvent.ItemDelta> deltas = new ArrayList<>();
         for (int slot = 0; slot < slotCount; slot++)
         {
-            final ItemSnapshot beforeItem = slot < (before == null ? 0 : before.length) ? before[slot] : ItemSnapshot.EMPTY;
-            final ItemSnapshot afterItem = slot < after.length ? after[slot] : ItemSnapshot.EMPTY;
+            final ItemSnapshot beforeItem = itemSnapshotAt(before, slot);
+            final ItemSnapshot afterItem = itemSnapshotAt(after, slot);
             if (!beforeItem.equals(afterItem))
             {
                 deltas.add(new InventoryDeltaTelemetryEvent.ItemDelta(
@@ -244,14 +243,14 @@ public final class RuneLiteSnapshotter
                     afterItem.quantity));
             }
         }
-        return Collections.unmodifiableList(deltas);
+        return immutableList(deltas);
     }
 
     private static ItemSnapshot[] itemSnapshots(ItemContainer itemContainer)
     {
         if (itemContainer == null || itemContainer.getItems() == null)
         {
-            return new ItemSnapshot[0];
+            return NO_ITEM_SNAPSHOTS;
         }
         final Item[] items = itemContainer.getItems();
         final ItemSnapshot[] snapshots = new ItemSnapshot[items.length];
@@ -261,6 +260,21 @@ public final class RuneLiteSnapshotter
             snapshots[i] = item == null ? ItemSnapshot.EMPTY : new ItemSnapshot(item.getId(), item.getQuantity());
         }
         return snapshots;
+    }
+
+    private static int firstRegionId(int[] mapRegions)
+    {
+        return mapRegions == null || mapRegions.length == 0 ? UNKNOWN : mapRegions[0];
+    }
+
+    private static ItemSnapshot itemSnapshotAt(ItemSnapshot[] snapshots, int slot)
+    {
+        return snapshots == null || slot >= snapshots.length ? ItemSnapshot.EMPTY : snapshots[slot];
+    }
+
+    private static <T> List<T> immutableList(List<T> values)
+    {
+        return values.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(values);
     }
 
     private static final class ItemSnapshot

@@ -1,5 +1,6 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.core.EventTime;
 import java.util.Objects;
 
@@ -13,9 +14,9 @@ public final class OpportunityEvidence
     public OpportunityEvidence(EventTime time, String sourceEventType, EvidenceStrength strength, String detail)
     {
         this.time = Objects.requireNonNull(time, "time");
-        this.sourceEventType = ActivityTexts.requireText(sourceEventType, "sourceEventType");
+        this.sourceEventType = TextValues.requireText(sourceEventType, "sourceEventType");
         this.strength = Objects.requireNonNull(strength, "strength");
-        this.detail = ActivityTexts.safeText(detail);
+        this.detail = TextValues.trimmedOrEmpty(detail);
     }
 
     public EventTime getTime()

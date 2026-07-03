@@ -1,7 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.common.ImmutableCollections;
-
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
 import java.util.List;
@@ -26,8 +26,8 @@ public final class ActivityDiagnostic
     {
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         this.confidence = requireConfidence(confidence);
-        this.decision = ActivityTexts.requireText(decision, "decision");
-        this.reason = ActivityTexts.safeText(reason);
+        this.decision = TextValues.requireText(decision, "decision");
+        this.reason = TextValues.trimmedOrEmpty(reason);
         this.time = Objects.requireNonNull(time, "time");
         this.evidence = ImmutableCollections.immutableList(evidence);
     }

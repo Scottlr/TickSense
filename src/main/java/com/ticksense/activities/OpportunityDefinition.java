@@ -1,7 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.TextValues;
 import com.ticksense.common.ImmutableCollections;
-
 import com.ticksense.core.ActivityType;
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +21,8 @@ public final class OpportunityDefinition
         long defaultTimeoutMillis,
         List<String> expectedResponses)
     {
-        this.id = ActivityTexts.requireText(id, "id");
-        this.displayName = ActivityTexts.requireText(displayName, "displayName");
+        this.id = TextValues.requireText(id, "id");
+        this.displayName = TextValues.requireText(displayName, "displayName");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         if (defaultTimeoutMillis < 0L)
         {

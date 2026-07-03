@@ -1,16 +1,18 @@
 package com.ticksense.activities.gemmining;
 
 import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.analytics.ActivityReportAssembler;
+import com.ticksense.analytics.AnalysisMath;
 import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.OpportunityMarkerResolver;
-import com.ticksense.analytics.OpportunityTimelineEntry;
+import com.ticksense.analytics.OpportunityTimelineBuilder;
+import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
@@ -57,8 +59,8 @@ public final class GemMiningAnalyzer
         final int idleTicks = intAttribute(normalizedActivityData, "idleTicks");
         final int redundantClicks = intAttribute(normalizedActivityData, "redundantClicks");
 
-        final double rockResponseValue = average(rockResponseLatencies);
-        final double movementLatencyValue = average(movementLatencies);
+        final double rockResponseValue = AnalysisMath.average(rockResponseLatencies);
+        final double movementLatencyValue = AnalysisMath.average(movementLatencies);
         final double cycleConsistencyValue = averageDeviation(rockResponseLatencies);
         final ExecutionScore executionScore = buildExecutionScore(idleTicks, redundantClicks, rockResponseValue, movementLatencyValue, cycleConsistencyValue);
 
@@ -73,14 +75,14 @@ public final class GemMiningAnalyzer
         final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
         tickLossCategories.put("Idle ticks", idleTicks);
         tickLossCategories.put("Redundant clicks", redundantClicks);
-        tickLossCategories.put("Movement latency", (int) Math.round(sum(movementLatencies)));
+        tickLossCategories.put("Movement latency", (int) Math.round(AnalysisMath.sum(movementLatencies)));
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(
-            idleTicks + redundantClicks + (int) Math.round(sum(movementLatencies)),
+            idleTicks + redundantClicks + (int) Math.round(AnalysisMath.sum(movementLatencies)),
             tickLossCategories);
 
         return new ActivityAnalysisData(
             metrics,
-            buildTimeline(opportunities),
+            OpportunityTimelineBuilder.build(opportunities, GemMiningAnalyzer::labelFor),
             tickLossBreakdown,
             buildEvidenceSummary(normalizedSession, normalizedActivityData),
             buildSummaryLines(rockResponseLatencies));
@@ -94,22 +96,7 @@ public final class GemMiningAnalyzer
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
-        return new ActivityReport(
-            ActivityReport.SCHEMA_VERSION,
-            normalizedSession.getActivityId() + "-report",
-            normalizedSession.getActivityId(),
-            normalizedSession.getActivityType(),
-            displayName(normalizedSession),
-            normalizedSession.getEndTime().getWallTimeMillis(),
-            normalizedSession.getEndTime().getGameTick() - normalizedSession.getStartTime().getGameTick(),
-            normalizedSession.getEndTime().getWallTimeMillis() - normalizedSession.getStartTime().getWallTimeMillis(),
-            normalizedSession.getFinishReason(),
-            confidence(normalizedSession),
-            reportData.getEvidenceSummary(),
-            reportData.getMetrics(),
-            reportData.getOpportunityTimeline(),
-            reportData.getTickLossBreakdown(),
-            reportData.getSummaryLines());
+        return ActivityReportAssembler.assemble(normalizedSession, activityData, "Gem Mining", reportData);
     }
 
     private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
@@ -125,44 +112,9 @@ public final class GemMiningAnalyzer
         return latencies;
     }
 
-    private static List<OpportunityTimelineEntry> buildTimeline(List<ResolvedOpportunity> opportunities)
-    {
-        if (opportunities.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<OpportunityTimelineEntry> timeline = new ArrayList<>(opportunities.size());
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            timeline.add(new OpportunityTimelineEntry(
-                opportunity.type(),
-                labelFor(opportunity.type()),
-                opportunity.status().name(),
-                opportunity.endTick(),
-                opportunity.endWallTimeMillis(),
-                opportunity.latencyTicks(),
-                opportunity.latencyMillis(),
-                evidenceDetails(opportunity.terminalEvidence())));
-        }
-        return Collections.unmodifiableList(timeline);
-    }
-
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
-        final List<String> evidence = new ArrayList<>();
-        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
-        if (!startEvidence.isEmpty())
-        {
-            for (String part : startEvidence.split("\\|"))
-            {
-                final String trimmed = part.trim();
-                if (!trimmed.isEmpty())
-                {
-                    evidence.add(trimmed);
-                }
-            }
-        }
+        final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         evidence.add("Idle ticks count only verified rock-available windows; depleted-rock wait stays in the RNG caveat, not execution loss.");
         evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
         return Collections.unmodifiableList(evidence);
@@ -207,30 +159,9 @@ public final class GemMiningAnalyzer
         return breakdown.getExecutionScore();
     }
 
-    private static String displayName(ActivitySession session)
-    {
-        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
-        return displayName.isEmpty() ? "Gem Mining" : displayName;
-    }
-
-    private static double confidence(ActivitySession session)
-    {
-        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
-        if (raw.isEmpty())
-        {
-            return 0.0D;
-        }
-        return Double.parseDouble(raw);
-    }
-
     private static int intAttribute(ActivityReportData activityData, String key)
     {
-        final String raw = TextValues.trimmedOrEmpty(activityData.getAttributes().get(key));
-        if (raw.isEmpty())
-        {
-            return 0;
-        }
-        return Integer.parseInt(raw);
+        return AnalysisMath.intAttribute(activityData, key);
     }
 
     private static String labelFor(String opportunityType)
@@ -250,49 +181,13 @@ public final class GemMiningAnalyzer
         return opportunityType.toLowerCase(Locale.US);
     }
 
-    private static List<String> evidenceDetails(List<OpportunityEvidence> evidence)
-    {
-        if (evidence == null || evidence.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        final List<String> details = new ArrayList<>(evidence.size());
-        for (OpportunityEvidence item : evidence)
-        {
-            details.add(item.getDetail().isEmpty() ? item.getSourceEventType() : item.getDetail());
-        }
-        return Collections.unmodifiableList(details);
-    }
-
-    private static double average(List<Double> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return 0.0D;
-        }
-        return sum(values) / values.size();
-    }
-
-    private static double sum(List<Double> values)
-    {
-        double sum = 0.0D;
-        if (values != null)
-        {
-            for (Double value : values)
-            {
-                sum += value;
-            }
-        }
-        return sum;
-    }
-
     private static double averageDeviation(List<Double> values)
     {
         if (values == null || values.size() <= 1)
         {
             return 0.0D;
         }
-        final double average = average(values);
+        final double average = AnalysisMath.average(values);
         double total = 0.0D;
         for (Double value : values)
         {

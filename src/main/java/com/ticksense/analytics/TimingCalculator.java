@@ -7,10 +7,10 @@ public final class TimingCalculator
 {
     public int latencyTicks(EventTime start, EventTime end)
     {
-        return difference(
+        return Math.toIntExact(difference(
             Objects.requireNonNull(start, "start").getGameTick(),
             Objects.requireNonNull(end, "end").getGameTick(),
-            "game tick");
+            "game tick"));
     }
 
     public long latencyMillis(EventTime start, EventTime end)
@@ -36,10 +36,10 @@ public final class TimingCalculator
 
     public int tickLoss(int expectedCompletionTick, EventTime observedCompletion)
     {
-        return difference(
+        return Math.toIntExact(difference(
             expectedCompletionTick,
             Objects.requireNonNull(observedCompletion, "observedCompletion").getGameTick(),
-            "expected completion tick");
+            "expected completion tick"));
     }
 
     public MetricValue metricTicks(String key, EventTime start, EventTime end)
@@ -60,15 +60,6 @@ public final class TimingCalculator
     private static MetricDefinition definition(String key, MetricUnit unit)
     {
         return new MetricDefinition(key, key, unit, "", true);
-    }
-
-    private static int difference(int start, int end, String label)
-    {
-        if (end < start)
-        {
-            throw new IllegalArgumentException(label + " end must not be before start");
-        }
-        return end - start;
     }
 
     private static long difference(long start, long end, String label)

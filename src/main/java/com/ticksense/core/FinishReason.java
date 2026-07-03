@@ -1,5 +1,6 @@
 package com.ticksense.core;
 
+import com.ticksense.common.ImmutableCollections;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +23,7 @@ public final class FinishReason
         this.time = Objects.requireNonNull(time, "time");
         this.confidence = requireConfidence(confidence);
         this.explanation = explanation == null ? "" : explanation;
-        this.evidence = CoreCollections.immutableList(evidence);
+        this.evidence = ImmutableCollections.immutableList(evidence);
     }
 
     public FinishReasonType getType()

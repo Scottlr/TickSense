@@ -1,5 +1,6 @@
 package com.ticksense.core;
 
+import com.ticksense.common.ImmutableCollections;
 import com.ticksense.common.TextValues;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +17,7 @@ public final class ActivitySpan
         this.spanType = TextValues.requireText(spanType, "spanType");
         this.startTime = Objects.requireNonNull(startTime, "startTime");
         this.endTime = endTime;
-        this.metadata = CoreCollections.immutableStringMap(metadata);
+        this.metadata = ImmutableCollections.immutableMap(metadata);
     }
 
     public ActivitySpan finish(EventTime endTime)

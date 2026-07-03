@@ -1,16 +1,18 @@
 package com.ticksense.activities.construction;
 
 import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ActivityAnalysisData;
+import com.ticksense.analytics.ActivityReportAssembler;
+import com.ticksense.analytics.AnalysisMath;
 import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.OpportunityMarkerResolver;
-import com.ticksense.analytics.OpportunityTimelineEntry;
+import com.ticksense.analytics.OpportunityTimelineBuilder;
+import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
@@ -52,10 +54,10 @@ public final class ConstructionAnalyzer
         final List<Double> bankingLatencies = latenciesFor(opportunities, ConstructionState.OPPORTUNITY_BANKING_DOWNTIME);
         final List<Double> inventoryCycleLatencies = latenciesFor(opportunities, ConstructionState.OPPORTUNITY_INVENTORY_CYCLE);
 
-        final double menuLatencyValue = average(menuLatencies);
-        final double cadenceValue = average(cadenceLatencies);
-        final double bankingValue = average(bankingLatencies);
-        final double inventoryCycleValue = average(inventoryCycleLatencies);
+        final double menuLatencyValue = AnalysisMath.average(menuLatencies);
+        final double cadenceValue = AnalysisMath.average(cadenceLatencies);
+        final double bankingValue = AnalysisMath.average(bankingLatencies);
+        final double inventoryCycleValue = AnalysisMath.average(inventoryCycleLatencies);
         final ExecutionScore executionScore = buildExecutionScore(menuLatencyValue, cadenceValue, bankingValue, inventoryCycleValue);
 
         final Map<String, MetricValue> metrics = new LinkedHashMap<>();
@@ -66,16 +68,16 @@ public final class ConstructionAnalyzer
         metrics.put(EXECUTION_SCORE.getKey(), new MetricValue(EXECUTION_SCORE, executionScore.getValue()));
 
         final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
-        tickLossCategories.put("Menu latency", (int) Math.round(sum(menuLatencies)));
-        tickLossCategories.put("Build/remove cadence", (int) Math.round(sum(cadenceLatencies)));
-        tickLossCategories.put("Banking downtime", (int) Math.round(sum(bankingLatencies)));
+        tickLossCategories.put("Menu latency", (int) Math.round(AnalysisMath.sum(menuLatencies)));
+        tickLossCategories.put("Build/remove cadence", (int) Math.round(AnalysisMath.sum(cadenceLatencies)));
+        tickLossCategories.put("Banking downtime", (int) Math.round(AnalysisMath.sum(bankingLatencies)));
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(
             tickLossCategories.get("Menu latency") + tickLossCategories.get("Build/remove cadence") + tickLossCategories.get("Banking downtime"),
             tickLossCategories);
 
         return new ActivityAnalysisData(
             metrics,
-            buildTimeline(opportunities),
+            OpportunityTimelineBuilder.build(opportunities, ConstructionAnalyzer::labelFor),
             tickLossBreakdown,
             buildEvidenceSummary(normalizedSession, normalizedActivityData),
             buildSummaryLines(menuLatencies, inventoryCycleLatencies));
@@ -89,22 +91,7 @@ public final class ConstructionAnalyzer
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
-        return new ActivityReport(
-            ActivityReport.SCHEMA_VERSION,
-            normalizedSession.getActivityId() + "-report",
-            normalizedSession.getActivityId(),
-            normalizedSession.getActivityType(),
-            displayName(normalizedSession),
-            normalizedSession.getEndTime().getWallTimeMillis(),
-            normalizedSession.getEndTime().getGameTick() - normalizedSession.getStartTime().getGameTick(),
-            normalizedSession.getEndTime().getWallTimeMillis() - normalizedSession.getStartTime().getWallTimeMillis(),
-            normalizedSession.getFinishReason(),
-            confidence(normalizedSession),
-            reportData.getEvidenceSummary(),
-            reportData.getMetrics(),
-            reportData.getOpportunityTimeline(),
-            reportData.getTickLossBreakdown(),
-            reportData.getSummaryLines());
+        return ActivityReportAssembler.assemble(normalizedSession, activityData, "Construction", reportData);
     }
 
     private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
@@ -148,44 +135,9 @@ public final class ConstructionAnalyzer
             || "larder space".equalsIgnoreCase(opportunity.contextValue("target"));
     }
 
-    private static List<OpportunityTimelineEntry> buildTimeline(List<ResolvedOpportunity> opportunities)
-    {
-        if (opportunities.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<OpportunityTimelineEntry> timeline = new ArrayList<>(opportunities.size());
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            timeline.add(new OpportunityTimelineEntry(
-                opportunity.type(),
-                labelFor(opportunity.type()),
-                opportunity.status().name(),
-                opportunity.endTick(),
-                opportunity.endWallTimeMillis(),
-                opportunity.latencyTicks(),
-                opportunity.latencyMillis(),
-                evidenceDetails(opportunity.terminalEvidence())));
-        }
-        return Collections.unmodifiableList(timeline);
-    }
-
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
-        final List<String> evidence = new ArrayList<>();
-        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
-        if (!startEvidence.isEmpty())
-        {
-            for (String part : startEvidence.split("\\|"))
-            {
-                final String trimmed = part.trim();
-                if (!trimmed.isEmpty())
-                {
-                    evidence.add(trimmed);
-                }
-            }
-        }
+        final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         evidence.add("Observe-only Construction analytics: menu, widget, animation, inventory, XP, and bank evidence are retrospective only.");
         evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
         evidence.add("Verified method: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("methodName")));
@@ -201,8 +153,8 @@ public final class ConstructionAnalyzer
                 "Longest cycle: No verified Construction cycle recorded.");
         }
 
-        final double bestMenuLatency = menuLatencies.isEmpty() ? 0.0D : minimum(menuLatencies);
-        final double longestCycle = inventoryCycleLatencies.isEmpty() ? 0.0D : maximum(inventoryCycleLatencies);
+        final double bestMenuLatency = menuLatencies.isEmpty() ? 0.0D : AnalysisMath.minimum(menuLatencies);
+        final double longestCycle = inventoryCycleLatencies.isEmpty() ? 0.0D : AnalysisMath.maximum(inventoryCycleLatencies);
         return java.util.Arrays.asList(
             "Best execution: Menu latency " + TickValueFormatter.formatTicks(bestMenuLatency) + " ticks",
             "Longest cycle: Inventory cycle " + TickValueFormatter.formatTicks(longestCycle) + " ticks");
@@ -224,22 +176,6 @@ public final class ConstructionAnalyzer
         return breakdown.getExecutionScore();
     }
 
-    private static String displayName(ActivitySession session)
-    {
-        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
-        return displayName.isEmpty() ? "Construction" : displayName;
-    }
-
-    private static double confidence(ActivitySession session)
-    {
-        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
-        if (raw.isEmpty())
-        {
-            return 0.0D;
-        }
-        return Double.parseDouble(raw);
-    }
-
     private static String labelFor(String opportunityType)
     {
         if (ConstructionState.OPPORTUNITY_MENU_LATENCY.equals(opportunityType))
@@ -259,62 +195,6 @@ public final class ConstructionAnalyzer
             return "Inventory cycle";
         }
         return opportunityType.toLowerCase(Locale.US);
-    }
-
-    private static List<String> evidenceDetails(List<OpportunityEvidence> evidence)
-    {
-        if (evidence == null || evidence.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        final List<String> details = new ArrayList<>(evidence.size());
-        for (OpportunityEvidence item : evidence)
-        {
-            details.add(item.getDetail().isEmpty() ? item.getSourceEventType() : item.getDetail());
-        }
-        return Collections.unmodifiableList(details);
-    }
-
-    private static double average(List<Double> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return 0.0D;
-        }
-        return sum(values) / values.size();
-    }
-
-    private static double sum(List<Double> values)
-    {
-        double sum = 0.0D;
-        if (values != null)
-        {
-            for (Double value : values)
-            {
-                sum += value;
-            }
-        }
-        return sum;
-    }
-
-    private static double minimum(List<Double> values)
-    {
-        double minimum = values.get(0);
-        for (Double value : values)
-        {
-            minimum = Math.min(minimum, value);
-        }
-        return minimum;
-    }
-
-    private static double maximum(List<Double> values)
-    {
-        double maximum = values.get(0);
-        for (Double value : values)
-        {
-            maximum = Math.max(maximum, value);
-        }
-        return maximum;
     }
 
 }

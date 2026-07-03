@@ -1,16 +1,18 @@
 package com.ticksense.activities.vardorvis;
 
 import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.analytics.ActivityReportAssembler;
+import com.ticksense.analytics.AnalysisMath;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.OpportunityMarkerResolver;
-import com.ticksense.analytics.OpportunityTimelineEntry;
+import com.ticksense.analytics.OpportunityTimelineBuilder;
+import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickValueFormatter;
@@ -50,13 +52,13 @@ public final class VardorvisAnalyzer
 
         final List<Double> responseLatencies = latenciesFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.COMPLETED);
         final int damageDuringOpportunities = damageDuringFailedOpportunities(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE);
-        final int completedLatencyTicks = (int) Math.round(sum(responseLatencies));
+        final int completedLatencyTicks = (int) Math.round(AnalysisMath.sum(responseLatencies));
         final int failedWindowTicks = latencyTicksFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.FAILED);
         final double downtimeValue = completedLatencyTicks + failedWindowTicks;
-        final double mechanicConfidenceValue = confidence(normalizedSession) * 100.0D;
+        final double mechanicConfidenceValue = ReportMetadata.confidence(normalizedSession) * 100.0D;
 
         final Map<String, MetricValue> metrics = new LinkedHashMap<>();
-        metrics.put(RESPONSE_LATENCY.getKey(), new MetricValue(RESPONSE_LATENCY, average(responseLatencies)));
+        metrics.put(RESPONSE_LATENCY.getKey(), new MetricValue(RESPONSE_LATENCY, AnalysisMath.average(responseLatencies)));
         metrics.put(DAMAGE_DURING_OPPORTUNITIES.getKey(), new MetricValue(DAMAGE_DURING_OPPORTUNITIES, damageDuringOpportunities));
         metrics.put(DOWNTIME.getKey(), new MetricValue(DOWNTIME, downtimeValue));
         metrics.put(MECHANIC_CONFIDENCE.getKey(), new MetricValue(MECHANIC_CONFIDENCE, mechanicConfidenceValue));
@@ -68,7 +70,7 @@ public final class VardorvisAnalyzer
 
         return new ActivityAnalysisData(
             metrics,
-            buildTimeline(opportunities),
+            OpportunityTimelineBuilder.build(opportunities, VardorvisAnalyzer::labelFor),
             tickLossBreakdown,
             buildEvidenceSummary(normalizedSession, normalizedActivityData),
             buildSummaryLines(responseLatencies, damageDuringOpportunities));
@@ -82,22 +84,7 @@ public final class VardorvisAnalyzer
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
-        return new ActivityReport(
-            ActivityReport.SCHEMA_VERSION,
-            normalizedSession.getActivityId() + "-report",
-            normalizedSession.getActivityId(),
-            normalizedSession.getActivityType(),
-            displayName(normalizedSession),
-            normalizedSession.getEndTime().getWallTimeMillis(),
-            normalizedSession.getEndTime().getGameTick() - normalizedSession.getStartTime().getGameTick(),
-            normalizedSession.getEndTime().getWallTimeMillis() - normalizedSession.getStartTime().getWallTimeMillis(),
-            normalizedSession.getFinishReason(),
-            confidence(normalizedSession),
-            reportData.getEvidenceSummary(),
-            reportData.getMetrics(),
-            reportData.getOpportunityTimeline(),
-            reportData.getTickLossBreakdown(),
-            reportData.getSummaryLines());
+        return ActivityReportAssembler.assemble(normalizedSession, activityData, "Vardorvis", reportData);
     }
 
     private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType, OpportunityStatus status)
@@ -135,7 +122,7 @@ public final class VardorvisAnalyzer
             {
                 continue;
             }
-            for (String detail : evidenceDetails(opportunity.terminalEvidence()))
+            for (String detail : OpportunityTimelineBuilder.evidenceDetails(opportunity.terminalEvidence()))
             {
                 final Matcher matcher = DAMAGE_PATTERN.matcher(detail);
                 if (matcher.find())
@@ -147,44 +134,9 @@ public final class VardorvisAnalyzer
         return totalDamage;
     }
 
-    private static List<OpportunityTimelineEntry> buildTimeline(List<ResolvedOpportunity> opportunities)
-    {
-        if (opportunities.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<OpportunityTimelineEntry> timeline = new ArrayList<>(opportunities.size());
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            timeline.add(new OpportunityTimelineEntry(
-                opportunity.type(),
-                labelFor(opportunity.type()),
-                opportunity.status().name(),
-                opportunity.endTick(),
-                opportunity.endWallTimeMillis(),
-                opportunity.latencyTicks(),
-                opportunity.latencyMillis(),
-                evidenceDetails(opportunity.terminalEvidence())));
-        }
-        return Collections.unmodifiableList(timeline);
-    }
-
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
-        final List<String> evidence = new ArrayList<>();
-        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
-        if (!startEvidence.isEmpty())
-        {
-            for (String part : startEvidence.split("\\|"))
-            {
-                final String trimmed = part.trim();
-                if (!trimmed.isEmpty())
-                {
-                    evidence.add(trimmed);
-                }
-            }
-        }
+        final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         evidence.add("Vardorvis damage attribution counts only local-player damage inside verified mechanic windows.");
         evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
         evidence.add("Verified mechanics: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verifiedMechanics")));
@@ -201,24 +153,8 @@ public final class VardorvisAnalyzer
         }
 
         return java.util.Arrays.asList(
-            "Best execution: Ranged head response " + TickValueFormatter.formatTicks(minimum(responseLatencies)) + " ticks",
+            "Best execution: Ranged head response " + TickValueFormatter.formatTicks(AnalysisMath.minimum(responseLatencies)) + " ticks",
             "Damage during opportunities: " + damageDuringOpportunities);
-    }
-
-    private static String displayName(ActivitySession session)
-    {
-        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
-        return displayName.isEmpty() ? "Vardorvis" : displayName;
-    }
-
-    private static double confidence(ActivitySession session)
-    {
-        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
-        if (raw.isEmpty())
-        {
-            return 0.0D;
-        }
-        return Double.parseDouble(raw);
     }
 
     private static String labelFor(String opportunityType)
@@ -240,52 +176,6 @@ public final class VardorvisAnalyzer
             return "Prayer response";
         }
         return opportunityType.toLowerCase(Locale.US);
-    }
-
-    private static List<String> evidenceDetails(List<OpportunityEvidence> evidence)
-    {
-        if (evidence == null || evidence.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        final List<String> details = new ArrayList<>(evidence.size());
-        for (OpportunityEvidence item : evidence)
-        {
-            details.add(item.getDetail().isEmpty() ? item.getSourceEventType() : item.getDetail());
-        }
-        return Collections.unmodifiableList(details);
-    }
-
-    private static double average(List<Double> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return 0.0D;
-        }
-        return sum(values) / values.size();
-    }
-
-    private static double sum(List<Double> values)
-    {
-        double sum = 0.0D;
-        if (values != null)
-        {
-            for (Double value : values)
-            {
-                sum += value;
-            }
-        }
-        return sum;
-    }
-
-    private static double minimum(List<Double> values)
-    {
-        double minimum = values.get(0);
-        for (Double value : values)
-        {
-            minimum = Math.min(minimum, value);
-        }
-        return minimum;
     }
 
 }

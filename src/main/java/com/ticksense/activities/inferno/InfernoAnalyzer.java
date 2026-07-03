@@ -1,15 +1,17 @@
 package com.ticksense.activities.inferno;
 
 import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.analytics.ActivityReportAssembler;
+import com.ticksense.analytics.AnalysisMath;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.OpportunityMarkerResolver;
-import com.ticksense.analytics.OpportunityTimelineEntry;
+import com.ticksense.analytics.OpportunityTimelineBuilder;
+import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickValueFormatter;
@@ -45,25 +47,25 @@ public final class InfernoAnalyzer
 
         final List<Double> waveDurations = latenciesFor(opportunities, InfernoState.OPPORTUNITY_WAVE);
         final List<Double> nibblerResponses = latenciesFor(opportunities, InfernoState.OPPORTUNITY_NIBBLER_WINDOW);
-        final int supplyUsage = intAttribute(normalizedActivityData, "supplyUseCount");
-        final int deathTimelineEvents = intAttribute(normalizedActivityData, "deathTimelineEventCount");
+        final int supplyUsage = AnalysisMath.intAttribute(normalizedActivityData, "supplyUseCount");
+        final int deathTimelineEvents = AnalysisMath.intAttribute(normalizedActivityData, "deathTimelineEventCount");
 
         final Map<String, MetricValue> metrics = new LinkedHashMap<>();
-        metrics.put(WAVE_DURATION.getKey(), new MetricValue(WAVE_DURATION, average(waveDurations)));
-        metrics.put(NIBBLER_RESPONSE.getKey(), new MetricValue(NIBBLER_RESPONSE, average(nibblerResponses)));
+        metrics.put(WAVE_DURATION.getKey(), new MetricValue(WAVE_DURATION, AnalysisMath.average(waveDurations)));
+        metrics.put(NIBBLER_RESPONSE.getKey(), new MetricValue(NIBBLER_RESPONSE, AnalysisMath.average(nibblerResponses)));
         metrics.put(SUPPLY_USAGE.getKey(), new MetricValue(SUPPLY_USAGE, supplyUsage));
         metrics.put(DEATH_TIMELINE_EVENTS.getKey(), new MetricValue(DEATH_TIMELINE_EVENTS, deathTimelineEvents));
 
         final Map<String, Integer> tickLossCategories = new LinkedHashMap<>();
-        tickLossCategories.put("Wave duration", (int) Math.round(sum(waveDurations)));
-        tickLossCategories.put("Nibbler response", (int) Math.round(sum(nibblerResponses)));
+        tickLossCategories.put("Wave duration", (int) Math.round(AnalysisMath.sum(waveDurations)));
+        tickLossCategories.put("Nibbler response", (int) Math.round(AnalysisMath.sum(nibblerResponses)));
         final TickLossBreakdown tickLossBreakdown = new TickLossBreakdown(
             tickLossCategories.get("Wave duration") + tickLossCategories.get("Nibbler response"),
             tickLossCategories);
 
         return new ActivityAnalysisData(
             metrics,
-            buildTimeline(opportunities),
+            OpportunityTimelineBuilder.build(opportunities, InfernoAnalyzer::labelFor),
             tickLossBreakdown,
             buildEvidenceSummary(normalizedSession, normalizedActivityData),
             buildSummaryLines(nibblerResponses, deathTimelineEvents));
@@ -77,22 +79,7 @@ public final class InfernoAnalyzer
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
-        return new ActivityReport(
-            ActivityReport.SCHEMA_VERSION,
-            normalizedSession.getActivityId() + "-report",
-            normalizedSession.getActivityId(),
-            normalizedSession.getActivityType(),
-            displayName(normalizedSession),
-            normalizedSession.getEndTime().getWallTimeMillis(),
-            normalizedSession.getEndTime().getGameTick() - normalizedSession.getStartTime().getGameTick(),
-            normalizedSession.getEndTime().getWallTimeMillis() - normalizedSession.getStartTime().getWallTimeMillis(),
-            normalizedSession.getFinishReason(),
-            confidence(normalizedSession),
-            reportData.getEvidenceSummary(),
-            reportData.getMetrics(),
-            reportData.getOpportunityTimeline(),
-            reportData.getTickLossBreakdown(),
-            reportData.getSummaryLines());
+        return ActivityReportAssembler.assemble(normalizedSession, activityData, "Inferno", reportData);
     }
 
     private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
@@ -108,44 +95,9 @@ public final class InfernoAnalyzer
         return latencies;
     }
 
-    private static List<OpportunityTimelineEntry> buildTimeline(List<ResolvedOpportunity> opportunities)
-    {
-        if (opportunities.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<OpportunityTimelineEntry> timeline = new ArrayList<>(opportunities.size());
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            timeline.add(new OpportunityTimelineEntry(
-                opportunity.type(),
-                labelFor(opportunity.type()),
-                opportunity.status().name(),
-                opportunity.endTick(),
-                opportunity.endWallTimeMillis(),
-                opportunity.latencyTicks(),
-                opportunity.latencyMillis(),
-                evidenceDetails(opportunity.terminalEvidence())));
-        }
-        return Collections.unmodifiableList(timeline);
-    }
-
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
-        final List<String> evidence = new ArrayList<>();
-        final String startEvidence = TextValues.trimmedOrEmpty(session.getMetadata().get("evidenceSummary"));
-        if (!startEvidence.isEmpty())
-        {
-            for (String part : startEvidence.split("\\|"))
-            {
-                final String trimmed = part.trim();
-                if (!trimmed.isEmpty())
-                {
-                    evidence.add(trimmed);
-                }
-            }
-        }
+        final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         final String prayerStatus = TextValues.trimmedOrEmpty(activityData.getAttributes().get("prayerEvidenceStatus"));
         evidence.add("Prayer timing omitted because prayer evidence is " + prayerStatus + ".");
         final String deathTimeline = TextValues.trimmedOrEmpty(activityData.getAttributes().get("deathTimelineEvidence"));
@@ -167,34 +119,8 @@ public final class InfernoAnalyzer
         }
 
         return java.util.Arrays.asList(
-            "Best execution: Nibbler response " + TickValueFormatter.formatTicks(minimum(nibblerResponses)) + " ticks",
+            "Best execution: Nibbler response " + TickValueFormatter.formatTicks(AnalysisMath.minimum(nibblerResponses)) + " ticks",
             "Death timeline captured " + deathTimelineEvents + " events");
-    }
-
-    private static String displayName(ActivitySession session)
-    {
-        final String displayName = TextValues.trimmedOrEmpty(session.getMetadata().get("displayName"));
-        return displayName.isEmpty() ? "Inferno" : displayName;
-    }
-
-    private static double confidence(ActivitySession session)
-    {
-        final String raw = TextValues.trimmedOrEmpty(session.getMetadata().get("confidence"));
-        if (raw.isEmpty())
-        {
-            return 0.0D;
-        }
-        return Double.parseDouble(raw);
-    }
-
-    private static int intAttribute(ActivityReportData activityData, String key)
-    {
-        final String raw = TextValues.trimmedOrEmpty(activityData.getAttributes().get(key));
-        if (raw.isEmpty())
-        {
-            return 0;
-        }
-        return Integer.parseInt(raw);
     }
 
     private static String labelFor(String opportunityType)
@@ -212,52 +138,6 @@ public final class InfernoAnalyzer
             return "Prayer window";
         }
         return opportunityType.toLowerCase(Locale.US);
-    }
-
-    private static List<String> evidenceDetails(List<OpportunityEvidence> evidence)
-    {
-        if (evidence == null || evidence.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        final List<String> details = new ArrayList<>(evidence.size());
-        for (OpportunityEvidence item : evidence)
-        {
-            details.add(item.getDetail().isEmpty() ? item.getSourceEventType() : item.getDetail());
-        }
-        return Collections.unmodifiableList(details);
-    }
-
-    private static double average(List<Double> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return 0.0D;
-        }
-        return sum(values) / values.size();
-    }
-
-    private static double sum(List<Double> values)
-    {
-        double sum = 0.0D;
-        if (values != null)
-        {
-            for (Double value : values)
-            {
-                sum += value;
-            }
-        }
-        return sum;
-    }
-
-    private static double minimum(List<Double> values)
-    {
-        double minimum = values.get(0);
-        for (Double value : values)
-        {
-            minimum = Math.min(minimum, value);
-        }
-        return minimum;
     }
 
 }

@@ -1,14 +1,12 @@
 package com.ticksense.ui;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.function.Supplier;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 
 public final class DeveloperDiagnosticsPanel extends JPanel
@@ -26,13 +24,7 @@ public final class DeveloperDiagnosticsPanel extends JPanel
         setLayout(new BorderLayout(0, 8));
         setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-        diagnosticsArea = new JTextArea();
-        diagnosticsArea.setEditable(false);
-        diagnosticsArea.setLineWrap(true);
-        diagnosticsArea.setWrapStyleWord(true);
-        diagnosticsArea.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        diagnosticsArea.setForeground(ColorScheme.TEXT_COLOR);
-        diagnosticsArea.setBorder(new EmptyBorder(8, 8, 8, 8));
+        diagnosticsArea = PanelTextAreas.readOnlyWrapped();
 
         final JButton refreshButton = new JButton("Refresh diagnostics");
         refreshButton.addActionListener(event -> refresh());

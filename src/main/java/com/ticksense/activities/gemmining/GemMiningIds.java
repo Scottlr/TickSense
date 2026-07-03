@@ -1,6 +1,7 @@
 package com.ticksense.activities.gemmining;
 
-import java.util.Arrays;
+import com.ticksense.activities.VerificationTexts;
+import java.util.List;
 
 public final class GemMiningIds
 {
@@ -41,20 +42,18 @@ public final class GemMiningIds
         1623 // RuneLite ItemID.UNCUT_SAPPHIRE
     };
 
+    private static final List<String> VERIFIED_EVIDENCE = VerificationTexts.listOf(
+        "Gem rock object IDs are sourced from official RuneLite ObjectID constants and exercised in the source-owned normalized verification fixture for the underground Shilo gem mine.",
+        "Gem mining region 11410 is verified in the source-owned normalized verification fixture via local player and gem rock world locations at 2840,9388.",
+        "Rock availability, depletion, and respawn transitions are verified in src/test/resources/replays/gem-mining-basic.jsonl through normalized object state events.",
+        "Mine click evidence is verified in src/test/resources/replays/gem-mining-basic.jsonl through a normalized player action event targeting Gem rock.",
+        "Mining animation IDs are sourced from official RuneLite AnimationID mining pickaxe constants across supported pickaxe families.",
+        "Mining confirmation is verified in src/test/resources/replays/gem-mining-basic.jsonl through mining XP and uncut ruby inventory gain events that use official RuneLite item IDs.");
+    private static final List<String> NOTES = VerificationTexts.listOf(
+        "This verified MVP slice is intentionally scoped to the underground Shilo gem mine fixture region rather than every gem-rock location in the game.",
+        "If OSRS updates change gem rock behavior or IDs, refresh the fixture and registry comments together before keeping gem mining enabled.");
     private static final GemMiningVerificationDecision VERIFICATION_DECISION =
-        GemMiningVerificationDecision.verified(
-            Arrays.asList(
-                "Gem rock object IDs are sourced from official RuneLite ObjectID constants and exercised in the source-owned normalized verification fixture for the underground Shilo gem mine.",
-                "Gem mining region 11410 is verified in the source-owned normalized verification fixture via local player and gem rock world locations at 2840,9388.",
-                "Rock availability, depletion, and respawn transitions are verified in src/test/resources/replays/gem-mining-basic.jsonl through normalized object state events.",
-                "Mine click evidence is verified in src/test/resources/replays/gem-mining-basic.jsonl through a normalized player action event targeting Gem rock.",
-                "Mining animation IDs are sourced from official RuneLite AnimationID mining pickaxe constants across supported pickaxe families.",
-                "Mining confirmation is verified in src/test/resources/replays/gem-mining-basic.jsonl through mining XP and uncut ruby inventory gain events that use official RuneLite item IDs."
-            ),
-            Arrays.asList(
-                "This verified MVP slice is intentionally scoped to the underground Shilo gem mine fixture region rather than every gem-rock location in the game.",
-                "If OSRS updates change gem rock behavior or IDs, refresh the fixture and registry comments together before keeping gem mining enabled."
-            ));
+        GemMiningVerificationDecision.verified(VERIFIED_EVIDENCE, NOTES);
 
     private GemMiningIds()
     {

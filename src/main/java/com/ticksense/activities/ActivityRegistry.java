@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +20,7 @@ public final class ActivityRegistry
 
     private ActivityRegistry(List<ActivityStrategy> strategies)
     {
-        this.strategies = ActivityCollections.immutableList(strategies);
+        this.strategies = ImmutableCollections.immutableList(strategies);
         this.strategiesByType = indexByType(strategies);
     }
 

@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public final class OpportunityInstance
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.definition = Objects.requireNonNull(definition, "definition");
         this.startTime = Objects.requireNonNull(startTime, "startTime");
-        this.context = ActivityCollections.immutableStringMap(context);
+        this.context = ImmutableCollections.immutableMap(context);
     }
 
     public String getInstanceId()

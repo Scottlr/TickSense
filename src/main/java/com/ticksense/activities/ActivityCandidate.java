@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
@@ -28,7 +30,7 @@ public final class ActivityCandidate
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         this.confidence = requireConfidence(confidence);
-        this.evidenceSummary = ActivityCollections.immutableList(evidenceSummary);
+        this.evidenceSummary = ImmutableCollections.immutableList(evidenceSummary);
         this.firstEvidenceTime = Objects.requireNonNull(firstEvidenceTime, "firstEvidenceTime");
         this.suppressed = suppressed;
         this.suppressionReason = ActivityTexts.safeText(suppressionReason);

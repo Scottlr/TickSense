@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
 import java.util.List;
@@ -33,8 +35,8 @@ public final class OpportunityMarker
         this.opportunityType = ActivityTexts.requireText(opportunityType, "opportunityType");
         this.status = Objects.requireNonNull(status, "status");
         this.time = Objects.requireNonNull(time, "time");
-        this.context = ActivityCollections.immutableStringMap(context);
-        this.evidence = ActivityCollections.immutableList(evidence);
+        this.context = ImmutableCollections.immutableMap(context);
+        this.evidence = ImmutableCollections.immutableList(evidence);
     }
 
     public String getMarkerId()

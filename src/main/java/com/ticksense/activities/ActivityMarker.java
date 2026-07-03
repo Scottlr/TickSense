@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
@@ -28,7 +30,7 @@ public final class ActivityMarker
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         this.markerType = ActivityTexts.requireText(markerType, "markerType");
         this.time = Objects.requireNonNull(time, "time");
-        this.metadata = ActivityCollections.immutableStringMap(metadata);
+        this.metadata = ImmutableCollections.immutableMap(metadata);
     }
 
     public String getMarkerId()

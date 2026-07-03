@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityType;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +29,7 @@ public final class OpportunityDefinition
             throw new IllegalArgumentException("defaultTimeoutMillis must be >= 0");
         }
         this.defaultTimeoutMillis = defaultTimeoutMillis;
-        this.expectedResponses = ActivityCollections.immutableList(expectedResponses);
+        this.expectedResponses = ImmutableCollections.immutableList(expectedResponses);
     }
 
     public String getId()

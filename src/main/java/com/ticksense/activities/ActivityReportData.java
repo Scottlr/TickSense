@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import java.util.Map;
@@ -15,7 +17,7 @@ public final class ActivityReportData
     {
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.attributes = ActivityCollections.immutableStringMap(attributes);
+        this.attributes = ImmutableCollections.immutableMap(attributes);
     }
 
     public ActivityId getActivityId()

@@ -1,5 +1,7 @@
 package com.ticksense.activities;
 
+import com.ticksense.common.ImmutableCollections;
+
 import java.util.Map;
 
 public final class ActivityContext
@@ -14,7 +16,7 @@ public final class ActivityContext
         this.sessionId = ActivityTexts.requireText(sessionId, "sessionId");
         this.world = world;
         this.debugActivityDiagnostics = debugActivityDiagnostics;
-        this.metadata = ActivityCollections.immutableStringMap(metadata);
+        this.metadata = ImmutableCollections.immutableMap(metadata);
     }
 
     public String getSessionId()

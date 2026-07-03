@@ -1,19 +1,12 @@
 package com.ticksense.core;
 
-import java.util.Objects;
-
 public final class ActivityId
 {
     private final String value;
 
     public ActivityId(String value)
     {
-        final String normalized = Objects.requireNonNull(value, "value").trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException("ActivityId value must not be blank");
-        }
-        this.value = normalized;
+        this.value = CoreTexts.requireText(value, "value");
     }
 
     public static ActivityId of(String value)

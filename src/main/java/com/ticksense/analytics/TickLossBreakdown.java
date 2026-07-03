@@ -59,11 +59,7 @@ public final class TickLossBreakdown
         final Map<String, Integer> copied = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : values.entrySet())
         {
-            final String key = Objects.requireNonNull(entry.getKey(), "category key").trim();
-            if (key.isEmpty())
-            {
-                throw new IllegalArgumentException("category key must not be blank");
-            }
+            final String key = AnalyticsTexts.requireText(entry.getKey(), "category key");
             copied.put(key, requireNonNegative(Objects.requireNonNull(entry.getValue(), "category value"), "category value"));
         }
         return Collections.unmodifiableMap(copied);

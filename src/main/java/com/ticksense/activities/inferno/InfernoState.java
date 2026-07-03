@@ -10,12 +10,15 @@ import com.ticksense.core.ActivityId;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 final class InfernoState
@@ -54,6 +57,7 @@ final class InfernoState
     private int nibblerResponseCount;
     private int supplyUseCount;
     private int prayerWindowCount;
+    private final List<String> deathTimelineEvidence = new ArrayList<>();
 
     InfernoState(
         InfernoVerificationDecision verificationDecision,
@@ -77,6 +81,11 @@ final class InfernoState
     boolean allowsPrayerTimingReports()
     {
         return verificationDecision.allowsPrayerTimingReports();
+    }
+
+    boolean allowsDeathTimelineEvidence()
+    {
+        return verificationDecision.allowsDeathTimelineEvidence();
     }
 
     void updateRegion(WorldLocation location)
@@ -157,6 +166,7 @@ final class InfernoState
             context(
                 "nibblerNpcId", String.valueOf(event.getNpcRef().getId()),
                 "regionId", String.valueOf(currentRegionId)));
+        appendDeathTimeline("Tick " + event.getTime().getGameTick() + ": verified nibbler " + event.getNpcRef().getId() + " opened.");
     }
 
     void noteNibblerInteraction(InteractingChangedTelemetryEvent event)
@@ -177,6 +187,7 @@ final class InfernoState
                 EvidenceStrength.CONFIRMING,
                 "Local player engaged the verified Inferno nibbler.")));
         nibblerResponseCount++;
+        appendDeathTimeline("Tick " + event.getTime().getGameTick() + ": local player engaged a verified nibbler.");
         nibblerWindow = null;
     }
 
@@ -191,8 +202,25 @@ final class InfernoState
             if (contains(supplyItemIds, delta.getBeforeItemId()) && delta.getAfterQuantity() < delta.getBeforeQuantity())
             {
                 supplyUseCount += (delta.getBeforeQuantity() - delta.getAfterQuantity());
+                appendDeathTimeline("Tick " + event.getTime().getGameTick() + ": used verified supply item " + delta.getBeforeItemId() + ".");
             }
         }
+    }
+
+    void noteDamage(DamageTelemetryEvent event)
+    {
+        if (event.getTargetRef().getType() != EntityRef.Type.LOCAL_PLAYER || !verificationDecision.allowsDeathTimelineEvidence())
+        {
+            return;
+        }
+        appendDeathTimeline("Tick " + event.getTime().getGameTick() + ": local player took " + event.getAmount() + " damage.");
+    }
+
+    boolean isVerifiedPlayerDeath(DamageTelemetryEvent event)
+    {
+        return verificationDecision.allowsDeathTimelineEvidence()
+            && event.getTargetRef().getType() == EntityRef.Type.LOCAL_PLAYER
+            && event.getHealthRatio() <= 0;
     }
 
     void completeWaveSpan(EventTime time, String detail)
@@ -225,6 +253,8 @@ final class InfernoState
         attributes.put("supplyUseCount", String.valueOf(supplyUseCount));
         attributes.put("prayerWindowCount", String.valueOf(prayerWindowCount));
         attributes.put("prayerEvidenceStatus", verificationDecision.getPrayerEvidenceStatus().name());
+        attributes.put("deathTimelineEventCount", String.valueOf(deathTimelineEvidence.size()));
+        attributes.put("deathTimelineEvidence", String.join(" | ", deathTimelineEvidence));
         return attributes;
     }
 
@@ -240,6 +270,7 @@ final class InfernoState
         nibblerResponseCount = 0;
         supplyUseCount = 0;
         prayerWindowCount = 0;
+        deathTimelineEvidence.clear();
     }
 
     java.util.List<String> activationEvidence(NpcStateTelemetryEvent event)
@@ -268,6 +299,20 @@ final class InfernoState
             context(
                 "waveNpcId", String.valueOf(event.getNpcRef().getId()),
                 "regionId", String.valueOf(currentRegionId)));
+        appendDeathTimeline("Tick " + event.getTime().getGameTick() + ": verified Inferno wave span opened.");
+    }
+
+    private void appendDeathTimeline(String detail)
+    {
+        if (!verificationDecision.allowsDeathTimelineEvidence())
+        {
+            return;
+        }
+        if (deathTimelineEvidence.size() == 5)
+        {
+            deathTimelineEvidence.remove(0);
+        }
+        deathTimelineEvidence.add(detail);
     }
 
     private static Map<String, String> context(String... pairs)

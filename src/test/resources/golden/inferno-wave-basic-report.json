@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "activityType": "INFERNO",
+  "detectedActivityName": "Inferno",
+  "durationTicks": 9,
+  "durationMillis": 5400,
+  "finishReason": {
+    "type": "PLAYER_DEAD",
+    "confidence": 0.95,
+    "explanation": "Inferno ended because verified death evidence placed the local player at zero health.",
+    "evidence": [
+      "Local player took 32 damage at tick 710."
+    ],
+    "gameTick": 710
+  },
+  "confidence": 0.93,
+  "evidenceSummary": [
+    "Inferno verification status is VERIFIED.",
+    "Verified Inferno region 9043 is active.",
+    "Verified wave NPC 7691 opened the Inferno attempt.",
+    "Prayer timing omitted because prayer evidence is BLOCKED.",
+    "Death timeline: Tick 701: verified Inferno wave span opened. | Tick 705: verified nibbler 7674 opened. | Tick 706: local player engaged a verified nibbler. | Tick 707: used verified supply item 2434. | Tick 710: local player took 32 damage.",
+    "Verification status: VERIFIED"
+  ],
+  "metrics": {
+    "waveDuration": {
+      "displayName": "Wave duration",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 9.0
+    },
+    "nibblerResponse": {
+      "displayName": "Nibbler response",
+      "unit": "TICKS",
+      "lowerValueBetter": true,
+      "value": 1.0
+    },
+    "supplyUsage": {
+      "displayName": "Supply usage",
+      "unit": "COUNT",
+      "lowerValueBetter": true,
+      "value": 1.0
+    },
+    "deathTimelineEvents": {
+      "displayName": "Death timeline events",
+      "unit": "COUNT",
+      "lowerValueBetter": true,
+      "value": 5.0
+    }
+  },
+  "opportunities": [
+    {
+      "type": "INFERNO_NIBBLER_WINDOW",
+      "label": "Nibbler response",
+      "status": "COMPLETED",
+      "gameTick": 706,
+      "latencyTicks": 1,
+      "latencyMillis": 600,
+      "evidenceSummary": [
+        "Local player engaged the verified Inferno nibbler."
+      ]
+    },
+    {
+      "type": "INFERNO_WAVE",
+      "label": "Wave span",
+      "status": "COMPLETED",
+      "gameTick": 710,
+      "latencyTicks": 9,
+      "latencyMillis": 5400,
+      "evidenceSummary": [
+        "Inferno ended because verified death evidence placed the local player at zero health."
+      ]
+    }
+  ],
+  "tickLossBreakdown": {
+    "totalTickLoss": 10,
+    "categories": {
+      "Wave duration": 9,
+      "Nibbler response": 1
+    }
+  },
+  "summaryLines": [
+    "Best execution: Nibbler response 1 ticks",
+    "Death timeline captured 5 events"
+  ]
+}

@@ -13,6 +13,7 @@ import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
 import com.ticksense.telemetry.TelemetryEvent;
+import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InteractingChangedTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
@@ -117,12 +118,34 @@ public final class InfernoStrategy implements ActivityStrategy
         if (event instanceof InventoryDeltaTelemetryEvent)
         {
             state.noteSupplyUsage((InventoryDeltaTelemetryEvent) event);
+            return;
+        }
+        if (event instanceof DamageTelemetryEvent)
+        {
+            state.noteDamage((DamageTelemetryEvent) event);
         }
     }
 
     @Override
     public Optional<FinishReason> evaluateTermination(ActivityContext context, ActivitySession session, TelemetryEvent event)
     {
+        if (event instanceof DamageTelemetryEvent)
+        {
+            final DamageTelemetryEvent damage = (DamageTelemetryEvent) event;
+            if (state.isVerifiedPlayerDeath(damage))
+            {
+                final FinishReason reason = new FinishReason(
+                    FinishReasonType.PLAYER_DEAD,
+                    damage.getTime(),
+                    0.95D,
+                    "Inferno ended because verified death evidence placed the local player at zero health.",
+                    Collections.singletonList("Local player took " + damage.getAmount() + " damage at tick " + damage.getTime().getGameTick() + "."));
+                state.completeWaveSpan(damage.getTime(), reason.getExplanation());
+                return Optional.of(reason);
+            }
+            return Optional.empty();
+        }
+
         if (!(event instanceof RegionInstanceTelemetryEvent))
         {
             return Optional.empty();

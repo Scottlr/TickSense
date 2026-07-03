@@ -7,6 +7,8 @@ import com.ticksense.activities.construction.ConstructionIds;
 import com.ticksense.activities.construction.ConstructionStrategy;
 import com.ticksense.activities.gemmining.GemMiningIds;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
+import com.ticksense.activities.vardorvis.VardorvisIds;
+import com.ticksense.activities.vardorvis.VardorvisStrategy;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.storage.DeleteAllDataService;
@@ -243,6 +245,10 @@ public class TickSensePlugin extends Plugin
             if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
             {
                 strategies.add(new ConstructionStrategy());
+            }
+            if (VardorvisIds.verificationDecision().allowsNormalReports())
+            {
+                strategies.add(new VardorvisStrategy());
             }
             return strategies;
         };

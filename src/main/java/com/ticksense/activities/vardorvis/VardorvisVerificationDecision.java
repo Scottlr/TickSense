@@ -135,6 +135,12 @@ public final class VardorvisVerificationDecision
         return status == Status.VERIFIED;
     }
 
+    public boolean allowsMechanicReports(String mechanic)
+    {
+        final String normalizedMechanic = normalizedValue(mechanic, "mechanic");
+        return allowsNormalReports() && verifiedMechanics.contains(normalizedMechanic);
+    }
+
     private static List<String> immutableCopy(List<String> values, String fieldName)
     {
         Objects.requireNonNull(values, fieldName);

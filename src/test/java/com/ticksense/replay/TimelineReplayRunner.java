@@ -12,6 +12,8 @@ import com.ticksense.activities.construction.ConstructionStrategy;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.gemmining.GemMiningAnalyzer;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
+import com.ticksense.activities.vardorvis.VardorvisIds;
+import com.ticksense.activities.vardorvis.VardorvisStrategy;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
@@ -205,6 +207,10 @@ public final class TimelineReplayRunner
         if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
         {
             builder.register(new ConstructionStrategy());
+        }
+        if (VardorvisIds.verificationDecision().allowsNormalReports())
+        {
+            builder.register(new VardorvisStrategy());
         }
         return builder.build();
     }

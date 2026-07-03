@@ -1,5 +1,6 @@
 package com.ticksense.core;
 
+import com.ticksense.common.ImmutableCollections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,8 +30,8 @@ public final class ActivitySession
         this.endTime = endTime;
         this.finishReason = finishReason;
         validateFinishState(endTime, finishReason);
-        this.spans = CoreCollections.immutableList(spans);
-        this.metadata = CoreCollections.immutableStringMap(metadata);
+        this.spans = ImmutableCollections.immutableList(spans);
+        this.metadata = ImmutableCollections.immutableMap(metadata);
     }
 
     public ActivitySession finish(FinishReason finishReason)

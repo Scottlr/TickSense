@@ -1,7 +1,8 @@
 package com.ticksense.activities.execution.recovery;
 
+import com.ticksense.activities.ids.InventoryItemClassifier;
+import com.ticksense.activities.ids.ItemCapability;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import java.util.Set;
 
 final class RecoveryItemConsumption
 {
@@ -11,13 +12,13 @@ final class RecoveryItemConsumption
 
     static Integer consumedItemId(
         InventoryDeltaTelemetryEvent event,
-        String inventoryAction,
-        Set<Integer> fallbackItemIds,
+        InventoryItemClassifier itemClassifier,
+        ItemCapability requiredCapability,
         boolean allowItemReplacement)
     {
         for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
         {
-            if (!matchesConsumption(delta, inventoryAction, fallbackItemIds))
+            if (!matchesConsumption(delta, itemClassifier, requiredCapability))
             {
                 continue;
             }
@@ -32,9 +33,12 @@ final class RecoveryItemConsumption
 
     private static boolean matchesConsumption(
         InventoryDeltaTelemetryEvent.ItemDelta delta,
-        String inventoryAction,
-        Set<Integer> fallbackItemIds)
+        InventoryItemClassifier itemClassifier,
+        ItemCapability requiredCapability)
     {
-        return delta.hasBeforeInventoryAction(inventoryAction) || fallbackItemIds.contains(delta.getBeforeItemId());
+        return itemClassifier.hasCapability(
+            delta.getBeforeItemId(),
+            delta.getBeforeInventoryActions(),
+            requiredCapability);
     }
 }

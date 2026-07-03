@@ -4,13 +4,15 @@ import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.execution.AbstractExecutionTracker;
-import com.ticksense.activities.ids.ConsumableItemIds;
+import com.ticksense.activities.ids.DefaultInventoryItemClassifier;
+import com.ticksense.activities.ids.InventoryItemClassifier;
+import com.ticksense.activities.ids.ItemCapability;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import java.util.Set;
+import java.util.Objects;
 
 public final class FoodRecoveryTracker extends AbstractExecutionTracker
 {
@@ -18,20 +20,19 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
     public static final String OPPORTUNITY_FOOD_RECOVERY = "FOOD_RECOVERY";
 
     private static final long DEFAULT_TIMEOUT_MILLIS = 3_600L;
-    private static final String FOOD_ACTION = "Eat";
 
-    private final Set<Integer> fallbackFoodItemIds;
+    private final InventoryItemClassifier itemClassifier;
     private OpportunityInstance recoveryWindow;
 
     public FoodRecoveryTracker()
     {
-        this(ConsumableItemIds.foodItemIds());
+        this(DefaultInventoryItemClassifier.INSTANCE);
     }
 
-    public FoodRecoveryTracker(Set<Integer> fallbackFoodItemIds)
+    public FoodRecoveryTracker(InventoryItemClassifier itemClassifier)
     {
         super(ID);
-        this.fallbackFoodItemIds = Set.copyOf(fallbackFoodItemIds);
+        this.itemClassifier = Objects.requireNonNull(itemClassifier, "itemClassifier");
     }
 
     @Override
@@ -83,7 +84,11 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
 
     private void completeOnFoodConsumption(ActivitySession session, InventoryDeltaTelemetryEvent event)
     {
-        final Integer consumedItemId = RecoveryItemConsumption.consumedItemId(event, FOOD_ACTION, fallbackFoodItemIds, false);
+        final Integer consumedItemId = RecoveryItemConsumption.consumedItemId(
+            event,
+            itemClassifier,
+            ItemCapability.FOOD,
+            false);
         if (consumedItemId == null)
         {
             return;

@@ -4,29 +4,30 @@ import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityInstance;
 import com.ticksense.activities.execution.AbstractExecutionTracker;
-import com.ticksense.activities.ids.ConsumableItemIds;
+import com.ticksense.activities.ids.DefaultInventoryItemClassifier;
+import com.ticksense.activities.ids.InventoryItemClassifier;
+import com.ticksense.activities.ids.ItemCapability;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import java.util.Set;
+import java.util.Objects;
 
 public final class PotionRecoveryTracker extends AbstractExecutionTracker
 {
     public static final String ID = "potion-recovery";
     public static final String OPPORTUNITY_POTION_RECOVERY = "POTION_RECOVERY";
-    private static final String POTION_ACTION = "Drink";
 
-    private final Set<Integer> fallbackPotionItemIds;
+    private final InventoryItemClassifier itemClassifier;
 
     public PotionRecoveryTracker()
     {
-        this(ConsumableItemIds.potionItemIds());
+        this(DefaultInventoryItemClassifier.INSTANCE);
     }
 
-    public PotionRecoveryTracker(Set<Integer> fallbackPotionItemIds)
+    public PotionRecoveryTracker(InventoryItemClassifier itemClassifier)
     {
         super(ID);
-        this.fallbackPotionItemIds = Set.copyOf(fallbackPotionItemIds);
+        this.itemClassifier = Objects.requireNonNull(itemClassifier, "itemClassifier");
     }
 
     @Override
@@ -41,7 +42,11 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
 
     private void completeOnPotionConsumption(ActivitySession session, InventoryDeltaTelemetryEvent event)
     {
-        final Integer consumedItemId = RecoveryItemConsumption.consumedItemId(event, POTION_ACTION, fallbackPotionItemIds, true);
+        final Integer consumedItemId = RecoveryItemConsumption.consumedItemId(
+            event,
+            itemClassifier,
+            ItemCapability.DRINK,
+            true);
         if (consumedItemId == null)
         {
             return;

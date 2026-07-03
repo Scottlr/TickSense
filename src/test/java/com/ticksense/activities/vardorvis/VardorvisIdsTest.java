@@ -44,6 +44,10 @@ public class VardorvisIdsTest
         assertArrayEquals(new int[0], VardorvisIds.bloodSplatGraphicIds());
         assertArrayEquals(new int[0], VardorvisIds.axeMechanicIds());
         assertArrayEquals(new int[0], VardorvisIds.verifiedRegionIds());
+        assertTrue(VardorvisIds.isBossNpcId(12223));
+        assertTrue(VardorvisIds.isHeadNpcId(12226));
+        assertFalse(VardorvisIds.hasVerifiedRegionIds());
+        assertFalse(VardorvisIds.isRangedHeadProjectileId(12345));
 
         final List<String> readmeLines = Files.readAllLines(
             Paths.get("src/test/resources/replays/README.md"),

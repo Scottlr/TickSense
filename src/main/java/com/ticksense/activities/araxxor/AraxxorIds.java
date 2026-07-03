@@ -1,5 +1,6 @@
 package com.ticksense.activities.araxxor;
 
+import com.ticksense.common.IntIdSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,12 @@ public final class AraxxorIds
     private static final int[] VERIFIED_REGION_IDS = {
         // Intentionally empty until T029 captures verified Araxxor region/instance fixtures.
     };
+
+    private static final IntIdSet ARAXXOR_NPC_ID_SET = IntIdSet.of(ARAXXOR_NPC_IDS);
+    private static final IntIdSet SPIDER_NPC_ID_SET = IntIdSet.of(SPIDER_NPC_IDS);
+    private static final IntIdSet RELEVANT_GRAPHIC_ID_SET = IntIdSet.of(RELEVANT_GRAPHIC_IDS);
+    private static final IntIdSet RELEVANT_PROJECTILE_ID_SET = IntIdSet.of(RELEVANT_PROJECTILE_IDS);
+    private static final IntIdSet VERIFIED_REGION_ID_SET = IntIdSet.of(VERIFIED_REGION_IDS);
 
     private static final AraxxorVerificationStatus VERIFICATION_STATUS = AraxxorVerificationStatus.PARTIALLY_VERIFIED;
 
@@ -78,6 +85,36 @@ public final class AraxxorIds
         return VERIFIED_REGION_IDS.clone();
     }
 
+    public static boolean isAraxxorNpcId(int npcId)
+    {
+        return ARAXXOR_NPC_ID_SET.contains(npcId);
+    }
+
+    public static boolean isSpiderNpcId(int npcId)
+    {
+        return SPIDER_NPC_ID_SET.contains(npcId);
+    }
+
+    public static boolean isRelevantGraphicId(int graphicId)
+    {
+        return RELEVANT_GRAPHIC_ID_SET.contains(graphicId);
+    }
+
+    public static boolean isRelevantProjectileId(int projectileId)
+    {
+        return RELEVANT_PROJECTILE_ID_SET.contains(projectileId);
+    }
+
+    public static boolean isVerifiedRegionId(int regionId)
+    {
+        return VERIFIED_REGION_ID_SET.contains(regionId);
+    }
+
+    public static boolean hasVerifiedRegionIds()
+    {
+        return !VERIFIED_REGION_ID_SET.isEmpty();
+    }
+
     public static AraxxorVerificationStatus verificationStatus()
     {
         return VERIFICATION_STATUS;
@@ -101,7 +138,7 @@ public final class AraxxorIds
     public static boolean allowsStrategyEnablement()
     {
         return verificationStatus().allowsNormalStrategyEnablement()
-            && ARAXXOR_NPC_IDS.length > 0
-            && SPIDER_NPC_IDS.length > 0;
+            && !ARAXXOR_NPC_ID_SET.isEmpty()
+            && !SPIDER_NPC_ID_SET.isEmpty();
     }
 }

@@ -21,7 +21,7 @@ public final class AraxxorModule implements ActivityModule
     public boolean isEnabled()
     {
         return AraxxorVerificationDecision.current().allowsNormalStrategyEnablement()
-            && AraxxorIds.verifiedRegionIds().length > 0;
+            && AraxxorIds.hasVerifiedRegionIds();
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.activities.execution.CommonExecutionTrackers;
 import com.ticksense.activities.execution.ExecutionTrackerSet;
-import com.ticksense.activities.execution.MovementResponseTracker;
+import com.ticksense.activities.execution.movement.MovementResponseTracker;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;

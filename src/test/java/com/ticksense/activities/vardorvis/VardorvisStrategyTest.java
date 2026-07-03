@@ -10,7 +10,7 @@ import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.OpportunityStatus;
-import com.ticksense.activities.execution.FoodRecoveryTracker;
+import com.ticksense.activities.execution.recovery.FoodRecoveryTracker;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReasonType;

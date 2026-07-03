@@ -1,6 +1,7 @@
-package com.ticksense.activities.execution;
+package com.ticksense.activities.execution.prayer;
 
 import com.ticksense.activities.ActivityContext;
+import com.ticksense.activities.execution.AbstractExecutionTracker;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.telemetry.TelemetryEvent;
 

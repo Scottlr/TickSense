@@ -10,16 +10,24 @@ This feature area tracks reusable execution behavior that can run inside many ac
 - Measurable emitted window: `Opportunity`.
 - Shared opportunity state machine: `OpportunityLifecycle`.
 
+## Package Layout
+
+- `com.ticksense.activities.execution`: contracts, base lifecycle plumbing, sets, and presets.
+- `com.ticksense.activities.execution.recovery`: food/potion/resource recovery trackers.
+- `com.ticksense.activities.execution.equipment`: gear and equipment-switch trackers.
+- `com.ticksense.activities.execution.prayer`: prayer cue/switch trackers.
+- `com.ticksense.activities.execution.movement`: target re-engagement and movement response trackers.
+
 ## PR Order
 
 | PR | Scope | Status | Notes |
 |---|---|---|---|
-| ET001 | Execution tracker foundation | Started | Adds `ExecutionTracker`, `AbstractExecutionTracker`, `ExecutionTrackerSet`, and `CommonExecutionTrackers`. |
-| ET002 | Food recovery tracker | Started | Emits `food-recovery.FOOD_RECOVERY` from local-player damage followed by known food consumption. |
-| ET003 | Gear switch tracker | Started | Emits `gear-switch.GEAR_SWITCH` from equipment-style inventory replacements. |
-| ET004 | Target re-engagement tracker | Started | Emits `target-reengagement.TARGET_REENGAGEMENT` from target loss followed by NPC interaction/action. |
-| ET005 | Movement response tracker | Started | Provides an explicit `openResponse` hook and completes on local-player movement. |
-| ET006 | Prayer switch tracker | Stubbed | No-op until normalized prayer widget/varbit telemetry exists. |
+| ET001 | Execution tracker foundation | Started | Adds `ExecutionTracker`, `AbstractExecutionTracker`, `ExecutionTrackerSet`, and `CommonExecutionTrackers` in the root execution package. |
+| ET002 | Food recovery tracker | Started | Emits `food-recovery.FOOD_RECOVERY` from `execution.recovery` using local-player damage followed by known food consumption. |
+| ET003 | Gear switch tracker | Started | Emits `gear-switch.GEAR_SWITCH` from `execution.equipment` using equipment-style inventory replacements. |
+| ET004 | Target re-engagement tracker | Started | Emits `target-reengagement.TARGET_REENGAGEMENT` from `execution.movement` using target loss followed by NPC interaction/action. |
+| ET005 | Movement response tracker | Started | Provides an explicit `openResponse` hook from `execution.movement` and completes on local-player movement. |
+| ET006 | Prayer switch tracker | Stubbed | No-op in `execution.prayer` until normalized prayer widget/varbit telemetry exists. |
 | ET007 | Activity adoption pass | Started | Araxxor wires reusable food/gear/prayer/movement; Vardorvis wires reusable food/gear/prayer; Gem Mining wires skilling gear/movement while keeping its domain-specific movement-to-rock opportunity. |
 
 ## Current TODOs

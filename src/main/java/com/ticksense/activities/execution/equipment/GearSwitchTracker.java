@@ -1,8 +1,9 @@
-package com.ticksense.activities.execution;
+package com.ticksense.activities.execution.equipment;
 
 import com.ticksense.activities.ActivityContext;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityInstance;
+import com.ticksense.activities.execution.AbstractExecutionTracker;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;

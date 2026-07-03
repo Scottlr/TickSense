@@ -36,9 +36,12 @@ public final class ReportIndexMaintenanceService
         final RetentionPolicy normalizedPolicy = Objects.requireNonNull(retentionPolicy, "retentionPolicy");
         final List<ReportSummary> summaries = rebuildIndex();
         final int deletedTimelineCount = deleteOldTimelines(normalizedPolicy);
+        final List<ReportSummary> retainedSummaries = normalizedPolicy.isKeepReportsForever()
+            ? summaries
+            : summaries.subList(0, Math.min(summaries.size(), normalizedPolicy.getMaxReportCount()));
         final int deletedReportCount = normalizedPolicy.isKeepReportsForever() ? 0 : deleteOldReports(summaries, normalizedPolicy);
-        final List<ReportSummary> rebuilt = rebuildIndex();
-        return new RetentionResult(deletedTimelineCount, deletedReportCount, rebuilt.size());
+        reportRepository.writeIndex(retainedSummaries);
+        return new RetentionResult(deletedTimelineCount, deletedReportCount, retainedSummaries.size());
     }
 
     private int deleteOldTimelines(RetentionPolicy retentionPolicy) throws IOException

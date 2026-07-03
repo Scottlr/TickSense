@@ -185,7 +185,7 @@ public final class JsonReportRepository implements ReportRepository
         }
     }
 
-    private void writeIndex(List<ReportSummary> summaries) throws IOException
+    void writeIndex(List<ReportSummary> summaries) throws IOException
     {
         final List<PersistedReportSummary> persistedSummaries = new ArrayList<>();
         for (ReportSummary summary : summaries)

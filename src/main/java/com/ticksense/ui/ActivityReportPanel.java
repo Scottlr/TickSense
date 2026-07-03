@@ -14,14 +14,18 @@ import net.runelite.client.ui.ColorScheme;
 
 public class ActivityReportPanel extends JPanel
 {
+    private static final String EMPTY_REPORT_TITLE = "Select a report";
+    private static final String UNKNOWN_VALUE = "Unknown";
+    private static final String EMPTY_REPORT_MESSAGE = "Completed reports will appear here.";
+
     private final JLabel titleLabel = sectionValue("");
-    private final JLabel durationValue = sectionValue("Unknown");
-    private final JLabel gradeValue = sectionValue("Unknown");
-    private final JLabel totalTickLossValue = sectionValue("Unknown");
-    private final JLabel bestExecutionValue = sectionValue("Unknown");
-    private final JLabel worstExecutionValue = sectionValue("Unknown");
-    private final JLabel finishReasonValue = sectionValue("Unknown");
-    private final JLabel confidenceValue = sectionValue("Unknown");
+    private final JLabel durationValue = sectionValue(UNKNOWN_VALUE);
+    private final JLabel gradeValue = sectionValue(UNKNOWN_VALUE);
+    private final JLabel totalTickLossValue = sectionValue(UNKNOWN_VALUE);
+    private final JLabel bestExecutionValue = sectionValue(UNKNOWN_VALUE);
+    private final JLabel worstExecutionValue = sectionValue(UNKNOWN_VALUE);
+    private final JLabel finishReasonValue = sectionValue(UNKNOWN_VALUE);
+    private final JLabel confidenceValue = sectionValue(UNKNOWN_VALUE);
     private final JTextArea evidenceValue = sectionText();
     private final DefaultMetricPanel metricPanel = new DefaultMetricPanel();
     private final OpportunityTimelinePanel opportunityTimelinePanel = new OpportunityTimelinePanel();
@@ -59,18 +63,7 @@ public class ActivityReportPanel extends JPanel
     {
         if (report == null)
         {
-            titleLabel.setText("Select a report");
-            durationValue.setText("Unknown");
-            gradeValue.setText("Unknown");
-            totalTickLossValue.setText("Unknown");
-            bestExecutionValue.setText("Unknown");
-            worstExecutionValue.setText("Unknown");
-            finishReasonValue.setText("Unknown");
-            confidenceValue.setText("Unknown");
-            evidenceValue.setText("Completed reports will appear here.");
-            metricPanel.setMetrics(null);
-            opportunityTimelinePanel.setEntries(null);
-            tickLossBreakdownPanel.setBreakdown(null);
+            resetReportDisplay();
             return;
         }
 
@@ -86,6 +79,22 @@ public class ActivityReportPanel extends JPanel
         metricPanel.setMetrics(report.getMetrics());
         opportunityTimelinePanel.setEntries(report.getOpportunities());
         tickLossBreakdownPanel.setBreakdown(report.getTickLossBreakdown());
+    }
+
+    private void resetReportDisplay()
+    {
+        titleLabel.setText(EMPTY_REPORT_TITLE);
+        durationValue.setText(UNKNOWN_VALUE);
+        gradeValue.setText(UNKNOWN_VALUE);
+        totalTickLossValue.setText(UNKNOWN_VALUE);
+        bestExecutionValue.setText(UNKNOWN_VALUE);
+        worstExecutionValue.setText(UNKNOWN_VALUE);
+        finishReasonValue.setText(UNKNOWN_VALUE);
+        confidenceValue.setText(UNKNOWN_VALUE);
+        evidenceValue.setText(EMPTY_REPORT_MESSAGE);
+        metricPanel.setMetrics(null);
+        opportunityTimelinePanel.setEntries(null);
+        tickLossBreakdownPanel.setBreakdown(null);
     }
 
     private JPanel createOverviewPanel()

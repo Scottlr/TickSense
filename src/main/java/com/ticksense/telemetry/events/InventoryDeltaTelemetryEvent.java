@@ -3,8 +3,10 @@ package com.ticksense.telemetry.events;
 import com.ticksense.core.EventTime;
 import com.ticksense.telemetry.AbstractTelemetryEvent;
 import com.ticksense.telemetry.TelemetryCategory;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class InventoryDeltaTelemetryEvent extends AbstractTelemetryEvent
@@ -38,14 +40,27 @@ public final class InventoryDeltaTelemetryEvent extends AbstractTelemetryEvent
         private final int beforeQuantity;
         private final int afterItemId;
         private final int afterQuantity;
+        private final List<String> beforeInventoryActions;
 
         public ItemDelta(int slot, int beforeItemId, int beforeQuantity, int afterItemId, int afterQuantity)
+        {
+            this(slot, beforeItemId, beforeQuantity, afterItemId, afterQuantity, Collections.emptyList());
+        }
+
+        public ItemDelta(
+            int slot,
+            int beforeItemId,
+            int beforeQuantity,
+            int afterItemId,
+            int afterQuantity,
+            List<String> beforeInventoryActions)
         {
             this.slot = slot;
             this.beforeItemId = beforeItemId;
             this.beforeQuantity = beforeQuantity;
             this.afterItemId = afterItemId;
             this.afterQuantity = afterQuantity;
+            this.beforeInventoryActions = immutableActions(beforeInventoryActions);
         }
 
         public int getSlot()
@@ -73,6 +88,28 @@ public final class InventoryDeltaTelemetryEvent extends AbstractTelemetryEvent
             return afterQuantity;
         }
 
+        public List<String> getBeforeInventoryActions()
+        {
+            return beforeInventoryActions;
+        }
+
+        public boolean hasBeforeInventoryAction(String action)
+        {
+            final String normalizedAction = normalizeAction(action);
+            if (normalizedAction.isEmpty())
+            {
+                return false;
+            }
+            for (String beforeAction : beforeInventoryActions)
+            {
+                if (normalizedAction.equalsIgnoreCase(normalizeAction(beforeAction)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         @Override
         public boolean equals(Object other)
         {
@@ -89,13 +126,38 @@ public final class InventoryDeltaTelemetryEvent extends AbstractTelemetryEvent
                 && beforeItemId == that.beforeItemId
                 && beforeQuantity == that.beforeQuantity
                 && afterItemId == that.afterItemId
-                && afterQuantity == that.afterQuantity;
+                && afterQuantity == that.afterQuantity
+                && beforeInventoryActions.equals(that.beforeInventoryActions);
         }
 
         @Override
         public int hashCode()
         {
-            return Objects.hash(slot, beforeItemId, beforeQuantity, afterItemId, afterQuantity);
+            return Objects.hash(slot, beforeItemId, beforeQuantity, afterItemId, afterQuantity, beforeInventoryActions);
+        }
+
+        private static List<String> immutableActions(List<String> source)
+        {
+            if (source == null || source.isEmpty())
+            {
+                return Collections.emptyList();
+            }
+
+            final List<String> actions = new ArrayList<>(source.size());
+            for (String action : source)
+            {
+                final String normalizedAction = normalizeAction(action);
+                if (!normalizedAction.isEmpty())
+                {
+                    actions.add(normalizedAction);
+                }
+            }
+            return Collections.unmodifiableList(actions);
+        }
+
+        private static String normalizeAction(String action)
+        {
+            return action == null ? "" : action.trim();
         }
     }
 }

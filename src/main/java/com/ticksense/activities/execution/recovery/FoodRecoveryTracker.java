@@ -17,19 +17,20 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
     public static final String OPPORTUNITY_FOOD_RECOVERY = "FOOD_RECOVERY";
 
     private static final long DEFAULT_TIMEOUT_MILLIS = 3_600L;
+    private static final String FOOD_ACTION = "Eat";
 
-    private final Set<Integer> foodItemIds;
+    private final Set<Integer> fallbackFoodItemIds;
     private OpportunityInstance recoveryWindow;
 
     public FoodRecoveryTracker()
     {
-        this(RecoveryItemIds.foodItemIds());
+        this(RecoveryItemFallbackIds.foodItemIds());
     }
 
-    public FoodRecoveryTracker(Set<Integer> foodItemIds)
+    public FoodRecoveryTracker(Set<Integer> fallbackFoodItemIds)
     {
         super(ID);
-        this.foodItemIds = Set.copyOf(foodItemIds);
+        this.fallbackFoodItemIds = Set.copyOf(fallbackFoodItemIds);
     }
 
     @Override
@@ -111,11 +112,16 @@ public final class FoodRecoveryTracker extends AbstractExecutionTracker
     {
         for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
         {
-            if (foodItemIds.contains(delta.getBeforeItemId()) && delta.getAfterQuantity() < delta.getBeforeQuantity())
+            if (isFoodConsumption(delta) && delta.getAfterQuantity() < delta.getBeforeQuantity())
             {
                 return delta.getBeforeItemId();
             }
         }
         return null;
+    }
+
+    private boolean isFoodConsumption(InventoryDeltaTelemetryEvent.ItemDelta delta)
+    {
+        return delta.hasBeforeInventoryAction(FOOD_ACTION) || fallbackFoodItemIds.contains(delta.getBeforeItemId());
     }
 }

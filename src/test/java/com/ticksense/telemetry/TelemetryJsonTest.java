@@ -148,7 +148,7 @@ public class TelemetryJsonTest
                 time(),
                 tags("ItemContainerChanged"),
                 93,
-                Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 100, 1, 101, 1))),
+                Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 100, 1, 101, 1, Collections.singletonList("Eat")))),
             new StatChangedTelemetryEvent(time(), tags("StatChanged"), "Mining", 12_345, 50, 71, 72),
             new MovementTelemetryEvent(
                 time(),

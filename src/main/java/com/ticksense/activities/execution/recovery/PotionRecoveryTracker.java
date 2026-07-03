@@ -13,18 +13,19 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
 {
     public static final String ID = "potion-recovery";
     public static final String OPPORTUNITY_POTION_RECOVERY = "POTION_RECOVERY";
+    private static final String POTION_ACTION = "Drink";
 
-    private final Set<Integer> potionItemIds;
+    private final Set<Integer> fallbackPotionItemIds;
 
     public PotionRecoveryTracker()
     {
-        this(RecoveryItemIds.potionItemIds());
+        this(RecoveryItemFallbackIds.potionItemIds());
     }
 
-    public PotionRecoveryTracker(Set<Integer> potionItemIds)
+    public PotionRecoveryTracker(Set<Integer> fallbackPotionItemIds)
     {
         super(ID);
-        this.potionItemIds = Set.copyOf(potionItemIds);
+        this.fallbackPotionItemIds = Set.copyOf(fallbackPotionItemIds);
     }
 
     @Override
@@ -70,7 +71,7 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
     {
         for (InventoryDeltaTelemetryEvent.ItemDelta delta : event.getDeltas())
         {
-            if (!potionItemIds.contains(delta.getBeforeItemId()))
+            if (!isPotionConsumption(delta))
             {
                 continue;
             }
@@ -80,5 +81,10 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
             }
         }
         return null;
+    }
+
+    private boolean isPotionConsumption(InventoryDeltaTelemetryEvent.ItemDelta delta)
+    {
+        return delta.hasBeforeInventoryAction(POTION_ACTION) || fallbackPotionItemIds.contains(delta.getBeforeItemId());
     }
 }

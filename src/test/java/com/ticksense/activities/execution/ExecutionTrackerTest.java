@@ -32,7 +32,7 @@ import org.junit.Test;
 public class ExecutionTrackerTest
 {
     @Test
-    public void foodRecoveryCompletesWhenFoodIsConsumedAfterDamage()
+    public void foodRecoveryCompletesWhenFoodMetadataIsPresent()
     {
         final Harness harness = new Harness(new FoodRecoveryTracker());
 
@@ -48,7 +48,7 @@ public class ExecutionTrackerTest
             time(101),
             tags(),
             93,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 385, 1, -1, 0))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 99999, 1, -1, 0, Collections.singletonList("Eat")))));
 
         assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
         assertEquals(OpportunityStatus.COMPLETED, harness.markers.get(1).getStatus());
@@ -180,7 +180,7 @@ public class ExecutionTrackerTest
     }
 
     @Test
-    public void potionRecoveryCompletesWhenKnownPotionIsConsumed()
+    public void potionRecoveryCompletesWhenPotionMetadataIsPresent()
     {
         final Harness harness = new Harness(new PotionRecoveryTracker());
 
@@ -188,13 +188,13 @@ public class ExecutionTrackerTest
             time(360),
             tags(),
             93,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 2434, 1, 139, 1))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 99998, 1, 139, 1, Collections.singletonList("Drink")))));
 
         assertEquals(2, harness.markers.size());
         assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
         assertEquals(OpportunityStatus.COMPLETED, harness.markers.get(1).getStatus());
         assertEquals("potion-recovery.POTION_RECOVERY", harness.markers.get(1).getOpportunityType());
-        assertEquals("2434", harness.markers.get(1).getContext().get("potionItemId"));
+        assertEquals("99998", harness.markers.get(1).getContext().get("potionItemId"));
     }
 
     @Test

@@ -1,12 +1,10 @@
 package com.ticksense.runelite;
 
 import com.ticksense.activities.ActivityMarker;
-import com.ticksense.activities.ActivityMarkerSink;
 import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.ActivityStrategyFactory;
 import com.ticksense.activities.OpportunityMarker;
-import com.ticksense.activities.OpportunitySink;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ReportGenerationService;
 import com.ticksense.core.ActivitySession;
@@ -71,14 +69,15 @@ public final class TickSenseServices implements AutoCloseable
             .registerFactory(Objects.requireNonNull(strategyFactory, "strategyFactory"))
             .build();
 
-        final ReportGenerationService[] reportServiceHolder = new ReportGenerationService[1];
-        final TickSenseServices[] servicesHolder = new TickSenseServices[1];
-        final ActivityMarkerSink activityMarkerSink = marker -> appendActivityMarker(normalizedTimelineRepository, marker, reportServiceHolder);
-        final OpportunitySink opportunitySink = marker -> appendOpportunityMarker(normalizedTimelineRepository, marker, servicesHolder);
-        final ActivityStrategyEngine strategyEngine = new ActivityStrategyEngine(registry, activityMarkerSink, opportunitySink, diagnosticsEnabled);
+        final MarkerPersistenceSinks markerSinks = new MarkerPersistenceSinks(normalizedTimelineRepository);
+        final ActivityStrategyEngine strategyEngine = new ActivityStrategyEngine(
+            registry,
+            markerSinks::appendActivityMarker,
+            markerSinks::appendOpportunityMarker,
+            diagnosticsEnabled);
         final ReportGenerationService reportGenerationService =
             new ReportGenerationService(normalizedTimelineRepository, normalizedReportRepository, strategyEngine);
-        reportServiceHolder[0] = reportGenerationService;
+        markerSinks.setReportGenerationService(reportGenerationService);
 
         final TickSenseServices services = new TickSenseServices(
             normalizedTelemetryBus,
@@ -86,7 +85,7 @@ public final class TickSenseServices implements AutoCloseable
             normalizedReportRepository,
             strategyEngine,
             reportGenerationService);
-        servicesHolder[0] = services;
+        markerSinks.setServices(services);
         return services;
     }
 
@@ -180,48 +179,6 @@ public final class TickSenseServices implements AutoCloseable
         }
     }
 
-    private static void appendActivityMarker(
-        TimelineRepository timelineRepository,
-        ActivityMarker marker,
-        ReportGenerationService[] reportServiceHolder)
-    {
-        try
-        {
-            timelineRepository.appendActivityMarker(marker);
-            if ("FINISHED".equals(marker.getMarkerType()) && reportServiceHolder[0] != null)
-            {
-                final Optional<ActivityReport> report = reportServiceHolder[0].generateForFinishedMarker(marker);
-                if (!report.isPresent())
-                {
-                    log.debug("No report generated for finished activity {}", marker.getActivityId());
-                }
-            }
-        }
-        catch (IOException ex)
-        {
-            log.warn("TickSense could not persist activity marker {}", marker.getMarkerId(), ex);
-        }
-    }
-
-    private static void appendOpportunityMarker(
-        TimelineRepository timelineRepository,
-        OpportunityMarker marker,
-        TickSenseServices[] servicesHolder)
-    {
-        try
-        {
-            timelineRepository.appendOpportunityMarker(marker);
-            if (servicesHolder[0] != null)
-            {
-                servicesHolder[0].trackOpportunityMarker(marker);
-            }
-        }
-        catch (IOException ex)
-        {
-            log.warn("TickSense could not persist opportunity marker {}", marker.getMarkerId(), ex);
-        }
-    }
-
     private synchronized void trackTelemetry(TelemetryEnvelope envelope)
     {
         if (recentTelemetry.size() == 50)
@@ -240,6 +197,64 @@ public final class TickSenseServices implements AutoCloseable
         else
         {
             openOpportunityMarkers.remove(marker.getOpportunityInstanceId());
+        }
+    }
+
+    private static final class MarkerPersistenceSinks
+    {
+        private final TimelineRepository timelineRepository;
+        private ReportGenerationService reportGenerationService;
+        private TickSenseServices services;
+
+        private MarkerPersistenceSinks(TimelineRepository timelineRepository)
+        {
+            this.timelineRepository = Objects.requireNonNull(timelineRepository, "timelineRepository");
+        }
+
+        private void setReportGenerationService(ReportGenerationService reportGenerationService)
+        {
+            this.reportGenerationService = Objects.requireNonNull(reportGenerationService, "reportGenerationService");
+        }
+
+        private void setServices(TickSenseServices services)
+        {
+            this.services = Objects.requireNonNull(services, "services");
+        }
+
+        private void appendActivityMarker(ActivityMarker marker)
+        {
+            try
+            {
+                timelineRepository.appendActivityMarker(marker);
+                if ("FINISHED".equals(marker.getMarkerType()) && reportGenerationService != null)
+                {
+                    final Optional<ActivityReport> report = reportGenerationService.generateForFinishedMarker(marker);
+                    if (!report.isPresent())
+                    {
+                        log.debug("No report generated for finished activity {}", marker.getActivityId());
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                log.warn("TickSense could not persist activity marker {}", marker.getMarkerId(), ex);
+            }
+        }
+
+        private void appendOpportunityMarker(OpportunityMarker marker)
+        {
+            try
+            {
+                timelineRepository.appendOpportunityMarker(marker);
+                if (services != null)
+                {
+                    services.trackOpportunityMarker(marker);
+                }
+            }
+            catch (IOException ex)
+            {
+                log.warn("TickSense could not persist opportunity marker {}", marker.getMarkerId(), ex);
+            }
         }
     }
 }

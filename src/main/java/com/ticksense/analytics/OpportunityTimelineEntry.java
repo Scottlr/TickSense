@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +26,9 @@ public final class OpportunityTimelineEntry
         Long latencyMillis,
         List<String> evidenceSummary)
     {
-        this.opportunityType = AnalyticsTexts.requireText(opportunityType, "opportunityType");
-        this.label = AnalyticsTexts.requireText(label, "label");
-        this.status = AnalyticsTexts.requireText(status, "status");
+        this.opportunityType = TextValues.requireText(opportunityType, "opportunityType");
+        this.label = TextValues.requireText(label, "label");
+        this.status = TextValues.requireText(status, "status");
         this.gameTick = requireNonNegative(gameTick, "gameTick");
         this.wallTimeMillis = requireNonNegative(wallTimeMillis, "wallTimeMillis");
         this.latencyTicks = latencyTicks == null ? null : requireNonNegative(latencyTicks, "latencyTicks");

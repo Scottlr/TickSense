@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import java.util.Objects;
 
 public final class MetricDefinition
@@ -22,10 +23,10 @@ public final class MetricDefinition
         String description,
         boolean lowerValueBetter)
     {
-        this.key = AnalyticsTexts.requireText(key, "key");
-        this.displayName = AnalyticsTexts.requireText(displayName, "displayName");
+        this.key = TextValues.requireText(key, "key");
+        this.displayName = TextValues.requireText(displayName, "displayName");
         this.unit = Objects.requireNonNull(unit, "unit");
-        this.description = AnalyticsTexts.safeText(description);
+        this.description = TextValues.trimmedOrEmpty(description);
         this.lowerValueBetter = lowerValueBetter;
     }
 

@@ -1,5 +1,6 @@
 package com.ticksense.analytics;
 
+import com.ticksense.common.TextValues;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Collections;
@@ -23,7 +24,7 @@ final class AnalyticsCollections
         final List<String> copied = new ArrayList<>(values.size());
         for (String value : values)
         {
-            copied.add(AnalyticsTexts.requireText(value, fieldName + " value"));
+            copied.add(TextValues.requireText(value, fieldName + " value"));
         }
         return Collections.unmodifiableList(copied);
     }
@@ -39,7 +40,7 @@ final class AnalyticsCollections
         for (Map.Entry<String, MetricValue> entry : values.entrySet())
         {
             copied.put(
-                AnalyticsTexts.requireText(entry.getKey(), "metric key"),
+                TextValues.requireText(entry.getKey(), "metric key"),
                 Objects.requireNonNull(entry.getValue(), "metric value"));
         }
         return Collections.unmodifiableMap(copied);

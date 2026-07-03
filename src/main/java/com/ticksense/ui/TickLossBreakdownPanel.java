@@ -20,7 +20,7 @@ public class TickLossBreakdownPanel extends JPanel
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(new EmptyBorder(0, 0, 8, 0));
 
-        add(PanelLists.borderlessScrollPane(breakdownList), BorderLayout.CENTER);
+        add(PanelScrollPanes.borderless(breakdownList), BorderLayout.CENTER);
     }
 
     public void setBreakdown(TickLossBreakdown breakdown)

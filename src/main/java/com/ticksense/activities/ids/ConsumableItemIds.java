@@ -1,5 +1,9 @@
 package com.ticksense.activities.ids;
 
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 public final class ConsumableItemIds
@@ -35,6 +39,8 @@ public final class ConsumableItemIds
         BASTION_POTION4_ITEM_ID,
         DIVINE_RANGING_POTION4_ITEM_ID);
 
+    private static final Map<Integer, Set<ItemCapability>> ITEM_CAPABILITIES = itemCapabilities();
+
     private ConsumableItemIds()
     {
     }
@@ -47,5 +53,34 @@ public final class ConsumableItemIds
     public static Set<Integer> potionItemIds()
     {
         return POTION_ITEM_IDS;
+    }
+
+    public static Set<ItemCapability> capabilitiesFor(int itemId)
+    {
+        final Set<ItemCapability> capabilities = ITEM_CAPABILITIES.get(itemId);
+        return capabilities == null ? Collections.emptySet() : capabilities;
+    }
+
+    private static Map<Integer, Set<ItemCapability>> itemCapabilities()
+    {
+        final Map<Integer, Set<ItemCapability>> capabilities = new LinkedHashMap<>();
+        for (int itemId : FOOD_ITEM_IDS)
+        {
+            capabilities.put(itemId, immutableCapabilities(ItemCapability.FOOD));
+        }
+        capabilities.put(PRAYER_POTION4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.PRAYER_RESTORE));
+        capabilities.put(RANGING_POTION4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.COMBAT_BOOST));
+        capabilities.put(SUPER_RESTORE4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.PRAYER_RESTORE, ItemCapability.STAT_RESTORE));
+        capabilities.put(SARADOMIN_BREW4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.BREW));
+        capabilities.put(ANTIVENOM4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.POISON_CURE));
+        capabilities.put(BASTION_POTION4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.COMBAT_BOOST));
+        capabilities.put(DIVINE_RANGING_POTION4_ITEM_ID, immutableCapabilities(ItemCapability.DRINK, ItemCapability.COMBAT_BOOST));
+        return Collections.unmodifiableMap(capabilities);
+    }
+
+    private static Set<ItemCapability> immutableCapabilities(ItemCapability first, ItemCapability... rest)
+    {
+        final EnumSet<ItemCapability> capabilities = EnumSet.of(first, rest);
+        return Collections.unmodifiableSet(capabilities);
     }
 }

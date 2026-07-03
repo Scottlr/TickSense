@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 
@@ -20,7 +21,9 @@ public class TickLossBreakdownPanel extends JPanel
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(new EmptyBorder(0, 0, 8, 0));
 
-        add(PanelScrollPanes.borderless(breakdownList), BorderLayout.CENTER);
+        final JScrollPane breakdownScrollPane = new JScrollPane(breakdownList);
+        breakdownScrollPane.setBorder(null);
+        add(breakdownScrollPane, BorderLayout.CENTER);
     }
 
     public void setBreakdown(TickLossBreakdown breakdown)

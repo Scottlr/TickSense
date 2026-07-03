@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
@@ -46,7 +47,9 @@ public class ActivityReportPanel extends JPanel
         content.add(titleLabel);
         content.add(createOverviewPanel());
         content.add(sectionLabel("Evidence"));
-        content.add(PanelScrollPanes.borderless(evidenceValue));
+        final JScrollPane evidenceScrollPane = new JScrollPane(evidenceValue);
+        evidenceScrollPane.setBorder(null);
+        content.add(evidenceScrollPane);
         content.add(sectionLabel("Metrics"));
         content.add(metricPanel);
         content.add(sectionLabel("Opportunity timeline"));
@@ -54,7 +57,9 @@ public class ActivityReportPanel extends JPanel
         content.add(sectionLabel("Tick-loss breakdown"));
         content.add(tickLossBreakdownPanel);
 
-        add(PanelScrollPanes.borderless(content), BorderLayout.CENTER);
+        final JScrollPane contentScrollPane = new JScrollPane(content);
+        contentScrollPane.setBorder(null);
+        add(contentScrollPane, BorderLayout.CENTER);
 
         showReport(null);
     }
@@ -149,7 +154,9 @@ public class ActivityReportPanel extends JPanel
             super(new BorderLayout());
             setBackground(ColorScheme.DARK_GRAY_COLOR);
             setBorder(new EmptyBorder(0, 0, 8, 0));
-            add(PanelScrollPanes.borderless(metricsText), BorderLayout.CENTER);
+            final JScrollPane metricsScrollPane = new JScrollPane(metricsText);
+            metricsScrollPane.setBorder(null);
+            add(metricsScrollPane, BorderLayout.CENTER);
         }
 
         private void setMetrics(Map<String, MetricValue> metrics)

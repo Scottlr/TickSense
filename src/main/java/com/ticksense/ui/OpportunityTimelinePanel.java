@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 
@@ -20,7 +21,9 @@ public class OpportunityTimelinePanel extends JPanel
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(new EmptyBorder(0, 0, 8, 0));
 
-        add(PanelScrollPanes.borderless(timelineList), BorderLayout.CENTER);
+        final JScrollPane timelineScrollPane = new JScrollPane(timelineList);
+        timelineScrollPane.setBorder(null);
+        add(timelineScrollPane, BorderLayout.CENTER);
     }
 
     public void setEntries(List<OpportunityTimelineEntry> timelineEntries)

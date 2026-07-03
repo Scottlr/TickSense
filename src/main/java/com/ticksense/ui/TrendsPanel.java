@@ -3,6 +3,7 @@ package com.ticksense.ui;
 import com.ticksense.analytics.TrendAnalyzer;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import net.runelite.client.ui.ColorScheme;
 
@@ -15,7 +16,9 @@ public final class TrendsPanel extends JPanel
         setLayout(new BorderLayout());
         setBackground(ColorScheme.DARK_GRAY_COLOR);
         textArea = PanelTextAreas.readOnlyWrapped();
-        add(PanelScrollPanes.borderless(textArea), BorderLayout.CENTER);
+        final JScrollPane textScrollPane = new JScrollPane(textArea);
+        textScrollPane.setBorder(null);
+        add(textScrollPane, BorderLayout.CENTER);
     }
 
     public void setTrendSummary(TrendAnalyzer.TrendSummary trendSummary)

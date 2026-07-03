@@ -3,8 +3,6 @@ package com.ticksense.analytics;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,20 +46,20 @@ public final class ActivityReport
         List<String> summaryLines)
     {
         this.schemaVersion = requireSchemaVersion(schemaVersion);
-        this.reportId = requireText(reportId, "reportId");
+        this.reportId = AnalyticsTexts.requireText(reportId, "reportId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.detectedActivityName = requireText(detectedActivityName, "detectedActivityName");
+        this.detectedActivityName = AnalyticsTexts.requireText(detectedActivityName, "detectedActivityName");
         this.createdAtMillis = requireNonNegative(createdAtMillis, "createdAtMillis");
         this.durationTicks = requireNonNegative(durationTicks, "durationTicks");
         this.durationMillis = requireNonNegative(durationMillis, "durationMillis");
         this.finishReason = Objects.requireNonNull(finishReason, "finishReason");
         this.confidence = requireConfidence(confidence);
-        this.evidenceSummary = immutableStrings(evidenceSummary);
-        this.metrics = immutableMetrics(metrics);
-        this.opportunities = immutableOpportunities(opportunities);
+        this.evidenceSummary = AnalyticsCollections.immutableTextList(evidenceSummary, "evidenceSummary");
+        this.metrics = AnalyticsCollections.immutableMetricValues(metrics);
+        this.opportunities = AnalyticsCollections.immutableTimelineEntries(opportunities);
         this.tickLossBreakdown = Objects.requireNonNull(tickLossBreakdown, "tickLossBreakdown");
-        this.summaryLines = immutableStrings(summaryLines);
+        this.summaryLines = AnalyticsCollections.immutableTextList(summaryLines, "summaryLines");
     }
 
     public int getSchemaVersion()
@@ -199,58 +197,4 @@ public final class ActivityReport
         return value;
     }
 
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static List<String> immutableStrings(List<String> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<String> copied = new ArrayList<>(source.size());
-        for (String value : source)
-        {
-            copied.add(requireText(value, "list value"));
-        }
-        return Collections.unmodifiableList(copied);
-    }
-
-    private static Map<String, MetricValue> immutableMetrics(Map<String, MetricValue> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-
-        final Map<String, MetricValue> copied = new LinkedHashMap<>();
-        for (Map.Entry<String, MetricValue> entry : source.entrySet())
-        {
-            copied.put(requireText(entry.getKey(), "metric key"), Objects.requireNonNull(entry.getValue(), "metricValue"));
-        }
-        return Collections.unmodifiableMap(copied);
-    }
-
-    private static List<OpportunityTimelineEntry> immutableOpportunities(List<OpportunityTimelineEntry> source)
-    {
-        if (source == null || source.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-
-        final List<OpportunityTimelineEntry> copied = new ArrayList<>(source.size());
-        for (OpportunityTimelineEntry entry : source)
-        {
-            copied.add(Objects.requireNonNull(entry, "opportunity"));
-        }
-        return Collections.unmodifiableList(copied);
-    }
 }

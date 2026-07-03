@@ -9,6 +9,14 @@ import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
+import com.ticksense.telemetry.StateChanges;
+import com.ticksense.telemetry.events.AnimationTelemetryEvent;
+import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
+import com.ticksense.telemetry.events.ObjectStateTelemetryEvent;
+import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
+import com.ticksense.telemetry.events.StatChangedTelemetryEvent;
+import com.ticksense.telemetry.events.WidgetTelemetryEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,20 +101,20 @@ final class ConstructionState
 
     void markObjectState(int objectId, WorldLocation location, String objectName, String stateChange, EventTime time)
     {
-        if (contains(ConstructionIds.buildSpotObjectIds(), objectId) && "AVAILABLE".equals(stateChange))
+        if (contains(ConstructionIds.buildSpotObjectIds(), objectId) && StateChanges.AVAILABLE.equals(stateChange))
         {
             availableBuildSpot = new BuildSpotAvailability(objectId, objectName, location, time);
             builtObject = null;
             return;
         }
-        if (contains(ConstructionIds.builtObjectIds(), objectId) && "BUILT".equals(stateChange))
+        if (contains(ConstructionIds.builtObjectIds(), objectId) && StateChanges.BUILT.equals(stateChange))
         {
             builtObject = new BuiltObject(objectId, objectName, location, time);
             availableBuildSpot = null;
-            noteBuildConfirmation(time, "object.state", "Verified oak larder object became built.");
+            noteBuildConfirmation(time, ObjectStateTelemetryEvent.TYPE, "Verified oak larder object became built.");
             return;
         }
-        if (contains(ConstructionIds.buildSpotObjectIds(), objectId) && "AVAILABLE".equals(stateChange) && cadenceOpportunity != null)
+        if (contains(ConstructionIds.buildSpotObjectIds(), objectId) && StateChanges.AVAILABLE.equals(stateChange) && cadenceOpportunity != null)
         {
             builtObject = null;
         }
@@ -130,7 +138,7 @@ final class ConstructionState
             opportunityLifecycle.complete(
                 cadenceOpportunity.getInstanceId(),
                 time,
-                evidence(time, "player.action", "Verified remove click followed the last build confirmation."));
+                evidence(time, PlayerActionTelemetryEvent.TYPE, "Verified remove click followed the last build confirmation."));
             buildRemoveCadenceCount++;
             cadenceOpportunity = null;
         }
@@ -154,7 +162,7 @@ final class ConstructionState
                     "option", option,
                     "target", target,
                     "regionId", String.valueOf(location.getRegionId())));
-            opportunityLifecycle.complete(menuLatency.getInstanceId(), time, evidence(time, "player.action", "Verified menu click followed menu-open evidence."));
+            opportunityLifecycle.complete(menuLatency.getInstanceId(), time, evidence(time, PlayerActionTelemetryEvent.TYPE, "Verified menu click followed menu-open evidence."));
             menuLatencyCount++;
         }
         pendingMenu = null;
@@ -165,7 +173,7 @@ final class ConstructionState
         if (contains(ConstructionIds.constructionWidgetGroupIds(), groupId)
             && contains(ConstructionIds.constructionWidgetChildIds(), childId))
         {
-            noteBuildConfirmation(time, "widget", "Verified construction widget confirmed the oak larder build choice.");
+            noteBuildConfirmation(time, WidgetTelemetryEvent.TYPE, "Verified construction widget confirmed the oak larder build choice.");
         }
     }
 
@@ -173,7 +181,7 @@ final class ConstructionState
     {
         if (contains(ConstructionIds.buildAnimationIds(), animationId))
         {
-            noteBuildConfirmation(time, "animation", "Verified Construction build animation confirmed progress.");
+            noteBuildConfirmation(time, AnimationTelemetryEvent.TYPE, "Verified Construction build animation confirmed progress.");
         }
     }
 
@@ -181,7 +189,7 @@ final class ConstructionState
     {
         if (beforeItemId == 8778 || afterItemId == 8778)
         {
-            noteBuildConfirmation(time, "inventory.delta", "Oak plank inventory changed during the verified build flow.");
+            noteBuildConfirmation(time, InventoryDeltaTelemetryEvent.TYPE, "Oak plank inventory changed during the verified build flow.");
             if (afterItemId == -1 || afterQuantity <= 0)
             {
                 pendingBanking = new PendingBanking(time, currentPlayerLocation, true);
@@ -193,7 +201,7 @@ final class ConstructionState
     {
         if (xpDelta > 0)
         {
-            noteBuildConfirmation(time, "stat.changed", "Construction XP gain confirmed the verified oak larder build.");
+            noteBuildConfirmation(time, StatChangedTelemetryEvent.TYPE, "Construction XP gain confirmed the verified oak larder build.");
         }
     }
 
@@ -213,7 +221,7 @@ final class ConstructionState
             opportunityLifecycle.complete(
                 inventoryCycle.getInstanceId(),
                 time,
-                evidence(time, "widget", "Verified bank widget completed the construction inventory cycle."));
+                evidence(time, WidgetTelemetryEvent.TYPE, "Verified bank widget completed the construction inventory cycle."));
             inventoryCycleCount++;
             inventoryCycle = null;
         }
@@ -228,7 +236,7 @@ final class ConstructionState
             opportunityLifecycle.complete(
                 downtime.getInstanceId(),
                 time,
-                evidence(time, "widget", "Verified bank widget ended Construction downtime."));
+                evidence(time, WidgetTelemetryEvent.TYPE, "Verified bank widget ended Construction downtime."));
             bankingDowntimeCount++;
             pendingBanking = null;
         }
@@ -304,7 +312,7 @@ final class ConstructionState
             opportunityLifecycle.complete(
                 menuLatency.getInstanceId(),
                 pendingBuild.clickTime,
-                evidence(pendingBuild.clickTime, "player.action", "Verified menu click followed menu-open evidence."));
+                evidence(pendingBuild.clickTime, PlayerActionTelemetryEvent.TYPE, "Verified menu click followed menu-open evidence."));
             menuLatencyCount++;
             pendingBuild.menuLatencyEmitted = true;
             pendingMenu = null;
@@ -320,7 +328,7 @@ final class ConstructionState
         opportunityLifecycle.cancelOpenOpportunities(
             activeActivityId,
             endTime,
-            Collections.singletonList(new OpportunityEvidence(endTime, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+            Collections.singletonList(new OpportunityEvidence(endTime, RegionInstanceTelemetryEvent.TYPE, EvidenceStrength.CONFIRMING, detail)));
     }
 
     Map<String, String> snapshotAttributes()

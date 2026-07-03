@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
@@ -61,7 +62,7 @@ public class GemMiningIdsTest
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent
                 && Arrays.stream(GemMiningIds.gemRockObjectIds()).anyMatch(id -> id == ((ObjectStateTelemetryEvent) envelope.getEvent()).getObjectId())
-                && "AVAILABLE".equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
+                && StateChanges.AVAILABLE.equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof PlayerActionTelemetryEvent
@@ -84,11 +85,11 @@ public class GemMiningIdsTest
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent
-                && "DEPLETED".equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
+                && StateChanges.DEPLETED.equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
 
         final long availableCount = events.stream().filter(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent
-                && "AVAILABLE".equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange()))
+                && StateChanges.AVAILABLE.equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange()))
             .count();
         assertTrue(availableCount >= 2L);
     }

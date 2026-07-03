@@ -13,6 +13,7 @@ import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.DamageTelemetryEvent;
@@ -243,7 +244,7 @@ final class InfernoState
             opportunityLifecycle.complete(
                 waveSpan.getInstanceId(),
                 time,
-                Collections.singletonList(new OpportunityEvidence(time, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+                Collections.singletonList(new OpportunityEvidence(time, RegionInstanceTelemetryEvent.TYPE, EvidenceStrength.CONFIRMING, detail)));
             waveSpanCount++;
             waveSpan = null;
         }
@@ -252,7 +253,7 @@ final class InfernoState
             opportunityLifecycle.cancel(
                 nibblerWindow.getInstanceId(),
                 time,
-                Collections.singletonList(new OpportunityEvidence(time, "region.instance", EvidenceStrength.CONFIRMING, detail)));
+                Collections.singletonList(new OpportunityEvidence(time, RegionInstanceTelemetryEvent.TYPE, EvidenceStrength.CONFIRMING, detail)));
             nibblerWindow = null;
         }
         reusableExecutionTrackers.cancelOpenOpportunities(time, detail);

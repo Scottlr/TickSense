@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
@@ -80,7 +81,7 @@ public class ConstructionIdsTest
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent
                 && Arrays.stream(ConstructionIds.buildSpotObjectIds()).anyMatch(id -> id == ((ObjectStateTelemetryEvent) envelope.getEvent()).getObjectId())
-                && "AVAILABLE".equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
+                && StateChanges.AVAILABLE.equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof MenuInteractionTelemetryEvent
@@ -121,7 +122,7 @@ public class ConstructionIdsTest
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof ObjectStateTelemetryEvent
                 && Arrays.stream(ConstructionIds.builtObjectIds()).anyMatch(id -> id == ((ObjectStateTelemetryEvent) envelope.getEvent()).getObjectId())
-                && "BUILT".equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
+                && StateChanges.BUILT.equals(((ObjectStateTelemetryEvent) envelope.getEvent()).getStateChange())));
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof WidgetTelemetryEvent

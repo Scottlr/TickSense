@@ -13,6 +13,7 @@ import com.ticksense.core.ActivityType;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.AnimationTelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
@@ -91,11 +92,11 @@ public final class GemMiningStrategy implements ActivityStrategy
         if (event instanceof ObjectStateTelemetryEvent)
         {
             final ObjectStateTelemetryEvent object = (ObjectStateTelemetryEvent) event;
-            if ("AVAILABLE".equals(object.getStateChange()))
+            if (StateChanges.AVAILABLE.equals(object.getStateChange()))
             {
                 state.markRockAvailable(object.getObjectId(), object.getLocation(), object.getTime());
             }
-            else if ("DEPLETED".equals(object.getStateChange()))
+            else if (StateChanges.DEPLETED.equals(object.getStateChange()))
             {
                 state.markRockDepleted(object.getObjectId(), object.getLocation());
             }
@@ -210,11 +211,11 @@ public final class GemMiningStrategy implements ActivityStrategy
         if (event instanceof ObjectStateTelemetryEvent)
         {
             final ObjectStateTelemetryEvent object = (ObjectStateTelemetryEvent) event;
-            if ("AVAILABLE".equals(object.getStateChange()))
+            if (StateChanges.AVAILABLE.equals(object.getStateChange()))
             {
                 state.markRockAvailable(object.getObjectId(), object.getLocation(), object.getTime());
             }
-            else if ("DEPLETED".equals(object.getStateChange()))
+            else if (StateChanges.DEPLETED.equals(object.getStateChange()))
             {
                 state.markRockDepleted(object.getObjectId(), object.getLocation());
             }

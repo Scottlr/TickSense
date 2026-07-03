@@ -15,6 +15,7 @@ import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
+import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -119,7 +120,7 @@ public class InfernoAnalyzerTest
                 OpportunityStatus.COMPLETED,
                 time(endTick),
                 context,
-                Collections.singletonList(new OpportunityEvidence(time(endTick), "region.instance", com.ticksense.activities.EvidenceStrength.CONFIRMING, detail))));
+                Collections.singletonList(new OpportunityEvidence(time(endTick), RegionInstanceTelemetryEvent.TYPE, com.ticksense.activities.EvidenceStrength.CONFIRMING, detail))));
     }
 
     @SafeVarargs

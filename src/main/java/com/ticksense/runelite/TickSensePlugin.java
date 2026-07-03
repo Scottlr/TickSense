@@ -14,6 +14,7 @@ import com.ticksense.storage.JsonReportRepository;
 import com.ticksense.storage.ReportIndexMaintenanceService;
 import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.debug.DebugEventRecorder;
+import com.ticksense.telemetry.StateChanges;
 import com.ticksense.telemetry.TelemetryBus;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.SessionIdProvider;
@@ -423,13 +424,13 @@ public class TickSensePlugin extends Plugin
     @Subscribe
     public void onGameObjectSpawned(GameObjectSpawned event)
     {
-        publishGameObjectSnapshot("GameObjectSpawned", event.getGameObject(), "AVAILABLE");
+        publishGameObjectSnapshot("GameObjectSpawned", event.getGameObject(), StateChanges.AVAILABLE);
     }
 
     @Subscribe
     public void onGameObjectDespawned(GameObjectDespawned event)
     {
-        publishGameObjectSnapshot("GameObjectDespawned", event.getGameObject(), "DEPLETED");
+        publishGameObjectSnapshot("GameObjectDespawned", event.getGameObject(), StateChanges.DEPLETED);
     }
 
     private void publish(String sourceEventType, Function<RuneLiteEventEnvelope, Optional<TelemetryEnvelope>> mapper)

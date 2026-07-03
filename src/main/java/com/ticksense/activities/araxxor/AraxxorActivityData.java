@@ -1,9 +1,9 @@
 package com.ticksense.activities.araxxor;
 
+import com.ticksense.activities.VerificationTexts;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 final class AraxxorActivityData
 {
@@ -24,7 +24,7 @@ final class AraxxorActivityData
         int bossReengagementDamage,
         int targetReengagementDamage)
     {
-        this.verificationStatus = requireText(verificationStatus, "verificationStatus");
+        this.verificationStatus = VerificationTexts.normalizedValue(verificationStatus, "verificationStatus");
         this.spiderEngagementCount = spiderEngagementCount;
         this.bossReengagementCount = bossReengagementCount;
         this.targetReengagementCount = targetReengagementCount;
@@ -44,15 +44,5 @@ final class AraxxorActivityData
         attributes.put("bossReengagementDamage", String.valueOf(bossReengagementDamage));
         attributes.put("targetReengagementDamage", String.valueOf(targetReengagementDamage));
         return Collections.unmodifiableMap(attributes);
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
     }
 }

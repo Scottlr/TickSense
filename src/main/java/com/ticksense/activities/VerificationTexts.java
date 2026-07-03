@@ -31,11 +31,4 @@ public final class VerificationTexts
         }
         return normalized;
     }
-
-    public static List<String> listOf(String... values)
-    {
-        final List<String> list = new ArrayList<>(values.length);
-        Collections.addAll(list, values);
-        return list;
-    }
 }

@@ -23,7 +23,7 @@ public final class GearSwitchAttackTracker extends AbstractExecutionTracker
 
     public GearSwitchAttackTracker()
     {
-        this(GearSwitchContainerIds.defaultIds());
+        this(GearSwitchContainerIds.defaultContainerIds());
     }
 
     public GearSwitchAttackTracker(Set<Integer> equipmentContainerIds)

@@ -1,5 +1,6 @@
 package com.ticksense.activities.execution.equipment;
 
+import java.util.Collection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,18 +14,23 @@ final class GearSwitchContainerIds
     {
     }
 
-    static Set<Integer> defaultIds()
+    static Set<Integer> defaultContainerIds()
     {
         return Set.of(DEFAULT_EQUIPMENT_CONTAINER_ID);
     }
 
     static Set<Integer> of(Set<Integer> containerIds)
     {
-        return Collections.unmodifiableSet(new HashSet<>(containerIds));
+        return immutableCopyOf(containerIds);
     }
 
     static Set<Integer> of(Integer... containerIds)
     {
-        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(containerIds)));
+        return immutableCopyOf(Arrays.asList(containerIds));
+    }
+
+    private static Set<Integer> immutableCopyOf(Collection<Integer> containerIds)
+    {
+        return Collections.unmodifiableSet(new HashSet<>(containerIds));
     }
 }

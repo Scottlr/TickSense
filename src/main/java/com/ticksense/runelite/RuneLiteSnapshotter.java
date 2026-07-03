@@ -1,5 +1,6 @@
 package com.ticksense.runelite;
 
+import com.ticksense.common.ImmutableCollections;
 import com.ticksense.core.EntityRef;
 import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
@@ -190,7 +191,7 @@ public final class RuneLiteSnapshotter
                 labels.add(menuEntryLabel(menuEntry));
             }
         }
-        return RuneliteCollections.immutableList(labels);
+        return ImmutableCollections.immutableList(labels);
     }
 
     String menuEntryLabel(MenuEntry menuEntry)
@@ -219,7 +220,7 @@ public final class RuneLiteSnapshotter
                 actions.add(action);
             }
         }
-        return RuneliteCollections.immutableList(actions);
+        return ImmutableCollections.immutableList(actions);
     }
 
     List<InventoryDeltaTelemetryEvent.ItemDelta> itemDeltas(int containerId, ItemContainer itemContainer)
@@ -245,7 +246,7 @@ public final class RuneLiteSnapshotter
                     itemActions(beforeItem.id)));
             }
         }
-        return RuneliteCollections.immutableList(deltas);
+        return ImmutableCollections.immutableList(deltas);
     }
 
     private static ItemSnapshot[] itemSnapshots(ItemContainer itemContainer)
@@ -286,7 +287,7 @@ public final class RuneLiteSnapshotter
                 actions.add(action.trim());
             }
         }
-        return RuneliteCollections.immutableList(actions);
+        return ImmutableCollections.immutableList(actions);
     }
 
     private ItemComposition itemDefinition(int itemId)

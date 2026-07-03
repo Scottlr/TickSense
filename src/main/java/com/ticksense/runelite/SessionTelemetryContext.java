@@ -1,13 +1,14 @@
 package com.ticksense.runelite;
 
 import com.ticksense.common.TextValues;
+import com.ticksense.telemetry.SessionIdProvider;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public final class SessionTelemetryContext
+public final class SessionTelemetryContext implements SessionIdProvider
 {
     private final AtomicLong eventSequence = new AtomicLong();
 

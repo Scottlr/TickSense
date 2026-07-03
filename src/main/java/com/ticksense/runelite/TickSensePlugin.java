@@ -16,6 +16,7 @@ import com.ticksense.storage.ReportRepository;
 import com.ticksense.storage.debug.DebugEventRecorder;
 import com.ticksense.telemetry.TelemetryBus;
 import com.ticksense.telemetry.TelemetryEnvelope;
+import com.ticksense.telemetry.SessionIdProvider;
 import com.ticksense.ui.NotifyingReportRepository;
 import com.ticksense.ui.TickSensePanel;
 import java.awt.Color;
@@ -254,6 +255,12 @@ public class TickSensePlugin extends Plugin
     ActivityStrategyFactory provideActivityStrategyFactory(List<ActivityModule> activityModules)
     {
         return ActivityModuleCatalog.strategyFactory(activityModules);
+    }
+
+    @Provides
+    SessionIdProvider provideSessionIdProvider(SessionTelemetryContext sessionTelemetryContext)
+    {
+        return sessionTelemetryContext;
     }
 
     @Provides

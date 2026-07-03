@@ -1,9 +1,9 @@
 package com.ticksense.storage.debug;
 
-import com.ticksense.runelite.SessionTelemetryContext;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.TelemetrySink;
+import com.ticksense.telemetry.SessionIdProvider;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +29,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
     private static final long BYTES_PER_MEGABYTE = 1024L * 1024L;
 
     private final Path debugDirectory;
-    private final SessionTelemetryContext sessionTelemetryContext;
+    private final SessionIdProvider sessionIdProvider;
 
     private BufferedWriter writer;
     private Path sessionFile;
@@ -39,15 +39,15 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
     private boolean warnedFailure;
 
     @Inject
-    DebugEventRecorder(SessionTelemetryContext sessionTelemetryContext)
+    DebugEventRecorder(SessionIdProvider sessionIdProvider)
     {
-        this(defaultDebugDirectory(), sessionTelemetryContext);
+        this(defaultDebugDirectory(), sessionIdProvider);
     }
 
-    DebugEventRecorder(Path debugDirectory, SessionTelemetryContext sessionTelemetryContext)
+    DebugEventRecorder(Path debugDirectory, SessionIdProvider sessionIdProvider)
     {
         this.debugDirectory = Objects.requireNonNull(debugDirectory, "debugDirectory");
-        this.sessionTelemetryContext = Objects.requireNonNull(sessionTelemetryContext, "sessionTelemetryContext");
+        this.sessionIdProvider = Objects.requireNonNull(sessionIdProvider, "sessionIdProvider");
     }
 
     public synchronized void startSession(boolean enabled, int maxDebugFileSizeMb, int maxDebugSessions)
@@ -156,7 +156,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
 
     private String sessionFileName()
     {
-        return "session-" + System.currentTimeMillis() + "-" + sessionTelemetryContext.getSessionId() + ".jsonl";
+        return "session-" + System.currentTimeMillis() + "-" + sessionIdProvider.getSessionId() + ".jsonl";
     }
 
     private void disableForFailure(String message, IOException ex)

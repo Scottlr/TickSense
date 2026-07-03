@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.ticksense.core.EventTime;
-import com.ticksense.runelite.SessionTelemetryContext;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.events.GameTickTelemetryEvent;
@@ -25,7 +24,7 @@ public class DebugEventRecorderTest
     public void writesNormalizedJsonlWhenEnabled() throws IOException
     {
         final Path tempDir = Files.createTempDirectory("ticksense-debug-enabled");
-        final DebugEventRecorder recorder = new DebugEventRecorder(tempDir, new SessionTelemetryContext("session-enabled"));
+        final DebugEventRecorder recorder = new DebugEventRecorder(tempDir, () -> "session-enabled");
 
         recorder.startSession(true, 25, 5);
         recorder.accept(envelope("event-enabled", "session-enabled"));
@@ -39,7 +38,7 @@ public class DebugEventRecorderTest
         assertEquals("event-enabled", parsed.getEventId());
         assertEquals("session-enabled", parsed.getSessionId());
 
-        final DebugEventRecorder disabledRecorder = new DebugEventRecorder(tempDir, new SessionTelemetryContext("session-disabled"));
+        final DebugEventRecorder disabledRecorder = new DebugEventRecorder(tempDir, () -> "session-disabled");
         disabledRecorder.startSession(false, 25, 5);
         disabledRecorder.accept(envelope("event-disabled", "session-disabled"));
         disabledRecorder.close();
@@ -52,19 +51,19 @@ public class DebugEventRecorderTest
     {
         final Path tempDir = Files.createTempDirectory("ticksense-debug-retention");
 
-        final DebugEventRecorder first = new DebugEventRecorder(tempDir, new SessionTelemetryContext("session-1"));
+        final DebugEventRecorder first = new DebugEventRecorder(tempDir, () -> "session-1");
         first.startSession(true, 25, 2);
         first.accept(envelope("event-1", "session-1"));
         first.close();
         Thread.sleep(5L);
 
-        final DebugEventRecorder second = new DebugEventRecorder(tempDir, new SessionTelemetryContext("session-2"));
+        final DebugEventRecorder second = new DebugEventRecorder(tempDir, () -> "session-2");
         second.startSession(true, 25, 2);
         second.accept(envelope("event-2", "session-2"));
         second.close();
         Thread.sleep(5L);
 
-        final DebugEventRecorder third = new DebugEventRecorder(tempDir, new SessionTelemetryContext("session-3"));
+        final DebugEventRecorder third = new DebugEventRecorder(tempDir, () -> "session-3");
         third.startSession(true, 25, 2);
         third.accept(envelope("event-3", "session-3"));
         third.close();

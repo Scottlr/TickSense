@@ -8,7 +8,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,8 +34,9 @@ public final class ReportIndexMaintenanceService
     public RetentionResult applyRetention(RetentionPolicy retentionPolicy) throws IOException
     {
         final RetentionPolicy normalizedPolicy = Objects.requireNonNull(retentionPolicy, "retentionPolicy");
+        final List<ReportSummary> summaries = rebuildIndex();
         final int deletedTimelineCount = deleteOldTimelines(normalizedPolicy);
-        final int deletedReportCount = normalizedPolicy.isKeepReportsForever() ? 0 : deleteOldReports(normalizedPolicy);
+        final int deletedReportCount = normalizedPolicy.isKeepReportsForever() ? 0 : deleteOldReports(summaries, normalizedPolicy);
         final List<ReportSummary> rebuilt = rebuildIndex();
         return new RetentionResult(deletedTimelineCount, deletedReportCount, rebuilt.size());
     }
@@ -63,9 +63,8 @@ public final class ReportIndexMaintenanceService
         return deleted;
     }
 
-    private int deleteOldReports(RetentionPolicy retentionPolicy) throws IOException
+    private int deleteOldReports(List<ReportSummary> summaries, RetentionPolicy retentionPolicy) throws IOException
     {
-        final List<ReportSummary> summaries = reportRepository.rebuildIndex();
         if (summaries.size() <= retentionPolicy.getMaxReportCount())
         {
             return 0;

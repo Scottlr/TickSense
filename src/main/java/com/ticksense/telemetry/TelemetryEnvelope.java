@@ -1,5 +1,6 @@
 package com.ticksense.telemetry;
 
+import com.ticksense.common.TextValues;
 import java.util.Objects;
 
 public final class TelemetryEnvelope
@@ -13,8 +14,8 @@ public final class TelemetryEnvelope
     {
         TelemetrySchema.requireSupported(schemaVersion);
         this.schemaVersion = schemaVersion;
-        this.eventId = TelemetryTexts.requireText(eventId, "eventId");
-        this.sessionId = TelemetryTexts.requireText(sessionId, "sessionId");
+        this.eventId = TextValues.requireText(eventId, "eventId");
+        this.sessionId = TextValues.requireText(sessionId, "sessionId");
         this.event = Objects.requireNonNull(event, "event");
     }
 

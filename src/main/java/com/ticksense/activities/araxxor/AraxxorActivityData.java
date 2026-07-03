@@ -1,6 +1,6 @@
 package com.ticksense.activities.araxxor;
 
-import com.ticksense.activities.VerificationTexts;
+import com.ticksense.common.TextValues;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ final class AraxxorActivityData
         int bossReengagementDamage,
         int targetReengagementDamage)
     {
-        this.verificationStatus = VerificationTexts.normalizedValue(verificationStatus, "verificationStatus");
+        this.verificationStatus = TextValues.requireText(verificationStatus, "verificationStatus");
         this.spiderEngagementCount = spiderEngagementCount;
         this.bossReengagementCount = bossReengagementCount;
         this.targetReengagementCount = targetReengagementCount;

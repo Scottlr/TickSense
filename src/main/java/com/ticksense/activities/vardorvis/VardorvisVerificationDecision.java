@@ -1,6 +1,6 @@
 package com.ticksense.activities.vardorvis;
 
-import com.ticksense.activities.VerificationTexts;
+import com.ticksense.common.TextValues;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -39,11 +39,11 @@ public final class VardorvisVerificationDecision
         List<String> notes)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedOnDate = VerificationTexts.normalizedValue(verifiedOnDate, "verifiedOnDate");
-        this.verifiedMechanics = VerificationTexts.immutableCopy(verifiedMechanics, "verifiedMechanics");
-        this.evidence = VerificationTexts.immutableCopy(evidence, "evidence");
-        this.unresolvedMechanics = VerificationTexts.immutableCopy(unresolvedMechanics, "unresolvedMechanics");
-        this.notes = VerificationTexts.immutableCopy(notes, "notes");
+        this.verifiedOnDate = TextValues.requireText(verifiedOnDate, "verifiedOnDate");
+        this.verifiedMechanics = TextValues.immutableTextList(verifiedMechanics, "verifiedMechanics");
+        this.evidence = TextValues.immutableTextList(evidence, "evidence");
+        this.unresolvedMechanics = TextValues.immutableTextList(unresolvedMechanics, "unresolvedMechanics");
+        this.notes = TextValues.immutableTextList(notes, "notes");
     }
 
     public static VardorvisVerificationDecision current()
@@ -133,7 +133,7 @@ public final class VardorvisVerificationDecision
 
     public boolean allowsMechanicReports(String mechanic)
     {
-        final String normalizedMechanic = VerificationTexts.normalizedValue(mechanic, "mechanic");
+        final String normalizedMechanic = TextValues.requireText(mechanic, "mechanic");
         return allowsNormalReports() && verifiedMechanics.contains(normalizedMechanic);
     }
 

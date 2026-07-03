@@ -1,6 +1,6 @@
 package com.ticksense.activities.construction;
 
-import com.ticksense.activities.VerificationTexts;
+import com.ticksense.common.TextValues;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -41,11 +41,11 @@ public final class ConstructionVerificationDecision
         List<String> notes)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.methodName = VerificationTexts.normalizedValue(methodName, "methodName");
-        this.verifiedOnDate = VerificationTexts.normalizedValue(verifiedOnDate, "verifiedOnDate");
-        this.verifiedEvidence = VerificationTexts.immutableCopy(verifiedEvidence, "verifiedEvidence");
-        this.blockers = VerificationTexts.immutableCopy(blockers, "blockers");
-        this.notes = VerificationTexts.immutableCopy(notes, "notes");
+        this.methodName = TextValues.requireText(methodName, "methodName");
+        this.verifiedOnDate = TextValues.requireText(verifiedOnDate, "verifiedOnDate");
+        this.verifiedEvidence = TextValues.immutableTextList(verifiedEvidence, "verifiedEvidence");
+        this.blockers = TextValues.immutableTextList(blockers, "blockers");
+        this.notes = TextValues.immutableTextList(notes, "notes");
     }
 
     public static ConstructionVerificationDecision current()

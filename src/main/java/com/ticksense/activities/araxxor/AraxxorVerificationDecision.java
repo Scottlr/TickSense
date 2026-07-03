@@ -1,6 +1,6 @@
 package com.ticksense.activities.araxxor;
 
-import com.ticksense.activities.VerificationTexts;
+import com.ticksense.common.TextValues;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,9 +29,9 @@ public final class AraxxorVerificationDecision
         List<String> unresolvedQuestions)
     {
         this.status = Objects.requireNonNull(status, "status");
-        this.verifiedOnDate = VerificationTexts.normalizedValue(verifiedOnDate, "verifiedOnDate");
-        this.evidence = VerificationTexts.immutableCopy(evidence, "evidence");
-        this.unresolvedQuestions = VerificationTexts.immutableCopy(unresolvedQuestions, "unresolvedQuestions");
+        this.verifiedOnDate = TextValues.requireText(verifiedOnDate, "verifiedOnDate");
+        this.evidence = TextValues.immutableTextList(evidence, "evidence");
+        this.unresolvedQuestions = TextValues.immutableTextList(unresolvedQuestions, "unresolvedQuestions");
     }
 
     public static AraxxorVerificationDecision verified(

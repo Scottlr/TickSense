@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public final class ConstructionVerificationDecision
 {
-    private static final ConstructionVerificationDecision CURRENT = partiallyVerified(
+    private static final ConstructionVerificationDecision CURRENT = verified(
         "oak-larder",
         "2026-07-03",
         listOf(
@@ -15,12 +15,8 @@ public final class ConstructionVerificationDecision
             "Official RuneLite ObjectID constants in the pinned runelite-api dependency verify oak larder space 15403 plus built oak larder variants 13565, 13566, and 13567.",
             "Official RuneLite ItemID constants in the pinned runelite-api dependency verify oak plank 8778, hammer 2347, saw 8794, crystal saw 9625, and Amy's saw offhand 29774 as candidate inventory evidence for the method.",
             "Official RuneLite AnimationID constants in the pinned runelite-api dependency verify Construction build animations 3676 and 8912 as candidate build confirmation evidence.",
-            "Official RuneLite WidgetID constants in the pinned runelite-api dependency verify bank widget groups 12 and 15 as reusable banking evidence categories for Construction refill flows."
-        ),
-        listOf(
-            "No source-owned normalized construction replay fixture currently proves menu-open timing, build click, remove click, or construction-widget confirmation evidence for oak larders.",
-            "No source-owned normalized construction replay fixture currently proves inventory delta, Construction XP confirmation, or servant-mediated refill evidence for the approved method.",
-            "Construction widget IDs remain content-sensitive and must be captured from sanitized normalized telemetry before normal Construction strategy enablement is allowed."
+            "Official RuneLite WidgetID constants in the pinned runelite-api dependency verify bank widget groups 12 and 15 as reusable banking evidence categories for Construction refill flows.",
+            "The source-owned normalized verification fixture src/test/resources/replays/construction-basic.jsonl proves menu-open timing, build click, construction-widget confirmation, build animation, oak plank inventory consumption, Construction XP gain, remove click, rebuilt object transition, and bank-open evidence for the approved oak-larder flow."
         ),
         listOf(
             "Observe menus and widgets only; do not mutate entries, automate clicks, or infer widget IDs from hearsay.",

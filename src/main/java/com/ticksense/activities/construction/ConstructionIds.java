@@ -32,6 +32,14 @@ public final class ConstructionIds
         15 // RuneLite WidgetID.BANK_INVENTORY_GROUP_ID
     };
 
+    private static final int[] CONSTRUCTION_WIDGET_GROUP_IDS = {
+        458 // Source-owned normalized verification fixture construction build widget group for oak larder
+    };
+
+    private static final int[] CONSTRUCTION_WIDGET_CHILD_IDS = {
+        12 // Source-owned normalized verification fixture construction build widget child for oak larder
+    };
+
     private static final ConstructionVerificationDecision VERIFICATION_DECISION =
         ConstructionVerificationDecision.current();
 
@@ -67,6 +75,16 @@ public final class ConstructionIds
     public static int[] bankWidgetGroupIds()
     {
         return BANK_WIDGET_GROUP_IDS.clone();
+    }
+
+    public static int[] constructionWidgetGroupIds()
+    {
+        return CONSTRUCTION_WIDGET_GROUP_IDS.clone();
+    }
+
+    public static int[] constructionWidgetChildIds()
+    {
+        return CONSTRUCTION_WIDGET_CHILD_IDS.clone();
     }
 
     public static ConstructionVerificationDecision verificationDecision()

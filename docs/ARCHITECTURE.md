@@ -343,22 +343,25 @@ Useful official docs:
 ```java
 public final class AraxxorIds
 {
+    private static final IntIdSet ARAXXOR_NPC_IDS = IntIdSet.of(
+        13668, // RuneLite NpcID.ARAXXOR
+        13669); // RuneLite NpcID.ARAXXOR_13669
+
     private AraxxorIds() {}
 
-    // Placeholder values. Verify each ID in RuneLite Dev Tools before enabling strategy.
-    public static final Set<Integer> ARAXXOR_NPC_IDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-        // NpcID.ARAXXOR, variant IDs...
-    )));
-
-    public static final Set<Integer> SPIDER_NPC_IDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-        // Araxxor spider IDs...
-    )));
+    public static boolean isAraxxorNpcId(int npcId)
+    {
+        return ARAXXOR_NPC_IDS.contains(npcId);
+    }
 }
 ```
 
 Rules:
 
 - Each committed ID must include a source comment: RuneLite constant, Dev Tools verification date, or existing plugin source.
+- Keep activity ID catalogs source-owned: use primitive IDs with provenance comments rather than importing `net.runelite` constants into strategy/catalog code.
+- Prefer intent methods such as `isAraxxorNpcId(int)` or `hasVerifiedRegionIds()` over exposing collections for caller-side membership checks.
+- Keep raw arrays only for fixture snapshots, iteration, or injectable strategy seams.
 - Keep ID registries small and reviewed.
 - Avoid arbitrary user-supplied mechanic IDs.
 - Log unknown IDs in debug diagnostics when inside a candidate activity.

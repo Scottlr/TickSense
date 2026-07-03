@@ -1,5 +1,6 @@
 package com.ticksense.runelite;
 
+import com.ticksense.common.TextValues;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
@@ -19,7 +20,7 @@ public final class SessionTelemetryContext
 
     public SessionTelemetryContext(String sessionId)
     {
-        this.sessionId = RuneliteTexts.requireText(sessionId, "sessionId");
+        this.sessionId = TextValues.requireText(sessionId, "sessionId");
     }
 
     public synchronized void resetSession()
@@ -35,7 +36,7 @@ public final class SessionTelemetryContext
 
     public String nextEventId(String sourceEventType)
     {
-        return RuneliteTexts.requireText(sourceEventType, "sourceEventType") + "-" + eventSequence.incrementAndGet();
+        return TextValues.requireText(sourceEventType, "sourceEventType") + "-" + eventSequence.incrementAndGet();
     }
 
     private static String newSessionId()

@@ -4,6 +4,7 @@ import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.OpportunityEvidence;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.analytics.ActivityAnalysisData;
 import com.ticksense.analytics.ExecutionScore;
 import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
@@ -37,7 +38,7 @@ public final class ConstructionAnalyzer
     private static final MetricDefinition EXECUTION_SCORE =
         new MetricDefinition("executionScore", "Execution score", MetricUnit.SCORE, "Construction execution score.", false);
 
-    public ConstructionReportData analyze(
+    public ActivityAnalysisData analyze(
         ActivitySession session,
         ActivityReportData activityData,
         List<OpportunityMarker> opportunityMarkers)
@@ -72,7 +73,7 @@ public final class ConstructionAnalyzer
             tickLossCategories.get("Menu latency") + tickLossCategories.get("Build/remove cadence") + tickLossCategories.get("Banking downtime"),
             tickLossCategories);
 
-        return new ConstructionReportData(
+        return new ActivityAnalysisData(
             metrics,
             buildTimeline(opportunities),
             tickLossBreakdown,
@@ -86,7 +87,7 @@ public final class ConstructionAnalyzer
         List<OpportunityMarker> opportunityMarkers)
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
-        final ConstructionReportData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
+        final ActivityAnalysisData reportData = analyze(normalizedSession, activityData, opportunityMarkers);
 
         return new ActivityReport(
             ActivityReport.SCHEMA_VERSION,

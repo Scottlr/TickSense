@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class ActivityAnalysisData
+public class ActivityAnalysisData
 {
     private final Map<String, MetricValue> metrics;
     private final List<OpportunityTimelineEntry> opportunityTimeline;
@@ -12,7 +12,7 @@ public abstract class ActivityAnalysisData
     private final List<String> evidenceSummary;
     private final List<String> summaryLines;
 
-    protected ActivityAnalysisData(
+    public ActivityAnalysisData(
         Map<String, MetricValue> metrics,
         List<OpportunityTimelineEntry> opportunityTimeline,
         TickLossBreakdown tickLossBreakdown,

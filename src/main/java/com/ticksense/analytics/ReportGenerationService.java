@@ -6,6 +6,7 @@ import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.construction.ConstructionAnalyzer;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.gemmining.GemMiningAnalyzer;
+import com.ticksense.activities.vardorvis.VardorvisAnalyzer;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
@@ -66,6 +67,10 @@ public final class ReportGenerationService
         if (session.getActivityType() == ActivityType.CONSTRUCTION)
         {
             return new ConstructionAnalyzer().buildReport(session, activityData, opportunityMarkers);
+        }
+        if (session.getActivityType() == ActivityType.VARDORVIS)
+        {
+            return new VardorvisAnalyzer().buildReport(session, activityData, opportunityMarkers);
         }
         throw new IllegalArgumentException("No report generator registered for " + session.getActivityType());
     }

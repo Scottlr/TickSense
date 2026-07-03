@@ -12,6 +12,7 @@ import com.ticksense.activities.construction.ConstructionStrategy;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.activities.gemmining.GemMiningAnalyzer;
 import com.ticksense.activities.gemmining.GemMiningStrategy;
+import com.ticksense.activities.vardorvis.VardorvisAnalyzer;
 import com.ticksense.activities.vardorvis.VardorvisIds;
 import com.ticksense.activities.vardorvis.VardorvisStrategy;
 import com.ticksense.analytics.ActivityReport;
@@ -127,6 +128,10 @@ public final class TimelineReplayRunner
         if (session.getActivityType() == ActivityType.CONSTRUCTION)
         {
             return new ConstructionAnalyzer().buildReport(session, reportData, opportunityMarkers);
+        }
+        if (session.getActivityType() == ActivityType.VARDORVIS)
+        {
+            return new VardorvisAnalyzer().buildReport(session, reportData, opportunityMarkers);
         }
         throw new IllegalArgumentException("No replay analyzer registered for " + session.getActivityType());
     }

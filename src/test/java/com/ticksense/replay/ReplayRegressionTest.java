@@ -11,6 +11,8 @@ import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategy;
 import com.ticksense.activities.OpportunitySink;
+import com.ticksense.activities.vardorvis.VardorvisStrategy;
+import com.ticksense.activities.vardorvis.VardorvisVerificationDecision;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
@@ -46,6 +48,16 @@ public class ReplayRegressionTest
         final ActivityReport report = replayRunner.run("replays/construction-basic.jsonl");
 
         GoldenReportAssert.matches("golden/construction-basic-report.json", report);
+    }
+
+    @Test
+    public void vardorvisBasicMatchesGoldenReport() throws IOException
+    {
+        final TimelineReplayRunner replayRunner = new TimelineReplayRunner(vardorvisRegistry());
+
+        final ActivityReport report = replayRunner.run("replays/vardorvis-basic.jsonl");
+
+        GoldenReportAssert.matches("golden/vardorvis-basic-report.json", report);
     }
 
     @Test
@@ -213,5 +225,23 @@ public class ReplayRegressionTest
         {
             return new ActivityReportData(session.getActivityId(), session.getActivityType(), Collections.emptyMap());
         }
+    }
+
+    private static ActivityRegistry vardorvisRegistry()
+    {
+        return ActivityRegistry.builder()
+            .register(new VardorvisStrategy(
+                VardorvisVerificationDecision.verified(
+                    "2026-07-03",
+                    Collections.singletonList("ranged-head-response"),
+                    Collections.singletonList("Synthetic verified Vardorvis ranged-head fixture."),
+                    Collections.singletonList("Replay-only verified strategy fixture.")),
+                new int[] {12223},
+                new int[] {12226},
+                new int[] {9911},
+                new int[0],
+                new int[0],
+                new int[] {4405}))
+            .build();
     }
 }

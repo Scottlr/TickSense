@@ -131,15 +131,7 @@ public class ActivityReportPanel extends JPanel
 
     private static JTextArea sectionText()
     {
-        final JTextArea textArea = new JTextArea();
-        textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setOpaque(true);
-        textArea.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        textArea.setForeground(ColorScheme.TEXT_COLOR);
-        textArea.setBorder(new EmptyBorder(8, 8, 8, 8));
-        return textArea;
+        return PanelTextAreas.readOnlyWrapped();
     }
 
     private static JScrollPane wrap(JTextArea textArea)

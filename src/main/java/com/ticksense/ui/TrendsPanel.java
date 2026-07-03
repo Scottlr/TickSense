@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 
 public final class TrendsPanel extends JPanel
@@ -16,13 +15,7 @@ public final class TrendsPanel extends JPanel
     {
         setLayout(new BorderLayout());
         setBackground(ColorScheme.DARK_GRAY_COLOR);
-        textArea = new JTextArea();
-        textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        textArea.setForeground(ColorScheme.TEXT_COLOR);
-        textArea.setBorder(new EmptyBorder(8, 8, 8, 8));
+        textArea = PanelTextAreas.readOnlyWrapped();
         add(new JScrollPane(textArea), BorderLayout.CENTER);
     }
 

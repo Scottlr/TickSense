@@ -3,6 +3,7 @@ package com.ticksense.storage;
 import com.ticksense.activities.ActivityMarker;
 import com.ticksense.activities.OpportunityMarker;
 import com.ticksense.core.ActivityId;
+import com.ticksense.common.ImmutableCollections;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import java.util.List;
 import java.util.Objects;
@@ -21,9 +22,9 @@ public final class CompletedActivityTimeline
         List<OpportunityMarker> opportunityMarkers)
     {
         this.activityId = Objects.requireNonNull(activityId, "activityId");
-        this.telemetryEvents = StorageCollections.immutableList(telemetryEvents);
-        this.activityMarkers = StorageCollections.immutableList(activityMarkers);
-        this.opportunityMarkers = StorageCollections.immutableList(opportunityMarkers);
+        this.telemetryEvents = ImmutableCollections.immutableList(telemetryEvents);
+        this.activityMarkers = ImmutableCollections.immutableList(activityMarkers);
+        this.opportunityMarkers = ImmutableCollections.immutableList(opportunityMarkers);
     }
 
     public ActivityId getActivityId()

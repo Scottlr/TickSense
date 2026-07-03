@@ -9,6 +9,7 @@ import com.ticksense.activities.OpportunityStatus;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EventTime;
+import com.ticksense.common.TextValues;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.TelemetrySchema;
@@ -50,7 +51,7 @@ public final class JsonlTimelineRepository implements TimelineRepository
     public JsonlTimelineRepository(TickSenseDataPaths dataPaths, String sessionId, Gson gson, Clock clock) throws IOException
     {
         this.dataPaths = Objects.requireNonNull(dataPaths, "dataPaths");
-        this.sessionId = StorageTexts.requireText(sessionId, "sessionId");
+        this.sessionId = TextValues.requireText(sessionId, "sessionId");
         this.gson = Objects.requireNonNull(gson, "gson");
         this.clock = Objects.requireNonNull(clock, "clock");
 

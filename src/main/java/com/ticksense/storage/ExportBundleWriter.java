@@ -3,6 +3,7 @@ package com.ticksense.storage;
 import com.google.gson.Gson;
 import com.ticksense.activities.ActivityDiagnostic;
 import com.ticksense.analytics.ActivityReport;
+import com.ticksense.common.TextValues;
 import com.ticksense.runelite.TickSenseConfig;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -62,7 +63,7 @@ public final class ExportBundleWriter
 
     public Path writeBundle(String reportId, Path destinationDirectory) throws IOException
     {
-        final String normalizedReportId = StorageTexts.requireText(reportId, "reportId");
+        final String normalizedReportId = TextValues.requireText(reportId, "reportId");
         final Path normalizedDestinationDirectory = Objects.requireNonNull(destinationDirectory, "destinationDirectory");
         final ActivityReport report = findReport(normalizedReportId);
         final List<String> timelineLines = JsonlTimelineRepository.readActivityRecordLines(dataPaths, report.getActivityId(), gson);

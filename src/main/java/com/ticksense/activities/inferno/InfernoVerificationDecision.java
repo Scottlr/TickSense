@@ -14,19 +14,16 @@ public final class InfernoVerificationDecision
         EvidenceStatus.BLOCKED,
         EvidenceStatus.PARTIALLY_VERIFIED,
         EvidenceStatus.BLOCKED,
-        VerificationTexts.listOf(
+        List.of(
             "Official RuneLite NpcID constants in the pinned runelite-api dependency verify source-owned Inferno NPC IDs for nibblers, bats, blobs, melee units, rangers, magers, Jad variants, and Zuk.",
-            "Official RuneLite ItemID constants in the pinned runelite-api dependency verify common Inferno supply items such as prayer potions, super restores, Saradomin brews, cooked karambwans, rune darts, and toxic blowpipe variants."
-        ),
-        VerificationTexts.listOf(
+            "Official RuneLite ItemID constants in the pinned runelite-api dependency verify common Inferno supply items such as prayer potions, super restores, Saradomin brews, cooked karambwans, rune darts, and toxic blowpipe variants."),
+        List.of(
             "No source-owned normalized Inferno replay fixture currently proves wave/region boundaries or attempt segmentation.",
             "No source-owned normalized Inferno replay fixture currently proves prayer state/timing evidence safely enough for normal reports.",
-            "No source-owned normalized Inferno replay fixture currently proves supply-usage timing or death-timeline evidence in TickSense's schema."
-        ),
-        VerificationTexts.listOf(
+            "No source-owned normalized Inferno replay fixture currently proves supply-usage timing or death-timeline evidence in TickSense's schema."),
+        List.of(
             "Inferno work must remain retrospective only; do not infer or display live wave solves, prayer calls, or target priorities.",
-            "Prayer timing stays disabled until direct prayer-state verification exists in source-owned normalized telemetry."
-        ));
+            "Prayer timing stays disabled until direct prayer-state verification exists in source-owned normalized telemetry."));
 
     private final Status status;
     private final String verifiedOnDate;

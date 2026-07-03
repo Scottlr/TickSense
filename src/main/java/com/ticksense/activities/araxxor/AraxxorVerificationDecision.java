@@ -8,16 +8,14 @@ public final class AraxxorVerificationDecision
 {
     private static final AraxxorVerificationDecision CURRENT = blocked(
         "2026-07-03",
-        VerificationTexts.listOf(
+        List.of(
             "Official RuneLite NpcID constants confirm Araxxor boss IDs 13668 and 13669.",
             "Official RuneLite NpcID constants confirm named spider IDs 13671, 13673, 13675, and 13680.",
-            "Araxxor fixture placeholders are reserved under src/test/resources/replays/ for future source-owned normalized captures."
-        ),
-        VerificationTexts.listOf(
+            "Araxxor fixture placeholders are reserved under src/test/resources/replays/ for future source-owned normalized captures."),
+        List.of(
             "No source-owned normalized Araxxor replay fixture currently proves spider spawn or spider availability evidence.",
             "No source-owned normalized Araxxor replay fixture currently proves attack click, interaction-changed, or damage evidence during a spider window.",
-            "Teleport-mid-kill termination evidence is still unverified and must be captured in sanitized normalized telemetry before Araxxor can move beyond BLOCKED."
-        ));
+            "Teleport-mid-kill termination evidence is still unverified and must be captured in sanitized normalized telemetry before Araxxor can move beyond BLOCKED."));
 
     private final Status status;
     private final String verifiedOnDate;

@@ -9,23 +9,19 @@ public final class VardorvisVerificationDecision
 {
     private static final VardorvisVerificationDecision CURRENT = partiallyVerified(
         "2026-07-03",
-        VerificationTexts.listOf(
+        List.of(
             "boss-presence",
-            "head-presence"
-        ),
-        VerificationTexts.listOf(
+            "head-presence"),
+        List.of(
             "Official RuneLite NpcID constants in the pinned runelite-api dependency verify Vardorvis boss variants 12223, 12224, 12228, 12425, 12426, and 13656.",
-            "Official RuneLite NpcID constants in the pinned runelite-api dependency verify the detached Vardorvis head NPC 12226 as a source-owned primitive cue."
-        ),
-        VerificationTexts.listOf(
+            "Official RuneLite NpcID constants in the pinned runelite-api dependency verify the detached Vardorvis head NPC 12226 as a source-owned primitive cue."),
+        List.of(
             "No source-owned normalized Vardorvis replay fixture currently proves ranged-head projectile IDs or their timing reliability.",
             "No source-owned normalized Vardorvis replay fixture currently proves blood-splat graphics, axe projectiles/graphics, prayer-response evidence, or damage attribution during mechanic windows.",
-            "No source-owned normalized Vardorvis replay fixture currently proves arena/region evidence for constraining normal reports to the intended boss context."
-        ),
-        VerificationTexts.listOf(
+            "No source-owned normalized Vardorvis replay fixture currently proves arena/region evidence for constraining normal reports to the intended boss context."),
+        List.of(
             "Observe projectiles and graphics only; do not recolor, replace, or otherwise alter live boss visuals.",
-            "Normal Vardorvis mechanic reports must stay disabled until projectile, graphic, animation, and damage evidence are source-owned and reviewed."
-        ));
+            "Normal Vardorvis mechanic reports must stay disabled until projectile, graphic, animation, and damage evidence are source-owned and reviewed."));
 
     private final Status status;
     private final String verifiedOnDate;

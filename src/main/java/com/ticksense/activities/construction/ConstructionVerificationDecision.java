@@ -9,14 +9,14 @@ public final class ConstructionVerificationDecision
 {
     private static final String METHOD_NAME = "oak-larder";
     private static final String VERIFIED_ON_DATE = "2026-07-03";
-    private static final List<String> VERIFIED_EVIDENCE = VerificationTexts.listOf(
+    private static final List<String> VERIFIED_EVIDENCE = List.of(
         "Approved method scope is limited to oak larders because the roadmap example and current registry values target one narrow build/remove flow.",
         "Official RuneLite ObjectID constants in the pinned runelite-api dependency verify oak larder space 15403 plus built oak larder variants 13565, 13566, and 13567.",
         "Official RuneLite ItemID constants in the pinned runelite-api dependency verify oak plank 8778, hammer 2347, saw 8794, crystal saw 9625, and Amy's saw offhand 29774 as candidate inventory evidence for the method.",
         "Official RuneLite AnimationID constants in the pinned runelite-api dependency verify Construction build animations 3676 and 8912 as candidate build confirmation evidence.",
         "Official RuneLite WidgetID constants in the pinned runelite-api dependency verify bank widget groups 12 and 15 as reusable banking evidence categories for Construction refill flows.",
         "The source-owned normalized verification fixture src/test/resources/replays/construction-basic.jsonl proves menu-open timing, build click, construction-widget confirmation, build animation, oak plank inventory consumption, Construction XP gain, remove click, rebuilt object transition, and bank-open evidence for the approved oak-larder flow.");
-    private static final List<String> NOTES = VerificationTexts.listOf(
+    private static final List<String> NOTES = List.of(
         "Observe menus and widgets only; do not mutate entries, automate clicks, or infer widget IDs from hearsay.",
         "Refresh the fixture and registry comments together after OSRS or RuneLite updates that affect POH Construction flows.");
     private static final ConstructionVerificationDecision CURRENT = verified(

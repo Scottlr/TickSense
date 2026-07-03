@@ -3,6 +3,7 @@ package com.ticksense.ui;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ReportSummary;
 import com.ticksense.analytics.TrendAnalyzer;
+import com.ticksense.runelite.ObservedId;
 import com.ticksense.runelite.TickSenseServices;
 import com.ticksense.runelite.TickSenseConfig;
 import com.ticksense.storage.DeleteAllDataService;
@@ -384,9 +385,29 @@ public class TickSensePanel extends PluginPanel
 
     private void appendUnknownIdsSection(StringBuilder builder)
     {
-        builder.append("Unknown IDs\n");
-        builder.append("-----------\n");
-        builder.append("None captured.\n\n");
+        builder.append("Observed IDs\n");
+        builder.append("------------\n");
+        final List<ObservedId> observedIds = services.getObservedIds();
+        if (observedIds.isEmpty())
+        {
+            builder.append("No IDs captured yet.\n\n");
+            return;
+        }
+
+        for (ObservedId observedId : observedIds)
+        {
+            builder.append(observedId.getKind())
+                .append(' ')
+                .append(observedId.getId())
+                .append(" x")
+                .append(observedId.getCount())
+                .append(" @ tick ")
+                .append(observedId.getLastSeenTick())
+                .append(" via ")
+                .append(observedId.getSourceEventType())
+                .append('\n');
+        }
+        builder.append('\n');
     }
 
     private void appendRecentEventsSection(StringBuilder builder)

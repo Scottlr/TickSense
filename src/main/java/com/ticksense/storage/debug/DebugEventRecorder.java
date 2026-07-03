@@ -1,5 +1,6 @@
 package com.ticksense.storage.debug;
 
+import com.google.gson.Gson;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
 import com.ticksense.telemetry.TelemetrySink;
@@ -30,6 +31,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
 
     private final Path debugDirectory;
     private final SessionIdProvider sessionIdProvider;
+    private final Gson gson = new Gson();
 
     private BufferedWriter writer;
     private Path sessionFile;
@@ -93,7 +95,13 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
             return;
         }
 
-        final String jsonLine = TelemetryJson.toJsonLine(envelope) + System.lineSeparator();
+        final String telemetryJson = TelemetryJson.toJsonLine(envelope);
+        final DebugEventRecord record = DebugEventRecord.normalizedTelemetry(
+            envelope.getSessionId(),
+            envelope.getEvent().getTags().getOrDefault("source", envelope.getEvent().getType()),
+            envelope.getEvent().getTime(),
+            telemetryJson);
+        final String jsonLine = gson.toJson(record) + System.lineSeparator();
         final byte[] lineBytes = jsonLine.getBytes(StandardCharsets.UTF_8);
         if (debugLimits.exceedsMaxFileBytes(bytesWritten, lineBytes.length))
         {

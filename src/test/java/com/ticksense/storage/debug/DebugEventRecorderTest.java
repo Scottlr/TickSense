@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.gson.Gson;
 import com.ticksense.core.EventTime;
 import com.ticksense.telemetry.TelemetryEnvelope;
 import com.ticksense.telemetry.TelemetryJson;
@@ -20,8 +21,10 @@ import org.junit.Test;
 
 public class DebugEventRecorderTest
 {
+    private static final Gson GSON = new Gson();
+
     @Test
-    public void writesNormalizedJsonlWhenEnabled() throws IOException
+    public void writesVersionedNormalizedJsonlWhenEnabled() throws IOException
     {
         final Path tempDir = Files.createTempDirectory("ticksense-debug-enabled");
         final DebugEventRecorder recorder = new DebugEventRecorder(tempDir, () -> "session-enabled");
@@ -34,7 +37,18 @@ public class DebugEventRecorderTest
         assertEquals(1, files.size());
 
         final String jsonLine = Files.readAllLines(files.get(0), StandardCharsets.UTF_8).get(0);
-        final TelemetryEnvelope parsed = TelemetryJson.fromJsonLine(jsonLine);
+        final DebugEventRecord debugRecord = GSON.fromJson(jsonLine, DebugEventRecord.class);
+        assertEquals(DebugEventRecord.SCHEMA_VERSION, debugRecord.getDebugSchemaVersion());
+        assertEquals(DebugEventKind.NORMALIZED_TELEMETRY, debugRecord.getKind());
+        assertEquals("session-enabled", debugRecord.getSessionId());
+        assertEquals("GameTick", debugRecord.getSourceEventType());
+        assertEquals(100L, debugRecord.getTime().getWallTimeMillis());
+        assertEquals(200L, debugRecord.getTime().getMonotonicNanos());
+        assertEquals(300, debugRecord.getTime().getGameTick());
+        assertEquals(400L, debugRecord.getTime().getClientCycle());
+        assertEquals(500, debugRecord.getTime().getClientTickSequence());
+
+        final TelemetryEnvelope parsed = TelemetryJson.fromJsonLine(debugRecord.getPayloadJson());
         assertEquals("event-enabled", parsed.getEventId());
         assertEquals("session-enabled", parsed.getSessionId());
 

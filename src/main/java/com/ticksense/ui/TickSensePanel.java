@@ -227,17 +227,6 @@ public class TickSensePanel extends PluginPanel
         return settingsPanel;
     }
 
-    private JPanel createDisabledPlaceholder(String message)
-    {
-        final JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-        final JLabel label = new JLabel(message);
-        label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        label.setBorder(new EmptyBorder(12, 12, 12, 12));
-        panel.add(label, BorderLayout.NORTH);
-        return panel;
-    }
-
     private JCheckBox createCheckBox(String label, boolean selected, java.util.function.Consumer<Boolean> onChange)
     {
         final JCheckBox checkBox = new JCheckBox(label, selected);

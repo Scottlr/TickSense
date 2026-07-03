@@ -33,9 +33,8 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
 
     private BufferedWriter writer;
     private Path sessionFile;
-    private long maxFileBytes;
+    private DebugLimits debugLimits = DebugLimits.disabled();
     private long bytesWritten;
-    private int maxSessions;
     private boolean active;
     private boolean warnedFailure;
 
@@ -60,8 +59,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
             return;
         }
 
-        maxFileBytes = Math.max(1L, (long) maxDebugFileSizeMb) * BYTES_PER_MEGABYTE;
-        maxSessions = Math.max(1, maxDebugSessions);
+        debugLimits = DebugLimits.fromConfig(maxDebugFileSizeMb, maxDebugSessions);
 
         try
         {
@@ -97,7 +95,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
 
         final String jsonLine = TelemetryJson.toJsonLine(envelope) + System.lineSeparator();
         final byte[] lineBytes = jsonLine.getBytes(StandardCharsets.UTF_8);
-        if (bytesWritten + lineBytes.length > maxFileBytes)
+        if (debugLimits.exceedsMaxFileBytes(bytesWritten, lineBytes.length))
         {
             close();
             return;
@@ -149,7 +147,7 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
                 .sorted(Comparator.comparing((Path path) -> path.getFileName().toString()).reversed())
                 .collect(Collectors.toCollection(ArrayList::new));
 
-            for (int i = maxSessions; i < debugFiles.size(); i++)
+            for (int i = debugLimits.getMaxSessions(); i < debugFiles.size(); i++)
             {
                 Files.deleteIfExists(debugFiles.get(i));
             }
@@ -174,5 +172,39 @@ public final class DebugEventRecorder implements TelemetrySink, AutoCloseable
     private static Path defaultDebugDirectory()
     {
         return Paths.get(System.getProperty("user.home"), ".runelite", "ticksense", "debug");
+    }
+
+    private static final class DebugLimits
+    {
+        private final long maxFileBytes;
+        private final int maxSessions;
+
+        private DebugLimits(long maxFileBytes, int maxSessions)
+        {
+            this.maxFileBytes = maxFileBytes;
+            this.maxSessions = maxSessions;
+        }
+
+        private static DebugLimits disabled()
+        {
+            return new DebugLimits(BYTES_PER_MEGABYTE, 1);
+        }
+
+        private static DebugLimits fromConfig(int maxDebugFileSizeMb, int maxDebugSessions)
+        {
+            return new DebugLimits(
+                Math.max(1L, (long) maxDebugFileSizeMb) * BYTES_PER_MEGABYTE,
+                Math.max(1, maxDebugSessions));
+        }
+
+        private boolean exceedsMaxFileBytes(long currentBytes, int nextBytes)
+        {
+            return currentBytes + nextBytes > maxFileBytes;
+        }
+
+        private int getMaxSessions()
+        {
+            return maxSessions;
+        }
     }
 }

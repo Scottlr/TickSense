@@ -1,5 +1,6 @@
 package com.ticksense.ui;
 
+import com.ticksense.analytics.ReportSummary;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.Collections;
@@ -10,17 +11,15 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import com.ticksense.analytics.ReportSummary;
 import net.runelite.client.ui.ColorScheme;
 
 public class ReportListPanel extends JPanel
 {
     private final JLabel emptyState = new JLabel("No reports yet.", SwingConstants.CENTER);
     private final DefaultListModel<ReportSummary> reportModel = new DefaultListModel<>();
-    private final JList<ReportSummary> reportList = new JList<>(reportModel);
+    private final JList<ReportSummary> reportList = PanelLists.readOnlyList(reportModel, ColorScheme.TEXT_COLOR);
 
     public ReportListPanel()
     {
@@ -29,10 +28,7 @@ public class ReportListPanel extends JPanel
         setBorder(new EmptyBorder(12, 8, 12, 8));
 
         emptyState.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        reportList.setBackground(ColorScheme.DARK_GRAY_COLOR);
-        reportList.setForeground(ColorScheme.TEXT_COLOR);
         reportList.setCellRenderer(new ReportSummaryRenderer());
-        reportList.setFocusable(false);
 
         add(emptyState, BorderLayout.CENTER);
     }
@@ -53,7 +49,7 @@ public class ReportListPanel extends JPanel
         }
         else
         {
-            add(new JScrollPane(reportList), BorderLayout.CENTER);
+            add(PanelLists.borderlessScrollPane(reportList), BorderLayout.CENTER);
             reportList.setSelectedIndex(0);
         }
         revalidate();

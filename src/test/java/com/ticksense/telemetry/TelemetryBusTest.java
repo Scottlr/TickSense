@@ -26,6 +26,21 @@ public class TelemetryBusTest
     }
 
     @Test
+    public void ignoresDuplicateSinkRegistration()
+    {
+        final TelemetryBus telemetryBus = new TelemetryBus();
+        final List<String> deliveries = new ArrayList<>();
+        final TelemetrySink sink = envelope -> deliveries.add(envelope.getEventId());
+        telemetryBus.addSink(sink);
+        telemetryBus.addSink(sink);
+
+        telemetryBus.accept(envelope("event-duplicate"));
+
+        assertEquals(1, deliveries.size());
+        assertEquals("event-duplicate", deliveries.get(0));
+    }
+
+    @Test
     public void continuesAfterSinkFailure()
     {
         final TelemetryBus telemetryBus = new TelemetryBus();

@@ -19,11 +19,7 @@ public final class TelemetryBus implements TelemetrySink
 
     public void addSink(TelemetrySink sink)
     {
-        final TelemetrySink normalizedSink = Objects.requireNonNull(sink, "sink");
-        if (!sinks.contains(normalizedSink))
-        {
-            sinks.add(normalizedSink);
-        }
+        sinks.addIfAbsent(Objects.requireNonNull(sink, "sink"));
     }
 
     public void removeSink(TelemetrySink sink)

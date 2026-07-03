@@ -22,4 +22,9 @@ public final class TextValues
     {
         return value == null ? "" : value.trim();
     }
+
+    public static String rawOrEmpty(String value)
+    {
+        return value == null ? "" : value;
+    }
 }

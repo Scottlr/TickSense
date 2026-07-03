@@ -15,6 +15,6 @@ final class TelemetryTexts
 
     static String safeText(String value)
     {
-        return value == null ? "" : value;
+        return TextValues.rawOrEmpty(value);
     }
 }

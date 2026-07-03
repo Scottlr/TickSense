@@ -7,8 +7,6 @@ import com.ticksense.activities.execution.AbstractExecutionTracker;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.telemetry.TelemetryEvent;
 import com.ticksense.telemetry.events.InventoryDeltaTelemetryEvent;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public final class PotionRecoveryTracker extends AbstractExecutionTracker
@@ -16,20 +14,17 @@ public final class PotionRecoveryTracker extends AbstractExecutionTracker
     public static final String ID = "potion-recovery";
     public static final String OPPORTUNITY_POTION_RECOVERY = "POTION_RECOVERY";
 
-    private static final Set<Integer> DEFAULT_POTION_ITEM_IDS = new HashSet<>(Arrays.asList(
-        2434, 2444, 3024, 6685, 12905, 22461, 23733));
-
     private final Set<Integer> potionItemIds;
 
     public PotionRecoveryTracker()
     {
-        this(DEFAULT_POTION_ITEM_IDS);
+        this(RecoveryItemIds.potionItemIds());
     }
 
     public PotionRecoveryTracker(Set<Integer> potionItemIds)
     {
         super(ID);
-        this.potionItemIds = new HashSet<>(potionItemIds);
+        this.potionItemIds = Set.copyOf(potionItemIds);
     }
 
     @Override

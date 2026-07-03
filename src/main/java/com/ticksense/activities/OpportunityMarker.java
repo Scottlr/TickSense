@@ -2,9 +2,6 @@ package com.ticksense.activities;
 
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.EventTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,14 +27,14 @@ public final class OpportunityMarker
         Map<String, String> context,
         List<OpportunityEvidence> evidence)
     {
-        this.markerId = requireText(markerId, "markerId");
-        this.opportunityInstanceId = requireText(opportunityInstanceId, "opportunityInstanceId");
+        this.markerId = ActivityTexts.requireText(markerId, "markerId");
+        this.opportunityInstanceId = ActivityTexts.requireText(opportunityInstanceId, "opportunityInstanceId");
         this.activityId = Objects.requireNonNull(activityId, "activityId");
-        this.opportunityType = requireText(opportunityType, "opportunityType");
+        this.opportunityType = ActivityTexts.requireText(opportunityType, "opportunityType");
         this.status = Objects.requireNonNull(status, "status");
         this.time = Objects.requireNonNull(time, "time");
-        this.context = immutableMap(context);
-        this.evidence = immutableList(evidence);
+        this.context = ActivityCollections.immutableStringMap(context);
+        this.evidence = ActivityCollections.immutableList(evidence);
     }
 
     public String getMarkerId()
@@ -78,33 +75,5 @@ public final class OpportunityMarker
     public List<OpportunityEvidence> getEvidence()
     {
         return evidence;
-    }
-
-    private static String requireText(String value, String fieldName)
-    {
-        final String normalized = Objects.requireNonNull(value, fieldName).trim();
-        if (normalized.isEmpty())
-        {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
-        }
-        return normalized;
-    }
-
-    private static Map<String, String> immutableMap(Map<String, String> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-        return Collections.unmodifiableMap(new LinkedHashMap<>(values));
-    }
-
-    private static List<OpportunityEvidence> immutableList(List<OpportunityEvidence> values)
-    {
-        if (values == null || values.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(values));
     }
 }

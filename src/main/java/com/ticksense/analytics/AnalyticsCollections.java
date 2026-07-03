@@ -28,6 +28,15 @@ final class AnalyticsCollections
         return Collections.unmodifiableList(copied);
     }
 
+    static <T> List<T> immutableList(List<T> values)
+    {
+        if (values == null || values.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(new ArrayList<>(values));
+    }
+
     static Map<String, MetricValue> immutableMetricValues(Map<String, MetricValue> values)
     {
         if (values == null || values.isEmpty())
@@ -43,6 +52,15 @@ final class AnalyticsCollections
                 Objects.requireNonNull(entry.getValue(), "metric value"));
         }
         return Collections.unmodifiableMap(copied);
+    }
+
+    static <K, V> Map<K, V> immutableMap(Map<K, V> values)
+    {
+        if (values == null || values.isEmpty())
+        {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(new LinkedHashMap<>(values));
     }
 
     static List<OpportunityTimelineEntry> immutableTimelineEntries(List<OpportunityTimelineEntry> values)

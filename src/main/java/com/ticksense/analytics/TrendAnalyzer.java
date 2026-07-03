@@ -103,7 +103,7 @@ public final class TrendAnalyzer
 
         private TrendSummary(List<ActivityTrend> activityTrends)
         {
-            this.activityTrends = Collections.unmodifiableList(new ArrayList<>(activityTrends));
+            this.activityTrends = AnalyticsCollections.immutableList(activityTrends);
         }
 
         public List<ActivityTrend> getActivityTrends()
@@ -138,8 +138,8 @@ public final class TrendAnalyzer
             this.schemaVersion = schemaVersion;
             this.sampleSize = sampleSize;
             this.smallSampleSize = smallSampleSize;
-            this.metricTrends = Collections.unmodifiableMap(new LinkedHashMap<>(metricTrends));
-            this.repeatedTickLossCategories = Collections.unmodifiableList(new ArrayList<>(repeatedTickLossCategories));
+            this.metricTrends = AnalyticsCollections.immutableMap(metricTrends);
+            this.repeatedTickLossCategories = AnalyticsCollections.immutableList(repeatedTickLossCategories);
         }
 
         public ActivityType getActivityType()

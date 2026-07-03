@@ -6,6 +6,7 @@ import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.ActivityStrategyFactory;
 import com.ticksense.activities.OpportunityMarker;
+import com.ticksense.common.ImmutableCollections;
 import com.ticksense.analytics.ActivityReport;
 import com.ticksense.analytics.ReportGenerationService;
 import com.ticksense.core.ActivitySession;
@@ -127,12 +128,12 @@ public final class TickSenseServices implements AutoCloseable
 
     public synchronized List<TelemetryEnvelope> getRecentTelemetry()
     {
-        return RuneliteCollections.immutableList(recentTelemetry);
+        return ImmutableCollections.immutableList(recentTelemetry);
     }
 
     public synchronized List<OpportunityMarker> getOpenOpportunityMarkers()
     {
-        return RuneliteCollections.immutableList(openOpportunityMarkers.values());
+        return ImmutableCollections.immutableList(openOpportunityMarkers.values());
     }
 
     public synchronized Optional<FinishReason> getLastFinishReason()

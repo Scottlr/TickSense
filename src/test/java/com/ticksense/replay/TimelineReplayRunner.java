@@ -6,6 +6,9 @@ import com.ticksense.activities.ActivityRegistry;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategy;
 import com.ticksense.activities.ActivityStrategyEngine;
+import com.ticksense.activities.araxxor.AraxxorIds;
+import com.ticksense.activities.araxxor.AraxxorStrategy;
+import com.ticksense.activities.araxxor.AraxxorVerificationDecision;
 import com.ticksense.activities.construction.ConstructionAnalyzer;
 import com.ticksense.activities.construction.ConstructionIds;
 import com.ticksense.activities.construction.ConstructionStrategy;
@@ -219,6 +222,10 @@ public final class TimelineReplayRunner
         if (ConstructionIds.verificationDecision().allowsStrategyEnablement())
         {
             builder.register(new ConstructionStrategy());
+        }
+        if (AraxxorVerificationDecision.current().allowsNormalStrategyEnablement() && AraxxorIds.verifiedRegionIds().length > 0)
+        {
+            builder.register(new AraxxorStrategy());
         }
         if (VardorvisIds.verificationDecision().allowsNormalReports())
         {

@@ -56,7 +56,6 @@ public class TickSensePanel extends PluginPanel
     private final Component developerDiagnosticsTab;
     private ReportSummary selectedSummary;
     private List<ReportSummary> lastLowConfidenceReports = new ArrayList<>();
-    private boolean diagnosticsTabVisible;
 
     public TickSensePanel(
         ReportRepository reportRepository,
@@ -108,7 +107,6 @@ public class TickSensePanel extends PluginPanel
         tabs.addTab("Trends", trendsPanel);
         tabs.addTab("Settings", createSettingsTab());
         developerDiagnosticsTab = developerDiagnosticsPanel;
-        diagnosticsTabVisible = false;
         setDiagnosticsTabEnabled(config.debugActivityDiagnostics());
         add(tabs, BorderLayout.CENTER);
     }
@@ -448,12 +446,10 @@ public class TickSensePanel extends PluginPanel
         if (enabled && index < 0)
         {
             tabs.addTab("Developer Diagnostics", developerDiagnosticsTab);
-            diagnosticsTabVisible = true;
         }
         else if (!enabled && index >= 0)
         {
             tabs.remove(index);
-            diagnosticsTabVisible = false;
         }
     }
 

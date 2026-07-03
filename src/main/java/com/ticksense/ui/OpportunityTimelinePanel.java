@@ -20,7 +20,7 @@ public class OpportunityTimelinePanel extends JPanel
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(new EmptyBorder(0, 0, 8, 0));
 
-        add(PanelLists.borderlessScrollPane(timelineList), BorderLayout.CENTER);
+        add(PanelScrollPanes.borderless(timelineList), BorderLayout.CENTER);
     }
 
     public void setEntries(List<OpportunityTimelineEntry> timelineEntries)

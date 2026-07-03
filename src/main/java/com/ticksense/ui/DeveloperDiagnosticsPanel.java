@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import net.runelite.client.ui.ColorScheme;
 
@@ -38,7 +37,7 @@ public final class DeveloperDiagnosticsPanel extends JPanel
         controls.add(exportButton);
 
         add(controls, BorderLayout.NORTH);
-        add(new JScrollPane(diagnosticsArea), BorderLayout.CENTER);
+        add(PanelScrollPanes.borderless(diagnosticsArea), BorderLayout.CENTER);
         refresh();
     }
 

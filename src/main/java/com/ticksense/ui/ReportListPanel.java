@@ -49,7 +49,7 @@ public class ReportListPanel extends JPanel
         }
         else
         {
-            add(PanelLists.borderlessScrollPane(reportList), BorderLayout.CENTER);
+            add(PanelScrollPanes.borderless(reportList), BorderLayout.CENTER);
             reportList.setSelectedIndex(0);
         }
         revalidate();

@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
@@ -43,7 +42,7 @@ public class ActivityReportPanel extends JPanel
         content.add(titleLabel);
         content.add(createOverviewPanel());
         content.add(sectionLabel("Evidence"));
-        content.add(wrap(evidenceValue));
+        content.add(PanelScrollPanes.borderless(evidenceValue));
         content.add(sectionLabel("Metrics"));
         content.add(metricPanel);
         content.add(sectionLabel("Opportunity timeline"));
@@ -51,9 +50,7 @@ public class ActivityReportPanel extends JPanel
         content.add(sectionLabel("Tick-loss breakdown"));
         content.add(tickLossBreakdownPanel);
 
-        final JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(null);
-        add(scrollPane, BorderLayout.CENTER);
+        add(PanelScrollPanes.borderless(content), BorderLayout.CENTER);
 
         showReport(null);
     }
@@ -134,13 +131,6 @@ public class ActivityReportPanel extends JPanel
         return PanelTextAreas.readOnlyWrapped();
     }
 
-    private static JScrollPane wrap(JTextArea textArea)
-    {
-        final JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setBorder(null);
-        return scrollPane;
-    }
-
     private static final class DefaultMetricPanel extends JPanel
     {
         private final JTextArea metricsText = sectionText();
@@ -150,7 +140,7 @@ public class ActivityReportPanel extends JPanel
             super(new BorderLayout());
             setBackground(ColorScheme.DARK_GRAY_COLOR);
             setBorder(new EmptyBorder(0, 0, 8, 0));
-            add(wrap(metricsText), BorderLayout.CENTER);
+            add(PanelScrollPanes.borderless(metricsText), BorderLayout.CENTER);
         }
 
         private void setMetrics(Map<String, MetricValue> metrics)

@@ -1,6 +1,7 @@
 package com.ticksense.analytics;
 
 import com.ticksense.activities.ActivityMarker;
+import com.ticksense.activities.ActivityMarkerTypes;
 import com.ticksense.activities.ActivityReportData;
 import com.ticksense.activities.ActivityStrategyEngine;
 import com.ticksense.activities.construction.ConstructionAnalyzer;
@@ -43,7 +44,7 @@ public final class ReportGenerationService
     public Optional<ActivityReport> generateForFinishedMarker(ActivityMarker marker) throws IOException
     {
         final ActivityMarker normalizedMarker = Objects.requireNonNull(marker, "marker");
-        if (!"FINISHED".equals(normalizedMarker.getMarkerType()))
+        if (!ActivityMarkerTypes.isFinished(normalizedMarker))
         {
             return Optional.empty();
         }

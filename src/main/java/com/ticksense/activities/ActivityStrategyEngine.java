@@ -191,8 +191,19 @@ public final class ActivityStrategyEngine implements TelemetrySink
         evaluation.strategy.onStart(context, session);
         activeStrategy = evaluation.strategy;
         activeSession = session;
-        emitMarker("STARTED", session.getActivityId(), definition.getActivityType(), candidate.getFirstEvidenceTime(), metadata);
-        emitDiagnostic(definition.getActivityType(), candidate.getConfidence(), "STARTED", "", candidate.getFirstEvidenceTime(), candidate.getEvidenceSummary());
+        emitMarker(
+            ActivityMarkerTypes.STARTED,
+            session.getActivityId(),
+            definition.getActivityType(),
+            candidate.getFirstEvidenceTime(),
+            metadata);
+        emitDiagnostic(
+            definition.getActivityType(),
+            candidate.getConfidence(),
+            ActivityMarkerTypes.STARTED,
+            "",
+            candidate.getFirstEvidenceTime(),
+            candidate.getEvidenceSummary());
     }
 
     private void finishActiveActivity(ActivityContext context, FinishReason finishReason)
@@ -216,7 +227,12 @@ public final class ActivityStrategyEngine implements TelemetrySink
             metadata.put("finishEvidence", String.join(" | ", finishReason.getEvidence()));
         }
 
-        emitMarker("FINISHED", finishedSession.getActivityId(), finishedSession.getActivityType(), finishReason.getTime(), metadata);
+        emitMarker(
+            ActivityMarkerTypes.FINISHED,
+            finishedSession.getActivityId(),
+            finishedSession.getActivityType(),
+            finishReason.getTime(),
+            metadata);
         emitDiagnostic(
             finishedSession.getActivityType(),
             finishReason.getConfidence(),

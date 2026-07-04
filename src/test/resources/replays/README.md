@@ -11,6 +11,24 @@ Fixture rules:
 - Re-verify the committed object, animation, item, and region IDs against current RuneLite-visible evidence after OSRS updates affecting gem rocks.
 - The current fixture is source-owned normalized evidence rather than a raw player capture. It is intentionally scoped to the underground Shilo gem mine verification slice at region `11410`.
 
+Debug replay fixtures:
+
+- Store opt-in debug JSONL captures under `replays/debug/` when the fixture must preserve both normalized telemetry and `ACTIVITY_DIAGNOSTIC` records.
+- Use `DebugEventReplayLoader` for debug fixtures. It can load raw debug records, replayable normalized telemetry, and activity diagnostics from the same file.
+- Observe-only boss fixtures should prove the known boss NPC evidence and all currently unverified event IDs through suppressed diagnostics before any normal report strategy is enabled.
+- Keep synthetic debug fixtures tiny. Real captured fixtures should preserve sanitized timing/order fidelity and should replace synthetic placeholders only when the evidence is source-owned and reviewed.
+
+Current debug fixtures:
+
+- `debug/scurrius-observe-only-debug.jsonl` is a synthetic observe-only fixture that proves debug replay loading for one known Scurrius NPC and unverified animation/graphic IDs.
+
+Reserved observe-only boss debug fixture names:
+
+- `debug/scurrius-capture-basic.jsonl`
+- `debug/phantom-muspah-capture-basic.jsonl`
+- `debug/hunllef-capture-basic.jsonl`
+- `debug/corrupted-gauntlet-capture-basic.jsonl`
+
 The current verification fixture proves:
 
 - gem rock availability at the start of the session;

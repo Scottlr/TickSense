@@ -19,4 +19,6 @@ Review the debug JSONL for:
 - Evidence lines named `Known boss NPC observed` and `Unverified event ID observed`.
 - `ACTIVITY_MARKER` and `OPPORTUNITY_MARKER` records once a boss graduates beyond observe-only.
 
-Only move a boss from observe-only diagnostics to normal reports when replay fixtures prove the IDs and timing used by the strategy.
+Store committed debug captures under `src/test/resources/replays/debug/` and assert them with `DebugEventReplayLoader`.
+
+Only move a boss from observe-only diagnostics to normal reports when replay fixtures prove the IDs, timing windows, and finish evidence used by the strategy.

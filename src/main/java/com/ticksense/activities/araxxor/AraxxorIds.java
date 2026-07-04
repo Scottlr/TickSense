@@ -1,8 +1,6 @@
 package com.ticksense.activities.araxxor;
 
 import com.ticksense.common.IntIdSet;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import net.runelite.api.NpcID;
 
@@ -40,22 +38,22 @@ public final class AraxxorIds
 
     private static final AraxxorVerificationStatus VERIFICATION_STATUS = AraxxorVerificationStatus.PARTIALLY_VERIFIED;
 
-    private static final List<String> VERIFIED_EVIDENCE = Collections.unmodifiableList(Arrays.asList(
+    private static final List<String> VERIFIED_EVIDENCE = List.of(
         "Official RuneLite NpcID constants expose Araxxor boss IDs 13668 and 13669.",
         "Official RuneLite NpcID constants expose named Araxyte spider IDs 13671, 13673, 13675, and 13680.",
         "Activity callers consume these IDs through catalog intent methods rather than direct NpcID references."
-    ));
+    );
 
-    private static final List<String> BLOCKERS = Collections.unmodifiableList(Arrays.asList(
+    private static final List<String> BLOCKERS = List.of(
         "T029 has not yet committed source-owned normalized Araxxor replay fixtures for boss start, spider windows, teleport/mid-kill transitions, or finish evidence.",
         "Araxxor spider attackability triggers still need RuneLite Dev Tools verification before normal strategy activation is safe.",
         "Relevant Araxxor projectile, graphic, and region identifiers remain intentionally uncommitted until they are verified from source-owned evidence."
-    ));
+    );
 
-    private static final List<String> NOTES = Collections.unmodifiableList(Arrays.asList(
+    private static final List<String> NOTES = List.of(
         "Normal Araxxor strategy registration must stay disabled until verificationStatus() is VERIFIED.",
         "If OSRS updates change Araxxor or Araxyte NPC identifiers, refresh the source comments and replay fixtures together before enabling the strategy."
-    ));
+    );
 
     private AraxxorIds()
     {

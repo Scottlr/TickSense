@@ -25,7 +25,7 @@ public final class ActivityModuleCatalog
 
     public static List<ActivityModule> productionModules()
     {
-        return ImmutableCollections.immutableList(java.util.Arrays.asList(
+        return List.of(
             new GemMiningModule(),
             new ConstructionModule(),
             new AraxxorModule(),
@@ -34,7 +34,7 @@ public final class ActivityModuleCatalog
             new ScurriusModule(),
             new PhantomMuspahModule(),
             new HunllefModule(),
-            new CorruptedGauntletModule()));
+            new CorruptedGauntletModule());
     }
 
     public static List<ActivityModule> enabledModules(List<ActivityModule> modules)

@@ -27,6 +27,7 @@ TickSense targets RuneLite Plugin Hub compatibility, so production and test code
 
 - Add new activities through an `ActivityDescriptor` exposed by an `ActivityModule`; the descriptor should define enablement, strategy creation, report builder, and explicit report mode.
 - Keep production `ActivityDefinition` values with their activity module. Use named local constants for strategy arbitration priority and activation threshold instead of positional literals. RuneLite exposes low-level IDs and some hiscore/boss-timer metadata, but TickSense owns strategy arbitration priority, activation threshold, reportability, and execution-activity categorization.
+- Keep unfinished or unverified modules behind `ActivitySupportConfig` code gates. These gates are not player-facing RuneLite settings and must not become manual per-session activity selection.
 - Prefer `SimpleActivityModule` for modules that only declare descriptor metadata. Add a custom module only when it owns meaningful behavior.
 - Prefer `AbstractActivityStrategy` and `ActivityStateSupport` for full strategies so lifecycle wiring, opportunity lifecycle setup, report-data construction, and state reset stay consistent.
 - Keep activity-specific evidence handling in the strategy/state pair. Reuse common execution trackers and `OpportunityAnalysis` helpers before adding activity-local copies.

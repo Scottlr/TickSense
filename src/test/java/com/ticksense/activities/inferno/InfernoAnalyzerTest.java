@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.runelite.api.ItemID;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class InfernoAnalyzerTest
@@ -59,7 +61,7 @@ public class InfernoAnalyzerTest
         final Map<String, String> metadata = new LinkedHashMap<>();
         metadata.put("displayName", "Inferno");
         metadata.put("confidence", "0.93");
-        metadata.put("evidenceSummary", "Inferno verification status is VERIFIED. | Verified Inferno region 9043 is active. | Verified wave NPC 7691 opened the Inferno attempt.");
+        metadata.put("evidenceSummary", "Inferno verification status is VERIFIED. | Verified Inferno region 9043 is active. | Verified wave NPC " + NpcID.JALNIB + " opened the Inferno attempt.");
         return new ActivitySession(
             ActivityId.of("inferno-session-1"),
             ActivityType.INFERNO,
@@ -86,7 +88,7 @@ public class InfernoAnalyzerTest
         attributes.put("prayerEvidenceStatus", "BLOCKED");
         attributes.put("deathTimelineEventCount", "4");
         attributes.put("deathTimelineEvidence",
-            "Tick 701: verified Inferno wave span opened. | Tick 705: verified nibbler 7674 opened. | Tick 706: local player engaged a verified nibbler. | Tick 707: used verified supply item 2434.");
+            "Tick 701: verified Inferno wave span opened. | Tick 705: verified nibbler " + NpcID.JALNIBREK + " opened. | Tick 706: local player engaged a verified nibbler. | Tick 707: used verified supply item " + ItemID.PRAYER_POTION4 + ".");
         return new ActivityReportData(ActivityId.of("inferno-session-1"), ActivityType.INFERNO, attributes);
     }
 
@@ -96,11 +98,11 @@ public class InfernoAnalyzerTest
         context.put("regionId", "9043");
         if (InfernoState.OPPORTUNITY_WAVE.equals(type))
         {
-            context.put("waveNpcId", "7691");
+            context.put("waveNpcId", String.valueOf(NpcID.JALNIB));
         }
         if (InfernoState.OPPORTUNITY_NIBBLER_WINDOW.equals(type))
         {
-            context.put("nibblerNpcId", "7674");
+            context.put("nibblerNpcId", String.valueOf(NpcID.JALNIBREK));
         }
         return Arrays.asList(
             new OpportunityMarker(

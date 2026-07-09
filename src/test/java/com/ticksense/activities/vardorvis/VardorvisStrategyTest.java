@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class VardorvisStrategyTest
@@ -43,7 +44,7 @@ public class VardorvisStrategyTest
         final OpportunityMarker marker = harness.completedOpportunity(VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE);
         assertEquals(502, marker.getTime().getGameTick());
         assertEquals("9911", marker.getContext().get("projectileId"));
-        assertEquals("12226", marker.getContext().get("sourceNpcId"));
+        assertEquals(String.valueOf(NpcID.VARDORVIS_HEAD), marker.getContext().get("sourceNpcId"));
         assertEquals("4405", marker.getContext().get("regionId"));
         assertEquals(FinishReasonType.LEFT_REGION, harness.engine.getCompletedSessions().get(0).getFinishReason().getType());
 
@@ -92,8 +93,8 @@ public class VardorvisStrategyTest
                 Collections.singletonList(VardorvisState.MECHANIC_RANGED_HEAD_RESPONSE),
                 Collections.singletonList("Synthetic verified ranged-head projectile and region evidence."),
                 Collections.singletonList("Synthetic test-only verification decision.")),
-            new int[] {12223},
-            new int[] {12226},
+            new int[] {NpcID.VARDORVIS},
+            new int[] {NpcID.VARDORVIS_HEAD},
             new int[] {9911},
             new int[0],
             new int[0],
@@ -156,7 +157,7 @@ public class VardorvisStrategyTest
                 time(tick),
                 Collections.singletonMap("source", "ProjectileMoved"),
                 projectileId,
-                EntityRef.npc(14, 12226, "Vardorvis head"),
+                EntityRef.npc(14, NpcID.VARDORVIS_HEAD, "Vardorvis head"),
                 EntityRef.localPlayer(),
                 playerLocation(),
                 tick * 20,

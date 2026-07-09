@@ -28,6 +28,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class TickSenseServicesTest
@@ -99,7 +100,7 @@ public class TickSenseServicesTest
                 new NpcStateTelemetryEvent(
                     new EventTime(100L, 200L, 321, 400L, 500),
                     Collections.singletonMap("source", "NpcSpawned"),
-                    EntityRef.npc(1, 7221, "Scurrius"),
+                    EntityRef.npc(1, NpcID.SCURRIUS, "Scurrius"),
                     "SPAWNED",
                     new WorldLocation(301, 0, 3200, 3201, 12_550, false),
                     9999,
@@ -115,7 +116,7 @@ public class TickSenseServicesTest
             final DebugEventRecord diagnosticRecord = firstDebugRecord(paths.getTickSenseRoot().resolve("debug"), DebugEventKind.ACTIVITY_DIAGNOSTIC);
             assertEquals("session-scurrius", diagnosticRecord.getSessionId());
             assertEquals("SCURRIUS", diagnosticRecord.getSourceEventType());
-            assertTrue(diagnosticRecord.getPayloadJson().contains("Known boss NPC observed: npc:7221"));
+            assertTrue(diagnosticRecord.getPayloadJson().contains("Known boss NPC observed: npc:" + NpcID.SCURRIUS));
             assertTrue(diagnosticRecord.getPayloadJson().contains("Unverified event ID observed: animation:9999"));
         }
         finally

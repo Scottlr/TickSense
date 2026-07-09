@@ -1,6 +1,7 @@
 package com.ticksense.activities.araxxor;
 
 import com.ticksense.common.TextValues;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,10 +9,7 @@ public final class AraxxorVerificationDecision
 {
     private static final AraxxorVerificationDecision CURRENT = blocked(
         "2026-07-03",
-        List.of(
-            "Official RuneLite NpcID constants confirm Araxxor boss IDs 13668 and 13669.",
-            "Official RuneLite NpcID constants confirm named spider IDs 13671, 13673, 13675, and 13680.",
-            "Araxxor fixture placeholders are reserved under src/test/resources/replays/ for future source-owned normalized captures."),
+        araxxorEvidence(),
         List.of(
             "No source-owned normalized Araxxor replay fixture currently proves spider spawn or spider availability evidence.",
             "No source-owned normalized Araxxor replay fixture currently proves attack click, interaction-changed, or damage evidence during a spider window.",
@@ -21,6 +19,13 @@ public final class AraxxorVerificationDecision
     private final String verifiedOnDate;
     private final List<String> evidence;
     private final List<String> unresolvedQuestions;
+
+    private static List<String> araxxorEvidence()
+    {
+        final List<String> evidence = new ArrayList<>(AraxxorIds.verifiedEvidence());
+        evidence.add("Araxxor fixture placeholders are reserved under src/test/resources/replays/ for future source-owned normalized captures.");
+        return evidence;
+    }
 
     private AraxxorVerificationDecision(
         Status status,

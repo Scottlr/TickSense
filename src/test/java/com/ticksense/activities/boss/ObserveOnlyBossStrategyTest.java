@@ -13,6 +13,7 @@ import com.ticksense.core.EventTime;
 import com.ticksense.core.WorldLocation;
 import com.ticksense.telemetry.events.NpcStateTelemetryEvent;
 import java.util.Collections;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class ObserveOnlyBossStrategyTest
@@ -22,16 +23,16 @@ public class ObserveOnlyBossStrategyTest
     {
         final ObserveOnlyBossStrategy strategy = new ObserveOnlyBossStrategy(
             new ActivityDefinition(ActivityType.SCURRIUS, "Scurrius", 35, 0.75D, true),
-            id -> id == 7221);
+            id -> id == NpcID.SCURRIUS);
 
         final ActivityCandidate candidate = strategy.evaluateActivation(
             context(),
-            npcEvent(7221, 1234, 5678));
+            npcEvent(NpcID.SCURRIUS, 1234, 5678));
 
         assertNotNull(candidate);
         assertTrue(candidate.isSuppressed());
         assertTrue(candidate.getSuppressionReason().contains("Observe-only"));
-        assertTrue(candidate.getEvidenceSummary().contains("Known boss NPC observed: npc:7221"));
+        assertTrue(candidate.getEvidenceSummary().contains("Known boss NPC observed: npc:" + NpcID.SCURRIUS));
         assertTrue(candidate.getEvidenceSummary().contains("Unverified event ID observed: animation:1234"));
         assertTrue(candidate.getEvidenceSummary().contains("Unverified event ID observed: graphic:5678"));
     }
@@ -41,7 +42,7 @@ public class ObserveOnlyBossStrategyTest
     {
         final ObserveOnlyBossStrategy strategy = new ObserveOnlyBossStrategy(
             new ActivityDefinition(ActivityType.SCURRIUS, "Scurrius", 35, 0.75D, true),
-            id -> id == 7221);
+            id -> id == NpcID.SCURRIUS);
 
         assertNull(strategy.evaluateActivation(context(), npcEvent(9999, 1234, 5678)));
     }

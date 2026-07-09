@@ -30,6 +30,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import net.runelite.api.AnimationID;
 import org.junit.Test;
 
 public class TelemetryJsonTest
@@ -133,7 +134,7 @@ public class TelemetryJsonTest
                 EntityRef.localPlayer(),
                 EntityRef.npc(8, 222, "Target"),
                 "TARGET_CHANGED"),
-            new AnimationTelemetryEvent(time(), tags("AnimationChanged"), EntityRef.localPlayer(), 624, -1),
+            new AnimationTelemetryEvent(time(), tags("AnimationChanged"), EntityRef.localPlayer(), AnimationID.MINING_RUNE_PICKAXE, -1),
             new GraphicTelemetryEvent(time(), tags("GraphicChanged"), EntityRef.localPlayer(), 86, location()),
             new ProjectileTelemetryEvent(
                 time(),

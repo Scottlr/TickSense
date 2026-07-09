@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class AraxxorStrategyTest
@@ -36,7 +37,7 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
 
         assertTrue(harness.engine.getActiveSession().isPresent());
         assertEquals("Araxxor", harness.engine.getActiveSession().get().getMetadata().get("displayName"));
@@ -48,10 +49,10 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
-        harness.accept(spiderSpawnEvent(605, 13671));
-        harness.accept(spiderInteractEvent(606, 13671));
-        harness.accept(bossDefeatEvent(612, 13668));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
+        harness.accept(spiderSpawnEvent(605, NpcID.MIRRORBACK_ARAXYTE));
+        harness.accept(spiderInteractEvent(606, NpcID.MIRRORBACK_ARAXYTE));
+        harness.accept(bossDefeatEvent(612, NpcID.ARAXXOR));
 
         final OpportunityMarker spider = harness.terminalOpportunity(
             AraxxorExecutionTracker.OPPORTUNITY_SPIDER_ENGAGEMENT,
@@ -68,18 +69,18 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
-        harness.accept(spiderSpawnEvent(605, 13671));
-        harness.accept(spiderInteractEvent(606, 13671));
-        harness.accept(spiderDespawnEvent(608, 13671));
-        harness.accept(bossInteractEvent(610, 13668));
-        harness.accept(bossDefeatEvent(615, 13668));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
+        harness.accept(spiderSpawnEvent(605, NpcID.MIRRORBACK_ARAXYTE));
+        harness.accept(spiderInteractEvent(606, NpcID.MIRRORBACK_ARAXYTE));
+        harness.accept(spiderDespawnEvent(608, NpcID.MIRRORBACK_ARAXYTE));
+        harness.accept(bossInteractEvent(610, NpcID.ARAXXOR));
+        harness.accept(bossDefeatEvent(615, NpcID.ARAXXOR));
 
         final OpportunityMarker boss = harness.terminalOpportunity(
             AraxxorExecutionTracker.OPPORTUNITY_BOSS_REENGAGEMENT,
             OpportunityStatus.COMPLETED);
         assertEquals(610, boss.getTime().getGameTick());
-        assertEquals("13671", boss.getContext().get("spiderNpcId"));
+        assertEquals(String.valueOf(NpcID.MIRRORBACK_ARAXYTE), boss.getContext().get("spiderNpcId"));
 
         final ActivityReportData data = harness.engine.getCompletedActivityData().get(0);
         assertEquals("1", data.getAttributes().get("bossReengagementCount"));
@@ -91,12 +92,12 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
-        harness.accept(spiderSpawnEvent(605, 13671));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
+        harness.accept(spiderSpawnEvent(605, NpcID.MIRRORBACK_ARAXYTE));
         harness.accept(localDamageEvent(606, 12, 20));
-        harness.accept(spiderInteractEvent(607, 13671));
+        harness.accept(spiderInteractEvent(607, NpcID.MIRRORBACK_ARAXYTE));
         harness.accept(localDamageEvent(608, 9, 16));
-        harness.accept(bossDefeatEvent(612, 13668));
+        harness.accept(bossDefeatEvent(612, NpcID.ARAXXOR));
 
         final ActivityReportData data = harness.engine.getCompletedActivityData().get(0);
         assertEquals("12", data.getAttributes().get("spiderWindowDamage"));
@@ -108,10 +109,10 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
         harness.accept(localDamageEvent(602, 14, 42));
         harness.accept(foodConsumedEvent(603, 385));
-        harness.accept(bossDefeatEvent(612, 13668));
+        harness.accept(bossDefeatEvent(612, NpcID.ARAXXOR));
 
         final OpportunityMarker food = harness.terminalOpportunity(
             FoodRecoveryTracker.ID + "." + FoodRecoveryTracker.OPPORTUNITY_FOOD_RECOVERY,
@@ -126,7 +127,7 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
         harness.accept(regionEvent(605, outsideLocation(), "LOGGED_IN"));
 
         assertEquals(FinishReasonType.TELEPORTED, harness.engine.getCompletedSessions().get(0).getFinishReason().getType());
@@ -138,7 +139,7 @@ public class AraxxorStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        harness.accept(bossInteractEvent(601, 13668));
+        harness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
         harness.accept(localDamageEvent(605, 32, 0));
 
         assertEquals(FinishReasonType.PLAYER_DEAD, harness.engine.getCompletedSessions().get(0).getFinishReason().getType());
@@ -149,12 +150,12 @@ public class AraxxorStrategyTest
     {
         final Harness partialHarness = new Harness(partialStrategy());
         partialHarness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        partialHarness.accept(bossInteractEvent(601, 13668));
+        partialHarness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
         assertFalse(partialHarness.engine.getActiveSession().isPresent());
 
         final Harness blockedHarness = new Harness(blockedStrategy());
         blockedHarness.accept(regionEvent(600, araxxorLocation(), "LOGGED_IN"));
-        blockedHarness.accept(bossInteractEvent(601, 13668));
+        blockedHarness.accept(bossInteractEvent(601, NpcID.ARAXXOR));
         assertFalse(blockedHarness.engine.getActiveSession().isPresent());
     }
 
@@ -165,8 +166,8 @@ public class AraxxorStrategyTest
                 "2026-07-03",
                 Collections.singletonList("Synthetic verified Araxxor region and interaction evidence."),
                 Collections.singletonList("Synthetic test-only verification decision.")),
-            new int[] {13668, 13669},
-            new int[] {13671, 13673, 13675, 13680},
+            new int[] {NpcID.ARAXXOR, NpcID.ARAXXOR_13669},
+            new int[] {NpcID.MIRRORBACK_ARAXYTE, NpcID.RUPTURA_ARAXYTE, NpcID.ACIDIC_ARAXYTE, NpcID.DREADBORN_ARAXYTE},
             new int[] {13878});
     }
 
@@ -177,8 +178,8 @@ public class AraxxorStrategyTest
                 "2026-07-03",
                 Collections.singletonList("Boss and spider IDs known, region evidence not fully verified."),
                 Collections.singletonList("Synthetic partial verification.")),
-            new int[] {13668, 13669},
-            new int[] {13671, 13673, 13675, 13680},
+            new int[] {NpcID.ARAXXOR, NpcID.ARAXXOR_13669},
+            new int[] {NpcID.MIRRORBACK_ARAXYTE, NpcID.RUPTURA_ARAXYTE, NpcID.ACIDIC_ARAXYTE, NpcID.DREADBORN_ARAXYTE},
             new int[] {13878});
     }
 
@@ -189,8 +190,8 @@ public class AraxxorStrategyTest
                 "2026-07-03",
                 Collections.singletonList("No verified Araxxor fixture."),
                 Collections.singletonList("Synthetic blocked verification.")),
-            new int[] {13668, 13669},
-            new int[] {13671, 13673, 13675, 13680},
+            new int[] {NpcID.ARAXXOR, NpcID.ARAXXOR_13669},
+            new int[] {NpcID.MIRRORBACK_ARAXYTE, NpcID.RUPTURA_ARAXYTE, NpcID.ACIDIC_ARAXYTE, NpcID.DREADBORN_ARAXYTE},
             new int[] {13878});
     }
 

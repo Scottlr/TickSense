@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.runelite.api.ObjectID;
+import net.runelite.api.widgets.WidgetID;
 import org.junit.Test;
 
 public class ConstructionAnalyzerTest
@@ -63,7 +65,7 @@ public class ConstructionAnalyzerTest
         final Map<String, String> metadata = new LinkedHashMap<>();
         metadata.put("displayName", "Construction");
         metadata.put("confidence", "0.92");
-        metadata.put("evidenceSummary", "Construction verification decision is VERIFIED for method oak-larder. | Verified build spot 15403 is available at 3110,3497. | Observed verified Build click on Larder space at region 7513.");
+        metadata.put("evidenceSummary", "Construction verification decision is VERIFIED for method oak-larder. | Verified build spot " + ObjectID.LARDER_SPACE + " is available at 3110,3497. | Observed verified Build click on Larder space at region 7513.");
         return new ActivitySession(
             ActivityId.of("construction-session-1"),
             ActivityType.CONSTRUCTION,
@@ -74,7 +76,7 @@ public class ConstructionAnalyzerTest
                 time(439),
                 0.95D,
                 "Construction ended because verified banking evidence completed the oak-larder cycle.",
-                Collections.singletonList("Bank widget group 12 loaded after the verified build/remove flow.")),
+                Collections.singletonList("Bank widget group " + WidgetID.BANK_GROUP_ID + " loaded after the verified build/remove flow.")),
             Collections.emptyList(),
             metadata);
     }

@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ObjectID;
 import org.junit.Test;
 
 public class GemMiningStrategyTest
@@ -36,14 +38,14 @@ public class GemMiningStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(200, 11410, playerLocation(2840, 9388, 11410), "LOGGED_IN"));
-        harness.accept(availableRockEvent(200, 11380, rockLocation()));
+        harness.accept(availableRockEvent(200, ObjectID.GEM_ROCKS, rockLocation()));
         harness.accept(mineClickEvent(202, rockLocation()));
-        harness.accept(miningAnimationEvent(203, 624));
+        harness.accept(miningAnimationEvent(203, AnimationID.MINING_RUNE_PICKAXE));
 
         assertTrue(harness.engine.getActiveSession().isPresent());
         final OpportunityMarker completed = harness.completedOpportunity(GemMiningState.OPPORTUNITY_RESPAWN_TO_CLICK);
         assertEquals(202, completed.getTime().getGameTick());
-        assertEquals("11380", completed.getContext().get("objectId"));
+        assertEquals(String.valueOf(ObjectID.GEM_ROCKS), completed.getContext().get("objectId"));
         assertEquals("11410", completed.getContext().get("regionId"));
         assertEquals(4, harness.opportunityMarkers.size());
     }
@@ -54,10 +56,10 @@ public class GemMiningStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(100, 11410, playerLocation(2840, 9388, 11410), "LOGGED_IN"));
-        harness.accept(availableRockEvent(100, 11380, rockLocation()));
+        harness.accept(availableRockEvent(100, ObjectID.GEM_ROCKS, rockLocation()));
         harness.accept(mineClickEvent(100, rockLocation()));
-        harness.accept(miningAnimationEvent(101, 624));
-        harness.accept(depletedRockEvent(102, 11380, rockLocation()));
+        harness.accept(miningAnimationEvent(101, AnimationID.MINING_RUNE_PICKAXE));
+        harness.accept(depletedRockEvent(102, ObjectID.GEM_ROCKS, rockLocation()));
         harness.accept(regionEvent(111, 12000, playerLocation(3200, 3200, 12000), "LOGGED_IN"));
 
         assertFalse(harness.engine.getActiveSession().isPresent());
@@ -73,7 +75,7 @@ public class GemMiningStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(200, 11410, playerLocation(2840, 9388, 11410), "LOGGED_IN"));
-        harness.accept(availableRockEvent(200, 11380, rockLocation()));
+        harness.accept(availableRockEvent(200, ObjectID.GEM_ROCKS, rockLocation()));
 
         assertFalse(harness.engine.getActiveSession().isPresent());
         assertTrue(harness.engine.getCompletedSessions().isEmpty());
@@ -87,10 +89,10 @@ public class GemMiningStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(200, 11410, playerLocation(2838, 9388, 11410), "LOGGED_IN"));
-        harness.accept(availableRockEvent(200, 11380, rockLocation()));
+        harness.accept(availableRockEvent(200, ObjectID.GEM_ROCKS, rockLocation()));
         harness.accept(movementEvent(201, playerLocation(2838, 9388, 11410), playerLocation(2840, 9388, 11410)));
         harness.accept(mineClickEvent(202, rockLocation()));
-        harness.accept(miningAnimationEvent(203, 624));
+        harness.accept(miningAnimationEvent(203, AnimationID.MINING_RUNE_PICKAXE));
 
         final OpportunityMarker movement = harness.completedOpportunity(GemMiningState.OPPORTUNITY_MOVEMENT_TO_ROCK);
         assertEquals(202, movement.getTime().getGameTick());
@@ -104,10 +106,10 @@ public class GemMiningStrategyTest
         final Harness harness = new Harness();
 
         harness.accept(regionEvent(200, 11410, playerLocation(2840, 9388, 11410), "LOGGED_IN"));
-        harness.accept(availableRockEvent(200, 11380, rockLocation()));
+        harness.accept(availableRockEvent(200, ObjectID.GEM_ROCKS, rockLocation()));
         harness.accept(mineClickEvent(202, rockLocation()));
         harness.accept(gearSwitchEvent(203, 11802, 11804));
-        harness.accept(miningAnimationEvent(204, 624));
+        harness.accept(miningAnimationEvent(204, AnimationID.MINING_RUNE_PICKAXE));
 
         final OpportunityMarker gear = harness.completedOpportunity(
             GearSwitchTracker.ID + "." + GearSwitchTracker.OPPORTUNITY_GEAR_SWITCH);

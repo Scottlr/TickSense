@@ -39,8 +39,9 @@ public final class AraxxorIds
     private static final AraxxorVerificationStatus VERIFICATION_STATUS = AraxxorVerificationStatus.PARTIALLY_VERIFIED;
 
     private static final List<String> VERIFIED_EVIDENCE = List.of(
-        "Official RuneLite NpcID constants expose Araxxor boss IDs 13668 and 13669.",
-        "Official RuneLite NpcID constants expose named Araxyte spider IDs 13671, 13673, 13675, and 13680.",
+        "Official RuneLite NpcID constants expose Araxxor boss IDs " + NpcID.ARAXXOR + " and " + NpcID.ARAXXOR_13669 + ".",
+        "Official RuneLite NpcID constants expose named Araxyte spider IDs " + NpcID.MIRRORBACK_ARAXYTE + ", "
+            + NpcID.RUPTURA_ARAXYTE + ", " + NpcID.ACIDIC_ARAXYTE + ", and " + NpcID.DREADBORN_ARAXYTE + ".",
         "Activity callers consume these IDs through catalog intent methods rather than direct NpcID references."
     );
 

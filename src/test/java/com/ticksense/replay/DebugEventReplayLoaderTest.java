@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class DebugEventReplayLoaderTest
@@ -87,7 +88,7 @@ public class DebugEventReplayLoaderTest
         assertEquals(1, events.size());
         assertTrue(events.get(0).getEvent() instanceof NpcStateTelemetryEvent);
         final NpcStateTelemetryEvent npcEvent = (NpcStateTelemetryEvent) events.get(0).getEvent();
-        assertEquals(7221, npcEvent.getNpcRef().getId());
+        assertEquals(NpcID.SCURRIUS, npcEvent.getNpcRef().getId());
         assertEquals(9999, npcEvent.getAnimationId());
         assertEquals(8888, npcEvent.getGraphicId());
 
@@ -96,7 +97,7 @@ public class DebugEventReplayLoaderTest
         assertEquals(ActivityType.SCURRIUS, diagnostic.getActivityType());
         assertEquals("SUPPRESSED", diagnostic.getDecision());
         assertEquals(0.74D, diagnostic.getConfidence(), 0.0D);
-        assertTrue(diagnostic.getEvidence().contains("Known boss NPC observed: npc:7221"));
+        assertTrue(diagnostic.getEvidence().contains("Known boss NPC observed: npc:" + NpcID.SCURRIUS));
         assertTrue(diagnostic.getEvidence().contains("Unverified event ID observed: animation:9999"));
         assertTrue(diagnostic.getEvidence().contains("Unverified event ID observed: graphic:8888"));
     }

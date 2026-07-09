@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class VardorvisIdsTest
@@ -28,14 +29,23 @@ public class VardorvisIdsTest
         assertTrue(decision.getVerifiedMechanics().contains("head-presence"));
         assertFalse(decision.getUnresolvedMechanics().isEmpty());
 
-        assertArrayEquals(new int[] {12223, 12224, 12228, 12425, 12426, 13656}, VardorvisIds.bossNpcIds());
-        assertArrayEquals(new int[] {12226}, VardorvisIds.headNpcIds());
+        assertArrayEquals(
+            new int[] {
+                NpcID.VARDORVIS,
+                NpcID.VARDORVIS_12224,
+                NpcID.VARDORVIS_12228,
+                NpcID.VARDORVIS_12425,
+                NpcID.VARDORVIS_12426,
+                NpcID.VARDORVIS_13656
+            },
+            VardorvisIds.bossNpcIds());
+        assertArrayEquals(new int[] {NpcID.VARDORVIS_HEAD}, VardorvisIds.headNpcIds());
         assertArrayEquals(new int[0], VardorvisIds.rangedHeadProjectileIds());
         assertArrayEquals(new int[0], VardorvisIds.bloodSplatGraphicIds());
         assertArrayEquals(new int[0], VardorvisIds.axeMechanicIds());
         assertArrayEquals(new int[0], VardorvisIds.verifiedRegionIds());
-        assertTrue(VardorvisIds.isBossNpcId(12223));
-        assertTrue(VardorvisIds.isHeadNpcId(12226));
+        assertTrue(VardorvisIds.isBossNpcId(NpcID.VARDORVIS));
+        assertTrue(VardorvisIds.isHeadNpcId(NpcID.VARDORVIS_HEAD));
         assertFalse(VardorvisIds.hasVerifiedRegionIds());
         assertFalse(VardorvisIds.isRangedHeadProjectileId(12345));
 

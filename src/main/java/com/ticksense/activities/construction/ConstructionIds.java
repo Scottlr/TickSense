@@ -4,6 +4,7 @@ import com.ticksense.common.IntIdSet;
 import net.runelite.api.AnimationID;
 import net.runelite.api.ItemID;
 import net.runelite.api.ObjectID;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.WidgetID;
 
 public final class ConstructionIds
@@ -38,11 +39,11 @@ public final class ConstructionIds
     };
 
     private static final int[] CONSTRUCTION_WIDGET_GROUP_IDS = {
-        458 // Source-owned normalized verification fixture construction build widget group for oak larder
+        InterfaceID.POH_FURNITURE_CREATION
     };
 
     private static final int[] CONSTRUCTION_WIDGET_CHILD_IDS = {
-        12 // Source-owned normalized verification fixture construction build widget child for oak larder
+        childId(InterfaceID.PohFurnitureCreation._09) // Oak larder entry in the verified fixture.
     };
 
     private static final IntIdSet METHOD_ITEM_ID_SET = IntIdSet.of(METHOD_ITEM_IDS);
@@ -58,6 +59,11 @@ public final class ConstructionIds
 
     private ConstructionIds()
     {
+    }
+
+    private static int childId(int packedWidgetId)
+    {
+        return packedWidgetId & 0xFFFF;
     }
 
     public static String approvedMethodName()

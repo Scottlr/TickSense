@@ -21,6 +21,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ItemID;
+import net.runelite.api.ObjectID;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.widgets.WidgetID;
 import org.junit.Test;
 
 public class ConstructionIdsTest
@@ -38,13 +43,21 @@ public class ConstructionIdsTest
         assertEquals(ConstructionVerificationDecision.Status.VERIFIED, decision.getStatus());
         assertTrue(decision.getBlockers().isEmpty());
         assertTrue(decision.getVerifiedEvidence().size() >= 5);
-        assertArrayEquals(new int[] {15403}, ConstructionIds.buildSpotObjectIds());
-        assertArrayEquals(new int[] {13565, 13566, 13567}, ConstructionIds.builtObjectIds());
-        assertArrayEquals(new int[] {8778, 2347, 8794, 9625, 29774}, ConstructionIds.methodItemIds());
-        assertArrayEquals(new int[] {3676, 8912}, ConstructionIds.buildAnimationIds());
-        assertArrayEquals(new int[] {12, 15}, ConstructionIds.bankWidgetGroupIds());
-        assertArrayEquals(new int[] {458}, ConstructionIds.constructionWidgetGroupIds());
-        assertArrayEquals(new int[] {12}, ConstructionIds.constructionWidgetChildIds());
+        assertArrayEquals(new int[] {ObjectID.LARDER_SPACE}, ConstructionIds.buildSpotObjectIds());
+        assertArrayEquals(
+            new int[] {ObjectID.LARDER_13565, ObjectID.LARDER_13566, ObjectID.LARDER_13567},
+            ConstructionIds.builtObjectIds());
+        assertArrayEquals(
+            new int[] {ItemID.OAK_PLANK, ItemID.HAMMER, ItemID.SAW, ItemID.CRYSTAL_SAW, ItemID.AMYS_SAW_OFFHAND},
+            ConstructionIds.methodItemIds());
+        assertArrayEquals(
+            new int[] {AnimationID.CONSTRUCTION, AnimationID.CONSTRUCTION_IMCANDO},
+            ConstructionIds.buildAnimationIds());
+        assertArrayEquals(
+            new int[] {WidgetID.BANK_GROUP_ID, WidgetID.BANK_INVENTORY_GROUP_ID},
+            ConstructionIds.bankWidgetGroupIds());
+        assertArrayEquals(new int[] {InterfaceID.POH_FURNITURE_CREATION}, ConstructionIds.constructionWidgetGroupIds());
+        assertArrayEquals(new int[] {InterfaceID.PohFurnitureCreation._09 & 0xFFFF}, ConstructionIds.constructionWidgetChildIds());
 
         final List<String> readmeLines = Files.readAllLines(
             Paths.get("src/test/resources/replays/README.md"),
@@ -96,7 +109,7 @@ public class ConstructionIdsTest
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof InventoryDeltaTelemetryEvent
                 && ((InventoryDeltaTelemetryEvent) envelope.getEvent()).getDeltas().stream()
-                .anyMatch(delta -> delta.getBeforeItemId() == 8778 && delta.getAfterItemId() == -1)));
+                .anyMatch(delta -> delta.getBeforeItemId() == ItemID.OAK_PLANK && delta.getAfterItemId() == -1)));
 
         assertTrue(events.stream().anyMatch(envelope ->
             envelope.getEvent() instanceof StatChangedTelemetryEvent

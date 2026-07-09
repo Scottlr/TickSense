@@ -28,6 +28,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ItemID;
+import net.runelite.api.NpcID;
+import net.runelite.api.ObjectID;
 import org.junit.Test;
 
 public class ReplayRegressionTest
@@ -92,11 +96,11 @@ public class ReplayRegressionTest
         final WorldLocation rock = TestEvents.location(2841, 9388, 11410);
         final List<TelemetryEnvelope> replay = Arrays.asList(
             events.region(200, 11410, TestEvents.location(2840, 9388, 11410), "LOGGED_IN"),
-            events.availableRock(200, 11380, rock),
+            events.availableRock(200, ObjectID.GEM_ROCKS, rock),
             events.mineClick(201, rock),
-            events.miningAnimation(202, 624),
-            events.inventoryGain(203, 4, 1619),
-            events.depletedRock(204, 11380, rock),
+            events.miningAnimation(202, AnimationID.MINING_RUNE_PICKAXE),
+            events.inventoryGain(203, 4, ItemID.UNCUT_RUBY),
+            events.depletedRock(204, ObjectID.GEM_ROCKS, rock),
             events.region(210, 12000, TestEvents.location(3200, 3200, 12000), "LOGGED_IN"));
 
         final ActivityReport report = new TimelineReplayRunner().replay(replay).requireSingleReport();
@@ -113,11 +117,11 @@ public class ReplayRegressionTest
         final WorldLocation rock = TestEvents.location(2841, 9388, 11410);
         final List<TelemetryEnvelope> replay = Arrays.asList(
             events.region(200, 11410, TestEvents.location(2840, 9388, 11410), "LOGGED_IN"),
-            events.availableRock(200, 11380, rock),
+            events.availableRock(200, ObjectID.GEM_ROCKS, rock),
             events.mineClick(201, rock),
             events.mineClick(202, rock),
-            events.miningAnimation(203, 624),
-            events.depletedRock(204, 11380, rock),
+            events.miningAnimation(203, AnimationID.MINING_RUNE_PICKAXE),
+            events.depletedRock(204, ObjectID.GEM_ROCKS, rock),
             events.region(210, 12000, TestEvents.location(3200, 3200, 12000), "LOGGED_IN"));
 
         final ActivityReport report = new TimelineReplayRunner().replay(replay).requireSingleReport();
@@ -133,14 +137,14 @@ public class ReplayRegressionTest
         final WorldLocation rock = TestEvents.location(2841, 9388, 11410);
         final List<TelemetryEnvelope> replay = Arrays.asList(
             events.region(200, 11410, TestEvents.location(2840, 9388, 11410), "LOGGED_IN"),
-            events.availableRock(200, 11380, rock),
+            events.availableRock(200, ObjectID.GEM_ROCKS, rock),
             events.mineClick(200, rock),
-            events.miningAnimation(201, 624),
-            events.depletedRock(202, 11380, rock),
-            events.availableRock(230, 11380, rock),
+            events.miningAnimation(201, AnimationID.MINING_RUNE_PICKAXE),
+            events.depletedRock(202, ObjectID.GEM_ROCKS, rock),
+            events.availableRock(230, ObjectID.GEM_ROCKS, rock),
             events.mineClick(231, rock),
             events.miningXp(232, 12345, 65),
-            events.depletedRock(233, 11380, rock),
+            events.depletedRock(233, ObjectID.GEM_ROCKS, rock),
             events.region(240, 12000, TestEvents.location(3200, 3200, 12000), "LOGGED_IN"));
 
         final ActivityReport report = new TimelineReplayRunner().replay(replay).requireSingleReport();
@@ -157,10 +161,10 @@ public class ReplayRegressionTest
         final WorldLocation rock = TestEvents.location(2841, 9388, 11410);
         final List<TelemetryEnvelope> replay = Arrays.asList(
             events.region(200, 11410, TestEvents.location(2840, 9388, 11410), "LOGGED_IN"),
-            events.availableRock(200, 11380, rock),
+            events.availableRock(200, ObjectID.GEM_ROCKS, rock),
             events.mineClick(201, rock),
-            events.miningAnimation(202, 624),
-            events.depletedRock(203, 11380, rock),
+            events.miningAnimation(202, AnimationID.MINING_RUNE_PICKAXE),
+            events.depletedRock(203, ObjectID.GEM_ROCKS, rock),
             events.region(204, 11410, TestEvents.location(2840, 9388, 11410), "LOADING"));
 
         final ActivityReport report = new TimelineReplayRunner().replay(replay).requireSingleReport();
@@ -248,8 +252,8 @@ public class ReplayRegressionTest
                     Collections.singletonList("ranged-head-response"),
                     Collections.singletonList("Synthetic verified Vardorvis ranged-head fixture."),
                     Collections.singletonList("Replay-only verified strategy fixture.")),
-                new int[] {12223},
-                new int[] {12226},
+                new int[] {NpcID.VARDORVIS},
+                new int[] {NpcID.VARDORVIS_HEAD},
                 new int[] {9911},
                 new int[0],
                 new int[0],
@@ -270,9 +274,9 @@ public class ReplayRegressionTest
                     InfernoVerificationDecision.EvidenceStatus.VERIFIED,
                     Collections.singletonList("Synthetic verified Inferno wave fixture."),
                     Collections.singletonList("Replay-only verified Inferno strategy fixture.")),
-                new int[] {7674, 7675},
-                new int[] {7691},
-                new int[] {2434},
+                new int[] {NpcID.JALNIBREK, NpcID.JALNIBREK_7675},
+                new int[] {NpcID.JALNIB},
+                new int[] {ItemID.PRAYER_POTION4},
                 new int[] {9043}))
             .build();
     }

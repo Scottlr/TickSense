@@ -27,6 +27,8 @@ import com.ticksense.telemetry.events.PlayerActionTelemetryEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.ItemID;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class ExecutionTrackerTest
@@ -88,7 +90,7 @@ public class ExecutionTrackerTest
             tags(),
             "Attack",
             "Araxxor",
-            EntityRef.npc(1, 13668, "Araxxor"),
+            EntityRef.npc(1, NpcID.ARAXXOR, "Araxxor"),
             "NPC_FIRST_OPTION",
             location(),
             0));
@@ -107,7 +109,7 @@ public class ExecutionTrackerTest
             time(300),
             tags(),
             94,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, 11802, 1, 11804, 1))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, ItemID.ARMADYL_GODSWORD, 1, ItemID.BANDOS_GODSWORD, 1))));
 
         assertEquals(2, harness.markers.size());
         assertEquals(OpportunityStatus.OPEN, harness.markers.get(0).getStatus());
@@ -124,7 +126,7 @@ public class ExecutionTrackerTest
             time(350),
             tags(),
             93,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 2434, 1, 139, 1))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, ItemID.PRAYER_POTION4, 1, ItemID.PRAYER_POTION3, 1))));
 
         assertTrue(harness.markers.isEmpty());
     }
@@ -138,13 +140,13 @@ public class ExecutionTrackerTest
             time(355),
             tags(),
             94,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, 11802, 1, 11804, 1))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, ItemID.ARMADYL_GODSWORD, 1, ItemID.BANDOS_GODSWORD, 1))));
         harness.accept(new PlayerActionTelemetryEvent(
             time(356),
             tags(),
             "Attack",
             "Araxxor",
-            EntityRef.npc(1, 13668, "Araxxor"),
+            EntityRef.npc(1, NpcID.ARAXXOR, "Araxxor"),
             "NPC_FIRST_OPTION",
             location(),
             0));
@@ -164,7 +166,7 @@ public class ExecutionTrackerTest
             time(358),
             tags(),
             94,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, 11802, 1, 11804, 1))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(3, ItemID.ARMADYL_GODSWORD, 1, ItemID.BANDOS_GODSWORD, 1))));
         harness.accept(new PlayerActionTelemetryEvent(
             time(359),
             tags(),
@@ -255,7 +257,7 @@ public class ExecutionTrackerTest
             time(601),
             tags(),
             93,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 385, 1, -1, 0))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, ItemID.SHARK, 1, -1, 0))));
         harness.accept(new InteractingChangedTelemetryEvent(
             time(602),
             tags(),
@@ -267,7 +269,7 @@ public class ExecutionTrackerTest
             tags(),
             "Attack",
             "Araxxor",
-            EntityRef.npc(1, 13668, "Araxxor"),
+            EntityRef.npc(1, NpcID.ARAXXOR, "Araxxor"),
             "NPC_FIRST_OPTION",
             location(),
             0));
@@ -294,12 +296,12 @@ public class ExecutionTrackerTest
             time(701),
             tags(),
             93,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 385, 1, -1, 0))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, ItemID.SHARK, 1, -1, 0))));
         harness.accept(new InventoryDeltaTelemetryEvent(
             time(702),
             tags(),
             93,
-            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, 2434, 1, 139, 1))));
+            Collections.singletonList(new InventoryDeltaTelemetryEvent.ItemDelta(0, ItemID.PRAYER_POTION4, 1, ItemID.PRAYER_POTION3, 1))));
 
         assertEquals(4, harness.markers.size());
         assertEquals("food-recovery.FOOD_RECOVERY", harness.markers.get(1).getOpportunityType());

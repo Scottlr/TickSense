@@ -13,7 +13,7 @@ TickSense targets RuneLite Plugin Hub compatibility, so production and test code
 
 - Keep live RuneLite API objects at the plugin edge in `com.ticksense.runelite`.
 - UI classes may use RuneLite client UI types such as `ColorScheme` and `PluginPanel`.
-- Activity ID catalogs may import RuneLite constants such as `NpcID`, `ItemID`, `ObjectID`, `AnimationID`, `InventoryID`, and `WidgetID`.
+- Activity ID catalogs may import RuneLite constants such as `NpcID`, `ItemID`, `ObjectID`, `AnimationID`, `InventoryID`, `WidgetID`, and `gameval.InterfaceID` for named widget groups/components.
 - Core, telemetry, analytics, storage, and activity strategy logic should consume normalized TickSense types and ID catalog helpers rather than RuneLite API objects.
 
 ## ID Catalogs

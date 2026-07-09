@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class VardorvisAnalyzerTest
@@ -58,7 +59,7 @@ public class VardorvisAnalyzerTest
         final Map<String, String> metadata = new LinkedHashMap<>();
         metadata.put("displayName", "Vardorvis");
         metadata.put("confidence", "0.94");
-        metadata.put("evidenceSummary", "Vardorvis verification status is VERIFIED. | Verified region 4405 contains the ranged-head cue. | Verified ranged-head projectile 9911 targeted the local player from NPC 12226.");
+        metadata.put("evidenceSummary", "Vardorvis verification status is VERIFIED. | Verified region 4405 contains the ranged-head cue. | Verified ranged-head projectile 9911 targeted the local player from NPC " + NpcID.VARDORVIS_HEAD + ".");
         return new ActivitySession(
             ActivityId.of("vardorvis-session-1"),
             ActivityType.VARDORVIS,
@@ -89,7 +90,7 @@ public class VardorvisAnalyzerTest
         final Map<String, String> context = new LinkedHashMap<>();
         context.put("mechanic", VardorvisState.MECHANIC_RANGED_HEAD_RESPONSE);
         context.put("projectileId", "9911");
-        context.put("sourceNpcId", "12226");
+        context.put("sourceNpcId", String.valueOf(NpcID.VARDORVIS_HEAD));
         context.put("regionId", "4405");
         return Arrays.asList(
             new OpportunityMarker(

@@ -16,6 +16,7 @@ import java.util.EnumSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class BossStubModuleCatalogTest
@@ -46,26 +47,26 @@ public class BossStubModuleCatalogTest
     @Test
     public void observeOnlyBossStubsEmitSuppressedCandidates()
     {
-        assertSuppressedCandidate(new com.ticksense.activities.scurrius.ScurriusModule(), 7221);
-        assertSuppressedCandidate(new com.ticksense.activities.phantommuspah.PhantomMuspahModule(), 12077);
-        assertSuppressedCandidate(new com.ticksense.activities.hunllef.HunllefModule(), 9021);
-        assertSuppressedCandidate(new com.ticksense.activities.hunllef.CorruptedGauntletModule(), 9035);
+        assertSuppressedCandidate(new com.ticksense.activities.scurrius.ScurriusModule(), NpcID.SCURRIUS);
+        assertSuppressedCandidate(new com.ticksense.activities.phantommuspah.PhantomMuspahModule(), NpcID.PHANTOM_MUSPAH);
+        assertSuppressedCandidate(new com.ticksense.activities.hunllef.HunllefModule(), NpcID.CRYSTALLINE_HUNLLEF);
+        assertSuppressedCandidate(new com.ticksense.activities.hunllef.CorruptedGauntletModule(), NpcID.CORRUPTED_HUNLLEF);
     }
 
     @Test
     public void exposesSourceOwnedBossNpcIds()
     {
-        assertTrue(ScurriusIds.isBossNpcId(7221));
-        assertTrue(ScurriusIds.isBossNpcId(15695));
+        assertTrue(ScurriusIds.isBossNpcId(NpcID.SCURRIUS));
+        assertTrue(ScurriusIds.isBossNpcId(NpcID.SCURRIUS_15695));
         assertFalse(ScurriusIds.isBossNpcId(-1));
 
-        assertTrue(PhantomMuspahIds.isBossNpcId(12077));
-        assertTrue(PhantomMuspahIds.isBossNpcId(15549));
+        assertTrue(PhantomMuspahIds.isBossNpcId(NpcID.PHANTOM_MUSPAH));
+        assertTrue(PhantomMuspahIds.isBossNpcId(NpcID.PHANTOM_MUSPAH_15549));
         assertFalse(PhantomMuspahIds.isBossNpcId(-1));
 
-        assertTrue(HunllefIds.isCrystallineHunllef(9021));
-        assertTrue(HunllefIds.isCorruptedHunllef(9035));
-        assertTrue(HunllefIds.isHunllef(15614));
+        assertTrue(HunllefIds.isCrystallineHunllef(NpcID.CRYSTALLINE_HUNLLEF));
+        assertTrue(HunllefIds.isCorruptedHunllef(NpcID.CORRUPTED_HUNLLEF));
+        assertTrue(HunllefIds.isHunllef(NpcID.CRYSTALLINE_HUNLLEF_15614));
         assertFalse(HunllefIds.isHunllef(-1));
     }
 

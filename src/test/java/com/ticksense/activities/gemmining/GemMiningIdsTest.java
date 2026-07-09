@@ -18,6 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ItemID;
+import net.runelite.api.ObjectID;
 import org.junit.Test;
 
 public class GemMiningIdsTest
@@ -31,9 +34,9 @@ public class GemMiningIdsTest
         assertEquals(GemMiningVerificationDecision.Status.VERIFIED, decision.getStatus());
         assertTrue(decision.getBlockers().isEmpty());
         assertTrue(GemMiningIds.isGemMiningRegionId(11410));
-        assertTrue(GemMiningIds.isGemRockObjectId(11380));
-        assertTrue(GemMiningIds.isMiningAnimationId(625));
-        assertTrue(GemMiningIds.isUncutGemItemId(1619));
+        assertTrue(GemMiningIds.isGemRockObjectId(ObjectID.GEM_ROCKS));
+        assertTrue(GemMiningIds.isMiningAnimationId(AnimationID.MINING_BRONZE_PICKAXE));
+        assertTrue(GemMiningIds.isUncutGemItemId(ItemID.UNCUT_RUBY));
     }
 
     @Test

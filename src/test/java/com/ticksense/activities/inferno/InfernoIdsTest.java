@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import net.runelite.api.ItemID;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class InfernoIdsTest
@@ -29,15 +31,39 @@ public class InfernoIdsTest
         assertFalse(decision.allowsPrayerTimingReports());
         assertFalse(decision.getBlockers().isEmpty());
 
-        assertArrayEquals(new int[] {7674, 7675}, InfernoIds.nibblerNpcIds());
-        assertArrayEquals(new int[] {7691, 7692, 7693, 7694, 7695, 7696, 7697, 7698, 7699, 7700, 7704, 7706}, InfernoIds.waveNpcIds());
-        assertArrayEquals(new int[] {2434, 3024, 6685, 3144, 811, 12926}, InfernoIds.supplyItemIds());
+        assertArrayEquals(new int[] {NpcID.JALNIBREK, NpcID.JALNIBREK_7675}, InfernoIds.nibblerNpcIds());
+        assertArrayEquals(
+            new int[] {
+                NpcID.JALNIB,
+                NpcID.JALMEJRAH,
+                NpcID.JALAK,
+                NpcID.JALAKREKMEJ,
+                NpcID.JALAKREKXIL,
+                NpcID.JALAKREKKET,
+                NpcID.JALIMKOT,
+                NpcID.JALXIL,
+                NpcID.JALZEK,
+                NpcID.JALTOKJAD,
+                NpcID.JALTOKJAD_7704,
+                NpcID.TZKALZUK
+            },
+            InfernoIds.waveNpcIds());
+        assertArrayEquals(
+            new int[] {
+                ItemID.PRAYER_POTION4,
+                ItemID.SUPER_RESTORE4,
+                ItemID.SARADOMIN_BREW4,
+                ItemID.COOKED_KARAMBWAN,
+                ItemID.RUNE_DART,
+                ItemID.TOXIC_BLOWPIPE
+            },
+            InfernoIds.supplyItemIds());
         assertArrayEquals(new int[0], InfernoIds.verifiedRegionIds());
         assertArrayEquals(new int[0], InfernoIds.prayerStateIds());
         assertArrayEquals(new int[0], InfernoIds.deathTimelineIds());
-        assertTrue(InfernoIds.isNibblerNpcId(7674));
-        assertTrue(InfernoIds.isWaveNpcId(7691));
-        assertTrue(InfernoIds.isSupplyItemId(2434));
+        assertTrue(InfernoIds.isNibblerNpcId(NpcID.JALNIBREK));
+        assertTrue(InfernoIds.isWaveNpcId(NpcID.JALNIB));
+        assertTrue(InfernoIds.isSupplyItemId(ItemID.PRAYER_POTION4));
         assertFalse(InfernoIds.hasVerifiedRegionIds());
         assertFalse(InfernoIds.isPrayerStateId(12345));
 

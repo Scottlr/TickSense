@@ -28,6 +28,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.AnimationID;
+import net.runelite.api.ItemID;
+import net.runelite.api.ObjectID;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.widgets.WidgetID;
 import org.junit.Test;
 
 public class ConstructionStrategyTest
@@ -41,7 +46,7 @@ public class ConstructionStrategyTest
         harness.accept(buildSpotEvent(400, StateChanges.AVAILABLE));
         harness.accept(menuOpenedEvent(401, "Build", "Larder space", buildLocation()));
         harness.accept(buildClickEvent(402));
-        harness.accept(constructionWidgetEvent(403, 458, 12, "Oak larder"));
+        harness.accept(constructionWidgetEvent(403, InterfaceID.POH_FURNITURE_CREATION, childId(InterfaceID.PohFurnitureCreation._09), "Oak larder"));
 
         final OpportunityMarker marker = harness.completedOpportunity(ConstructionState.OPPORTUNITY_MENU_LATENCY);
         assertEquals(402, marker.getTime().getGameTick());
@@ -58,9 +63,9 @@ public class ConstructionStrategyTest
         harness.accept(buildSpotEvent(400, StateChanges.AVAILABLE));
         harness.accept(menuOpenedEvent(401, "Build", "Larder space", buildLocation()));
         harness.accept(buildClickEvent(402));
-        harness.accept(constructionWidgetEvent(403, 458, 12, "Oak larder"));
-        harness.accept(animationEvent(404, 3676));
-        harness.accept(inventoryDeltaEvent(405, 8778, -1, 0));
+        harness.accept(constructionWidgetEvent(403, InterfaceID.POH_FURNITURE_CREATION, childId(InterfaceID.PohFurnitureCreation._09), "Oak larder"));
+        harness.accept(animationEvent(404, AnimationID.CONSTRUCTION));
+        harness.accept(inventoryDeltaEvent(405, ItemID.OAK_PLANK, -1, 0));
         harness.accept(constructionXpEvent(406, 480));
         harness.accept(builtLarderEvent(407));
         harness.accept(menuOpenedEvent(415, "Remove", "Oak larder", buildLocation()));
@@ -102,7 +107,7 @@ public class ConstructionStrategyTest
                 entries,
                 "Build",
                 "Larder space",
-                15403,
+                ObjectID.LARDER_SPACE,
                 3110,
                 3497,
                 EntityRef.unknown())));
@@ -150,6 +155,11 @@ public class ConstructionStrategyTest
             new RegionInstanceTelemetryEvent(time(tick), Collections.singletonMap("source", "WorldViewLoaded"), 330, location.getRegionId(), "top", false, "LOGGED_IN", location));
     }
 
+    private static int childId(int packedWidgetId)
+    {
+        return packedWidgetId & 0xFFFF;
+    }
+
     private static TelemetryEnvelope buildSpotEvent(int tick, String stateChange)
     {
         return envelope(
@@ -157,7 +167,7 @@ public class ConstructionStrategyTest
             new ObjectStateTelemetryEvent(
                 time(tick),
                 Collections.singletonMap("source", "ObjectSnapshot"),
-                15403,
+                ObjectID.LARDER_SPACE,
                 "Larder space",
                 buildLocation(),
                 "GAME_OBJECT",
@@ -172,7 +182,7 @@ public class ConstructionStrategyTest
             new ObjectStateTelemetryEvent(
                 time(tick),
                 Collections.singletonMap("source", "ObjectSnapshot"),
-                13565,
+                ObjectID.LARDER_13565,
                 "Oak larder",
                 buildLocation(),
                 "GAME_OBJECT",
@@ -191,7 +201,7 @@ public class ConstructionStrategyTest
                 Collections.singletonList(option + " <col=ff9040>" + target),
                 option,
                 target,
-                "Build".equals(option) ? 15403 : 13565,
+                "Build".equals(option) ? ObjectID.LARDER_SPACE : ObjectID.LARDER_13565,
                 location.getX(),
                 location.getY(),
                 EntityRef.unknown()));
@@ -236,7 +246,7 @@ public class ConstructionStrategyTest
                 Collections.singletonMap("source", "WidgetLoaded"),
                 groupId,
                 childId,
-                8778,
+                ItemID.OAK_PLANK,
                 text,
                 "WidgetLoaded",
                 true,
@@ -250,7 +260,7 @@ public class ConstructionStrategyTest
             new WidgetTelemetryEvent(
                 time(tick),
                 Collections.singletonMap("source", "WidgetLoaded"),
-                12,
+                WidgetID.BANK_GROUP_ID,
                 0,
                 -1,
                 "The Bank of Gielinor",

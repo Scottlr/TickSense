@@ -26,6 +26,8 @@ import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.ItemID;
+import net.runelite.api.NpcID;
 import org.junit.Test;
 
 public class InfernoStrategyTest
@@ -36,12 +38,12 @@ public class InfernoStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(700, infernoLocation(), "LOGGED_IN"));
-        harness.accept(waveNpcSpawnEvent(701, 7691));
+        harness.accept(waveNpcSpawnEvent(701, NpcID.JALNIB));
         harness.accept(regionEvent(720, outsideLocation(), "LOGGED_IN"));
 
         final OpportunityMarker wave = harness.terminalOpportunity(InfernoState.OPPORTUNITY_WAVE, OpportunityStatus.COMPLETED);
         assertEquals(720, wave.getTime().getGameTick());
-        assertEquals("7691", wave.getContext().get("waveNpcId"));
+        assertEquals(String.valueOf(NpcID.JALNIB), wave.getContext().get("waveNpcId"));
         assertEquals(FinishReasonType.LEFT_REGION, harness.engine.getCompletedSessions().get(0).getFinishReason().getType());
 
         final ActivityReportData data = harness.engine.getCompletedActivityData().get(0);
@@ -54,10 +56,10 @@ public class InfernoStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(700, infernoLocation(), "LOGGED_IN"));
-        harness.accept(waveNpcSpawnEvent(701, 7691));
-        harness.accept(nibblerSpawnEvent(705, 7674));
-        harness.accept(nibblerInteractEvent(706, 7674));
-        harness.accept(supplyUseEvent(707, 2434));
+        harness.accept(waveNpcSpawnEvent(701, NpcID.JALNIB));
+        harness.accept(nibblerSpawnEvent(705, NpcID.JALNIBREK));
+        harness.accept(nibblerInteractEvent(706, NpcID.JALNIBREK));
+        harness.accept(supplyUseEvent(707, ItemID.PRAYER_POTION4));
         harness.accept(regionEvent(720, outsideLocation(), "LOGGED_IN"));
 
         final OpportunityMarker nibbler = harness.terminalOpportunity(InfernoState.OPPORTUNITY_NIBBLER_WINDOW, OpportunityStatus.COMPLETED);
@@ -79,7 +81,7 @@ public class InfernoStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(700, infernoLocation(), "LOGGED_IN"));
-        harness.accept(waveNpcSpawnEvent(701, 7691));
+        harness.accept(waveNpcSpawnEvent(701, NpcID.JALNIB));
         harness.accept(localDamageEvent(702, 31, 55));
         harness.accept(supplyUseEvent(703, 385));
         harness.accept(regionEvent(720, outsideLocation(), "LOGGED_IN"));
@@ -96,8 +98,8 @@ public class InfernoStrategyTest
         final Harness harness = new Harness(verifiedStrategy());
 
         harness.accept(regionEvent(700, infernoLocation(), "LOGGED_IN"));
-        harness.accept(waveNpcSpawnEvent(701, 7691));
-        harness.accept(nibblerSpawnEvent(705, 7674));
+        harness.accept(waveNpcSpawnEvent(701, NpcID.JALNIB));
+        harness.accept(nibblerSpawnEvent(705, NpcID.JALNIBREK));
         harness.accept(regionEvent(720, outsideLocation(), "LOGGED_IN"));
 
         assertTrue(harness.opportunityMarkers.stream().noneMatch(marker -> InfernoState.OPPORTUNITY_PRAYER_WINDOW.equals(marker.getOpportunityType())));
@@ -119,9 +121,9 @@ public class InfernoStrategyTest
                 InfernoVerificationDecision.EvidenceStatus.BLOCKED,
                 Collections.singletonList("Synthetic verified Inferno wave and nibbler evidence."),
                 Collections.singletonList("Prayer timing intentionally stays blocked in tests.")),
-            new int[] {7674, 7675},
-            new int[] {7691},
-            new int[] {2434},
+            new int[] {NpcID.JALNIBREK, NpcID.JALNIBREK_7675},
+            new int[] {NpcID.JALNIB},
+            new int[] {ItemID.PRAYER_POTION4},
             new int[] {9043});
     }
 

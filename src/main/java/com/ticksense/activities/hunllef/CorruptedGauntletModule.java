@@ -8,8 +8,11 @@ import com.ticksense.core.ActivityType;
 
 public final class CorruptedGauntletModule extends SimpleActivityModule
 {
+    private static final int ARBITRATION_PRIORITY = 37;
+    private static final double ACTIVATION_THRESHOLD = 0.75D;
+
     static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.CORRUPTED_GAUNTLET, "Corrupted Gauntlet", 37, 0.75D, true);
+        new ActivityDefinition(ActivityType.CORRUPTED_GAUNTLET, "Corrupted Gauntlet", ARBITRATION_PRIORITY, ACTIVATION_THRESHOLD, true);
 
     public CorruptedGauntletModule()
     {

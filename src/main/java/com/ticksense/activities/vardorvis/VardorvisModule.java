@@ -7,8 +7,11 @@ import com.ticksense.core.ActivityType;
 
 public final class VardorvisModule extends SimpleActivityModule
 {
+    private static final int ARBITRATION_PRIORITY = 30;
+    private static final double ACTIVATION_THRESHOLD = 0.75D;
+
     static final ActivityDefinition DEFINITION =
-        new ActivityDefinition(ActivityType.VARDORVIS, "Vardorvis", 30, 0.75D, true);
+        new ActivityDefinition(ActivityType.VARDORVIS, "Vardorvis", ARBITRATION_PRIORITY, ACTIVATION_THRESHOLD, true);
 
     public VardorvisModule()
     {

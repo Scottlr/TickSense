@@ -87,7 +87,7 @@ public final class ActivityRegistry
         {
             final List<ActivityStrategy> ordered = new ArrayList<>(strategies);
             ordered.sort(Comparator
-                .comparingInt((ActivityStrategy strategy) -> strategy.getDefinition().getPriority()).reversed()
+                .comparingInt((ActivityStrategy strategy) -> strategy.getDefinition().getArbitrationPriority()).reversed()
                 .thenComparing(strategy -> strategy.getDefinition().getDisplayName())
                 .thenComparing(strategy -> strategy.getDefinition().getActivityType().name()));
             return new ActivityRegistry(ordered);

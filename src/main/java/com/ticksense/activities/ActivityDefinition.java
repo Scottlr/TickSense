@@ -8,20 +8,20 @@ public final class ActivityDefinition
 {
     private final ActivityType activityType;
     private final String displayName;
-    private final int priority;
+    private final int arbitrationPriority;
     private final double activationThreshold;
     private final boolean bossActivity;
 
     public ActivityDefinition(
         ActivityType activityType,
         String displayName,
-        int priority,
+        int arbitrationPriority,
         double activationThreshold,
         boolean bossActivity)
     {
         this.activityType = Objects.requireNonNull(activityType, "activityType");
         this.displayName = TextValues.requireText(displayName, "displayName");
-        this.priority = priority;
+        this.arbitrationPriority = arbitrationPriority;
         this.activationThreshold = requireThreshold(activationThreshold);
         this.bossActivity = bossActivity;
     }
@@ -36,9 +36,9 @@ public final class ActivityDefinition
         return displayName;
     }
 
-    public int getPriority()
+    public int getArbitrationPriority()
     {
-        return priority;
+        return arbitrationPriority;
     }
 
     public double getActivationThreshold()

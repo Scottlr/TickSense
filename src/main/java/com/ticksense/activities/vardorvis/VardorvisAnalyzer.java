@@ -11,14 +11,13 @@ import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.MetricValueMap;
-import com.ticksense.analytics.OpportunityMarkerResolver;
+import com.ticksense.analytics.OpportunityAnalysis;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
-import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,12 +48,14 @@ public final class VardorvisAnalyzer
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityReportData normalizedActivityData = Objects.requireNonNull(activityData, "activityData");
-        final List<ResolvedOpportunity> opportunities = OpportunityMarkerResolver.resolve(opportunityMarkers);
+        final List<ResolvedOpportunity> opportunities = OpportunityAnalysis.resolve(opportunityMarkers);
 
-        final List<Double> responseLatencies = latenciesFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.COMPLETED);
+        final List<Double> responseLatencies =
+            OpportunityAnalysis.latenciesFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.COMPLETED);
         final int damageDuringOpportunities = damageDuringFailedOpportunities(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE);
         final int completedLatencyTicks = (int) Math.round(AnalysisMath.sum(responseLatencies));
-        final int failedWindowTicks = latencyTicksFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.FAILED);
+        final int failedWindowTicks =
+            OpportunityAnalysis.latencyTicksFor(opportunities, VardorvisState.OPPORTUNITY_RANGED_HEAD_RESPONSE, OpportunityStatus.FAILED);
         final double downtimeValue = completedLatencyTicks + failedWindowTicks;
         final double mechanicConfidenceValue = ReportMetadata.confidence(normalizedSession) * 100.0D;
 
@@ -90,32 +91,6 @@ public final class VardorvisAnalyzer
         return ActivityReportAssembler.assemble(normalizedSession, activityData, "Vardorvis", reportData);
     }
 
-    private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType, OpportunityStatus status)
-    {
-        final List<Double> latencies = new ArrayList<>();
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            if (opportunityType.equals(opportunity.type()) && opportunity.status() == status)
-            {
-                latencies.add((double) opportunity.latencyTicks());
-            }
-        }
-        return latencies;
-    }
-
-    private static int latencyTicksFor(List<ResolvedOpportunity> opportunities, String opportunityType, OpportunityStatus status)
-    {
-        int total = 0;
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            if (opportunityType.equals(opportunity.type()) && opportunity.status() == status)
-            {
-                total += opportunity.latencyTicks();
-            }
-        }
-        return total;
-    }
-
     private static int damageDuringFailedOpportunities(List<ResolvedOpportunity> opportunities, String opportunityType)
     {
         int totalDamage = 0;
@@ -141,8 +116,8 @@ public final class VardorvisAnalyzer
     {
         final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         evidence.add("Vardorvis damage attribution counts only local-player damage inside verified mechanic windows.");
-        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
-        evidence.add("Verified mechanics: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verifiedMechanics")));
+        evidence.add("Verification status: " + activityData.attributes().getText("verificationStatus"));
+        evidence.add("Verified mechanics: " + activityData.attributes().getText("verifiedMechanics"));
         return Collections.unmodifiableList(evidence);
     }
 

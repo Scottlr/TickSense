@@ -1,6 +1,8 @@
 package com.ticksense.activities.gemmining;
 
 import com.ticksense.activities.ActivityContext;
+import com.ticksense.activities.ActivityReportAttributes;
+import com.ticksense.activities.ActivityStateSupport;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
@@ -24,7 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-final class GemMiningState
+final class GemMiningState implements ActivityStateSupport
 {
     static final String OPPORTUNITY_RESPAWN_TO_CLICK = "GEM_ROCK_RESPAWN_TO_CLICK";
     static final String OPPORTUNITY_IDLE = "GEM_MINING_IDLE";
@@ -199,13 +201,15 @@ final class GemMiningState
         return availableRock == null ? -1 : availableRock.objectId;
     }
 
-    void startActivity(ActivityId activityId)
+    @Override
+    public void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
         reusableExecutionTrackers.startActivity(activityId);
     }
 
-    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
+    @Override
+    public void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
         if (opportunityLifecycle == null)
         {
@@ -233,7 +237,8 @@ final class GemMiningState
         flushPendingCycleOpportunities();
     }
 
-    void cancelOpenOpportunities(EventTime endTime, String detail)
+    @Override
+    public void cancelOpenOpportunities(EventTime endTime, String detail)
     {
         if (opportunityLifecycle == null || activeActivityId == null)
         {
@@ -246,23 +251,26 @@ final class GemMiningState
         reusableExecutionTrackers.cancelOpenOpportunities(endTime, detail);
     }
 
-    Map<String, String> snapshotAttributes()
+    @Override
+    public Map<String, String> snapshotAttributes()
     {
-        final Map<String, String> attributes = new LinkedHashMap<>();
-        attributes.put("verificationStatus", GemMiningIds.verificationDecision().getStatus().name());
-        attributes.put("verifiedRegionIds", GemMiningIds.verifiedRegionIdsCsv());
-        attributes.put("verifiedObjectIds", GemMiningIds.verifiedObjectIdsCsv());
-        attributes.put("mineClicks", String.valueOf(totalMineClicks));
-        attributes.put("redundantClicks", String.valueOf(redundantClicks));
-        attributes.put("idleTicks", String.valueOf(totalIdleTicks));
-        attributes.put("miningConfirmations", String.valueOf(miningConfirmations));
-        attributes.put("respawnOpportunityCount", String.valueOf(countTerminalOpportunities(OPPORTUNITY_RESPAWN_TO_CLICK)));
-        attributes.put("idleOpportunityCount", String.valueOf(countTerminalOpportunities(OPPORTUNITY_IDLE)));
-        attributes.put("movementOpportunityCount", String.valueOf(countTerminalOpportunities(OPPORTUNITY_MOVEMENT_TO_ROCK)));
-        return attributes;
+        return ActivityReportAttributes.builder()
+            .putText("verificationStatus", GemMiningIds.verificationDecision().getStatus().name())
+            .putText("verifiedRegionIds", GemMiningIds.verifiedRegionIdsCsv())
+            .putText("verifiedObjectIds", GemMiningIds.verifiedObjectIdsCsv())
+            .putInt("mineClicks", totalMineClicks)
+            .putInt("redundantClicks", redundantClicks)
+            .putInt("idleTicks", totalIdleTicks)
+            .putInt("miningConfirmations", miningConfirmations)
+            .putInt("respawnOpportunityCount", countTerminalOpportunities(OPPORTUNITY_RESPAWN_TO_CLICK))
+            .putInt("idleOpportunityCount", countTerminalOpportunities(OPPORTUNITY_IDLE))
+            .putInt("movementOpportunityCount", countTerminalOpportunities(OPPORTUNITY_MOVEMENT_TO_ROCK))
+            .build()
+            .asMap();
     }
 
-    void resetForNextSession()
+    @Override
+    public void resetForNextSession()
     {
         availableRock = null;
         pendingMovement = null;

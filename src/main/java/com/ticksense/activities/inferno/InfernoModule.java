@@ -1,38 +1,22 @@
 package com.ticksense.activities.inferno;
 
 import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityModule;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.analytics.ReportBuilder;
+import com.ticksense.activities.ActivityDescriptor;
+import com.ticksense.activities.SimpleActivityModule;
 import com.ticksense.core.ActivityType;
 
-public final class InfernoModule implements ActivityModule
+public final class InfernoModule extends SimpleActivityModule
 {
     static final ActivityDefinition DEFINITION =
         new ActivityDefinition(ActivityType.INFERNO, "Inferno", 35, 0.75D, true);
 
-    @Override
-    public ActivityDefinition definition()
+    public InfernoModule()
     {
-        return DEFINITION;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return InfernoIds.verificationDecision().allowsStrategyEnablement()
-            && InfernoIds.hasVerifiedRegionIds();
-    }
-
-    @Override
-    public ActivityStrategy createStrategy()
-    {
-        return new InfernoStrategy();
-    }
-
-    @Override
-    public ReportBuilder reportBuilder()
-    {
-        return new InfernoAnalyzer()::buildReport;
+        super(ActivityDescriptor.reportable(
+            DEFINITION,
+            () -> InfernoIds.verificationDecision().allowsStrategyEnablement()
+                && InfernoIds.hasVerifiedRegionIds(),
+            InfernoStrategy::new,
+            new InfernoAnalyzer()::buildReport));
     }
 }

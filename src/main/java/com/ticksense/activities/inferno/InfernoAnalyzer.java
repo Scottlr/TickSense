@@ -10,14 +10,13 @@ import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.MetricValueMap;
-import com.ticksense.analytics.OpportunityMarkerResolver;
+import com.ticksense.analytics.OpportunityAnalysis;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
-import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,10 +43,12 @@ public final class InfernoAnalyzer
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityReportData normalizedActivityData = Objects.requireNonNull(activityData, "activityData");
-        final List<ResolvedOpportunity> opportunities = OpportunityMarkerResolver.resolve(opportunityMarkers);
+        final List<ResolvedOpportunity> opportunities = OpportunityAnalysis.resolve(opportunityMarkers);
 
-        final List<Double> waveDurations = latenciesFor(opportunities, InfernoState.OPPORTUNITY_WAVE);
-        final List<Double> nibblerResponses = latenciesFor(opportunities, InfernoState.OPPORTUNITY_NIBBLER_WINDOW);
+        final List<Double> waveDurations =
+            OpportunityAnalysis.completedLatencies(opportunities, InfernoState.OPPORTUNITY_WAVE);
+        final List<Double> nibblerResponses =
+            OpportunityAnalysis.completedLatencies(opportunities, InfernoState.OPPORTUNITY_NIBBLER_WINDOW);
         final int supplyUsage = AnalysisMath.intAttribute(normalizedActivityData, "supplyUseCount");
         final int deathTimelineEvents = AnalysisMath.intAttribute(normalizedActivityData, "deathTimelineEventCount");
 
@@ -85,30 +86,17 @@ public final class InfernoAnalyzer
         return ActivityReportAssembler.assemble(normalizedSession, activityData, "Inferno", reportData);
     }
 
-    private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
-    {
-        final List<Double> latencies = new ArrayList<>();
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            if (opportunityType.equals(opportunity.type()) && opportunity.completed())
-            {
-                latencies.add((double) opportunity.latencyTicks());
-            }
-        }
-        return latencies;
-    }
-
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
         final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
-        final String prayerStatus = TextValues.trimmedOrEmpty(activityData.getAttributes().get("prayerEvidenceStatus"));
+        final String prayerStatus = activityData.attributes().getText("prayerEvidenceStatus");
         evidence.add("Prayer timing omitted because prayer evidence is " + prayerStatus + ".");
-        final String deathTimeline = TextValues.trimmedOrEmpty(activityData.getAttributes().get("deathTimelineEvidence"));
+        final String deathTimeline = activityData.attributes().getText("deathTimelineEvidence");
         if (!deathTimeline.isEmpty())
         {
             evidence.add("Death timeline: " + deathTimeline);
         }
-        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
+        evidence.add("Verification status: " + activityData.attributes().getText("verificationStatus"));
         return Collections.unmodifiableList(evidence);
     }
 

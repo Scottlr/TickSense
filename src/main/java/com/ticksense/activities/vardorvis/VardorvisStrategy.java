@@ -1,13 +1,8 @@
 package com.ticksense.activities.vardorvis;
 
+import com.ticksense.activities.AbstractActivityStrategy;
 import com.ticksense.activities.ActivityCandidate;
 import com.ticksense.activities.ActivityContext;
-import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.activities.OpportunitySink;
-import com.ticksense.activities.OpportunityLifecycle;
-import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
@@ -21,10 +16,8 @@ import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.Collections;
 import java.util.Optional;
 
-public final class VardorvisStrategy implements ActivityStrategy
+public final class VardorvisStrategy extends AbstractActivityStrategy<VardorvisState>
 {
-    private final VardorvisState state;
-
     public VardorvisStrategy()
     {
         this(
@@ -46,20 +39,17 @@ public final class VardorvisStrategy implements ActivityStrategy
         int[] axeMechanicIds,
         int[] verifiedRegionIds)
     {
-        this.state = new VardorvisState(
-            verificationDecision,
-            bossNpcIds,
-            headNpcIds,
-            rangedHeadProjectileIds,
-            bloodSplatGraphicIds,
-            axeMechanicIds,
-            verifiedRegionIds);
-    }
-
-    @Override
-    public ActivityDefinition getDefinition()
-    {
-        return VardorvisModule.DEFINITION;
+        super(
+            VardorvisModule.DEFINITION,
+            "vardorvis",
+            new VardorvisState(
+                verificationDecision,
+                bossNpcIds,
+                headNpcIds,
+                rangedHeadProjectileIds,
+                bloodSplatGraphicIds,
+                axeMechanicIds,
+                verifiedRegionIds));
     }
 
     @Override
@@ -80,7 +70,7 @@ public final class VardorvisStrategy implements ActivityStrategy
 
         state.noteActivationProjectile(projectile);
         return new ActivityCandidate(
-            ActivityId.of("vardorvis-" + context.getSessionId() + "-" + projectile.getTime().getGameTick()),
+            activityId(context, projectile),
             ActivityType.VARDORVIS,
             0.94D,
             state.activationEvidence(projectile),
@@ -90,15 +80,8 @@ public final class VardorvisStrategy implements ActivityStrategy
     }
 
     @Override
-    public void onStart(ActivityContext context, ActivitySession session)
+    protected void onActivityEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
     {
-        state.startActivity(session.getActivityId());
-    }
-
-    @Override
-    public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
-    {
-        state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
         state.noteReusableExecutionEvent(context, session, event);
         state.flushActivationDerivedOpportunities();
 
@@ -173,14 +156,6 @@ public final class VardorvisStrategy implements ActivityStrategy
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public ActivityReportData buildActivityData(ActivityContext context, ActivitySession session)
-    {
-        final ActivityReportData data = new ActivityReportData(session.getActivityId(), session.getActivityType(), state.snapshotAttributes());
-        state.resetForNextSession();
-        return data;
     }
 
     private void updatePassiveState(TelemetryEvent event)

@@ -1,6 +1,8 @@
 package com.ticksense.activities.inferno;
 
 import com.ticksense.activities.ActivityContext;
+import com.ticksense.activities.ActivityReportAttributes;
+import com.ticksense.activities.ActivityStateSupport;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
@@ -28,7 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class InfernoState
+final class InfernoState implements ActivityStateSupport
 {
     static final String OPPORTUNITY_WAVE = "INFERNO_WAVE";
     static final String OPPORTUNITY_NIBBLER_WINDOW = "INFERNO_NIBBLER_WINDOW";
@@ -122,13 +124,15 @@ final class InfernoState
         pendingWave = new PendingWave(event);
     }
 
-    void startActivity(ActivityId activityId)
+    @Override
+    public void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
         reusableExecutionTrackers.startActivity(activityId);
     }
 
-    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
+    @Override
+    public void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
         if (opportunityLifecycle == null)
         {
@@ -260,6 +264,12 @@ final class InfernoState
         reusableExecutionTrackers.cancelOpenOpportunities(time, detail);
     }
 
+    @Override
+    public void cancelOpenOpportunities(EventTime time, String detail)
+    {
+        completeWaveSpan(time, detail);
+    }
+
     void expireTimedOut(EventTime time)
     {
         if (opportunityLifecycle != null)
@@ -273,21 +283,24 @@ final class InfernoState
         }
     }
 
-    Map<String, String> snapshotAttributes()
+    @Override
+    public Map<String, String> snapshotAttributes()
     {
-        final Map<String, String> attributes = new LinkedHashMap<>();
-        attributes.put("verificationStatus", verificationDecision.getStatus().name());
-        attributes.put("waveSpanCount", String.valueOf(waveSpanCount));
-        attributes.put("nibblerResponseCount", String.valueOf(nibblerResponseCount));
-        attributes.put("supplyUseCount", String.valueOf(supplyUseCount));
-        attributes.put("prayerWindowCount", String.valueOf(prayerWindowCount));
-        attributes.put("prayerEvidenceStatus", verificationDecision.getPrayerEvidenceStatus().name());
-        attributes.put("deathTimelineEventCount", String.valueOf(deathTimelineEvidence.size()));
-        attributes.put("deathTimelineEvidence", String.join(" | ", deathTimelineEvidence));
-        return attributes;
+        return ActivityReportAttributes.builder()
+            .putText("verificationStatus", verificationDecision.getStatus().name())
+            .putInt("waveSpanCount", waveSpanCount)
+            .putInt("nibblerResponseCount", nibblerResponseCount)
+            .putInt("supplyUseCount", supplyUseCount)
+            .putInt("prayerWindowCount", prayerWindowCount)
+            .putText("prayerEvidenceStatus", verificationDecision.getPrayerEvidenceStatus().name())
+            .putInt("deathTimelineEventCount", deathTimelineEvidence.size())
+            .putText("deathTimelineEvidence", String.join(" | ", deathTimelineEvidence))
+            .build()
+            .asMap();
     }
 
-    void resetForNextSession()
+    @Override
+    public void resetForNextSession()
     {
         currentRegionId = -1;
         activeActivityId = null;

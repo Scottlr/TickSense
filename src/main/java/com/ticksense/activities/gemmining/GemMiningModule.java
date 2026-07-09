@@ -1,37 +1,21 @@
 package com.ticksense.activities.gemmining;
 
 import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityModule;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.analytics.ReportBuilder;
+import com.ticksense.activities.ActivityDescriptor;
+import com.ticksense.activities.SimpleActivityModule;
 import com.ticksense.core.ActivityType;
 
-public final class GemMiningModule implements ActivityModule
+public final class GemMiningModule extends SimpleActivityModule
 {
     static final ActivityDefinition DEFINITION =
         new ActivityDefinition(ActivityType.GEM_MINING, "Gem Mining", 25, 0.75D, false);
 
-    @Override
-    public ActivityDefinition definition()
+    public GemMiningModule()
     {
-        return DEFINITION;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return GemMiningIds.verificationDecision().allowsStrategyEnablement();
-    }
-
-    @Override
-    public ActivityStrategy createStrategy()
-    {
-        return new GemMiningStrategy();
-    }
-
-    @Override
-    public ReportBuilder reportBuilder()
-    {
-        return new GemMiningAnalyzer()::buildReport;
+        super(ActivityDescriptor.reportable(
+            DEFINITION,
+            () -> GemMiningIds.verificationDecision().allowsStrategyEnablement(),
+            GemMiningStrategy::new,
+            new GemMiningAnalyzer()::buildReport));
     }
 }

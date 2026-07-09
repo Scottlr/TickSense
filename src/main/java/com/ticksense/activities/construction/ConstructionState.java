@@ -1,5 +1,7 @@
 package com.ticksense.activities.construction;
 
+import com.ticksense.activities.ActivityReportAttributes;
+import com.ticksense.activities.ActivityStateSupport;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
@@ -24,7 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-final class ConstructionState
+final class ConstructionState implements ActivityStateSupport
 {
     static final String OPPORTUNITY_MENU_LATENCY = "CONSTRUCTION_MENU_LATENCY";
     static final String OPPORTUNITY_BUILD_REMOVE_CADENCE = "CONSTRUCTION_BUILD_REMOVE_CADENCE";
@@ -272,12 +274,14 @@ final class ConstructionState
         return availableBuildSpot == null ? fallback : availableBuildSpot.availableSince;
     }
 
-    void startActivity(ActivityId activityId)
+    @Override
+    public void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
     }
 
-    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
+    @Override
+    public void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
         if (opportunityLifecycle == null)
         {
@@ -318,7 +322,8 @@ final class ConstructionState
         }
     }
 
-    void cancelOpenOpportunities(EventTime endTime, String detail)
+    @Override
+    public void cancelOpenOpportunities(EventTime endTime, String detail)
     {
         if (opportunityLifecycle == null || activeActivityId == null)
         {
@@ -330,21 +335,24 @@ final class ConstructionState
             Collections.singletonList(new OpportunityEvidence(endTime, RegionInstanceTelemetryEvent.TYPE, EvidenceStrength.CONFIRMING, detail)));
     }
 
-    Map<String, String> snapshotAttributes()
+    @Override
+    public Map<String, String> snapshotAttributes()
     {
-        final Map<String, String> attributes = new LinkedHashMap<>();
-        attributes.put("verificationStatus", ConstructionIds.verificationDecision().getStatus().name());
-        attributes.put("methodName", ConstructionIds.approvedMethodName());
-        attributes.put("menuLatencyCount", String.valueOf(menuLatencyCount));
-        attributes.put("buildRemoveCadenceCount", String.valueOf(buildRemoveCadenceCount));
-        attributes.put("inventoryCycleCount", String.valueOf(inventoryCycleCount));
-        attributes.put("bankingDowntimeCount", String.valueOf(bankingDowntimeCount));
-        attributes.put("buildConfirmationCount", String.valueOf(buildConfirmationCount));
-        attributes.put("removeClickCount", String.valueOf(removeClickCount));
-        return attributes;
+        return ActivityReportAttributes.builder()
+            .putText("verificationStatus", ConstructionIds.verificationDecision().getStatus().name())
+            .putText("methodName", ConstructionIds.approvedMethodName())
+            .putInt("menuLatencyCount", menuLatencyCount)
+            .putInt("buildRemoveCadenceCount", buildRemoveCadenceCount)
+            .putInt("inventoryCycleCount", inventoryCycleCount)
+            .putInt("bankingDowntimeCount", bankingDowntimeCount)
+            .putInt("buildConfirmationCount", buildConfirmationCount)
+            .putInt("removeClickCount", removeClickCount)
+            .build()
+            .asMap();
     }
 
-    void resetForNextSession()
+    @Override
+    public void resetForNextSession()
     {
         availableBuildSpot = null;
         builtObject = null;

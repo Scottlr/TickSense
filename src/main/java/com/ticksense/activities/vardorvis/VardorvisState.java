@@ -1,6 +1,8 @@
 package com.ticksense.activities.vardorvis;
 
 import com.ticksense.activities.ActivityContext;
+import com.ticksense.activities.ActivityReportAttributes;
+import com.ticksense.activities.ActivityStateSupport;
 import com.ticksense.activities.EvidenceStrength;
 import com.ticksense.activities.OpportunityDefinition;
 import com.ticksense.activities.OpportunityEvidence;
@@ -26,7 +28,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-final class VardorvisState
+final class VardorvisState implements ActivityStateSupport
 {
     static final String MECHANIC_RANGED_HEAD_RESPONSE = "ranged-head-response";
     static final String OPPORTUNITY_RANGED_HEAD_RESPONSE = "VARDORVIS_RANGED_HEAD_RESPONSE";
@@ -116,13 +118,15 @@ final class VardorvisState
         pendingRangedHeadProjectile = new PendingProjectile(event);
     }
 
-    void startActivity(ActivityId activityId)
+    @Override
+    public void startActivity(ActivityId activityId)
     {
         activeActivityId = activityId;
         reusableExecutionTrackers.startActivity(activityId);
     }
 
-    void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
+    @Override
+    public void ensureOpportunityLifecycle(OpportunityLifecycle nextLifecycle)
     {
         if (opportunityLifecycle == null)
         {
@@ -209,7 +213,8 @@ final class VardorvisState
         rangedHeadOpportunity = null;
     }
 
-    void cancelOpenOpportunities(EventTime endTime, String detail)
+    @Override
+    public void cancelOpenOpportunities(EventTime endTime, String detail)
     {
         if (opportunityLifecycle == null || activeActivityId == null)
         {
@@ -236,19 +241,22 @@ final class VardorvisState
         }
     }
 
-    Map<String, String> snapshotAttributes()
+    @Override
+    public Map<String, String> snapshotAttributes()
     {
-        final Map<String, String> attributes = new LinkedHashMap<>();
-        attributes.put("verificationStatus", verificationDecision.getStatus().name());
-        attributes.put("verifiedMechanics", String.join(",", verificationDecision.getVerifiedMechanics()));
-        attributes.put("rangedHeadResponseCount", String.valueOf(rangedHeadResponseCount));
-        attributes.put("rangedHeadDamageFailures", String.valueOf(rangedHeadDamageFailures));
-        attributes.put("bloodSplatGraphicIdCount", String.valueOf(bloodSplatGraphicIds.size()));
-        attributes.put("axeMechanicIdCount", String.valueOf(axeMechanicIds.size()));
-        return attributes;
+        return ActivityReportAttributes.builder()
+            .putText("verificationStatus", verificationDecision.getStatus().name())
+            .putText("verifiedMechanics", String.join(",", verificationDecision.getVerifiedMechanics()))
+            .putInt("rangedHeadResponseCount", rangedHeadResponseCount)
+            .putInt("rangedHeadDamageFailures", rangedHeadDamageFailures)
+            .putInt("bloodSplatGraphicIdCount", bloodSplatGraphicIds.size())
+            .putInt("axeMechanicIdCount", axeMechanicIds.size())
+            .build()
+            .asMap();
     }
 
-    void resetForNextSession()
+    @Override
+    public void resetForNextSession()
     {
         currentRegionId = -1;
         currentPlayerLocation = WorldLocation.unknown();

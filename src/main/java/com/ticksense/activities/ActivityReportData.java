@@ -1,7 +1,5 @@
 package com.ticksense.activities;
 
-import com.ticksense.common.ImmutableCollections;
-
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivityType;
 import java.util.Map;
@@ -11,13 +9,13 @@ public final class ActivityReportData
 {
     private final ActivityId activityId;
     private final ActivityType activityType;
-    private final Map<String, String> attributes;
+    private final ActivityReportAttributes attributes;
 
     public ActivityReportData(ActivityId activityId, ActivityType activityType, Map<String, String> attributes)
     {
         this.activityId = Objects.requireNonNull(activityId, "activityId");
         this.activityType = Objects.requireNonNull(activityType, "activityType");
-        this.attributes = ImmutableCollections.immutableMap(attributes);
+        this.attributes = new ActivityReportAttributes(attributes);
     }
 
     public ActivityId getActivityId()
@@ -31,6 +29,11 @@ public final class ActivityReportData
     }
 
     public Map<String, String> getAttributes()
+    {
+        return attributes.asMap();
+    }
+
+    public ActivityReportAttributes attributes()
     {
         return attributes;
     }

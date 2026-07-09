@@ -1,8 +1,7 @@
 package com.ticksense.activities.araxxor;
 
+import com.ticksense.activities.ActivityReportAttributes;
 import com.ticksense.common.TextValues;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 final class AraxxorActivityData
@@ -35,14 +34,15 @@ final class AraxxorActivityData
 
     Map<String, String> toAttributes()
     {
-        final Map<String, String> attributes = new LinkedHashMap<>();
-        attributes.put("verificationStatus", verificationStatus);
-        attributes.put("spiderEngagementCount", String.valueOf(spiderEngagementCount));
-        attributes.put("bossReengagementCount", String.valueOf(bossReengagementCount));
-        attributes.put("targetReengagementCount", String.valueOf(targetReengagementCount));
-        attributes.put("spiderWindowDamage", String.valueOf(spiderWindowDamage));
-        attributes.put("bossReengagementDamage", String.valueOf(bossReengagementDamage));
-        attributes.put("targetReengagementDamage", String.valueOf(targetReengagementDamage));
-        return Collections.unmodifiableMap(attributes);
+        return ActivityReportAttributes.builder()
+            .putText("verificationStatus", verificationStatus)
+            .putInt("spiderEngagementCount", spiderEngagementCount)
+            .putInt("bossReengagementCount", bossReengagementCount)
+            .putInt("targetReengagementCount", targetReengagementCount)
+            .putInt("spiderWindowDamage", spiderWindowDamage)
+            .putInt("bossReengagementDamage", bossReengagementDamage)
+            .putInt("targetReengagementDamage", targetReengagementDamage)
+            .build()
+            .asMap();
     }
 }

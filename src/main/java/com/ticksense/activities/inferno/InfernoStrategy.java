@@ -1,13 +1,8 @@
 package com.ticksense.activities.inferno;
 
+import com.ticksense.activities.AbstractActivityStrategy;
 import com.ticksense.activities.ActivityCandidate;
 import com.ticksense.activities.ActivityContext;
-import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.activities.OpportunitySink;
-import com.ticksense.activities.OpportunityLifecycle;
-import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
@@ -21,10 +16,8 @@ import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.Collections;
 import java.util.Optional;
 
-public final class InfernoStrategy implements ActivityStrategy
+public final class InfernoStrategy extends AbstractActivityStrategy<InfernoState>
 {
-    private final InfernoState state;
-
     public InfernoStrategy()
     {
         this(
@@ -42,18 +35,10 @@ public final class InfernoStrategy implements ActivityStrategy
         int[] supplyItemIds,
         int[] verifiedRegionIds)
     {
-        this.state = new InfernoState(
-            verificationDecision,
-            nibblerNpcIds,
-            waveNpcIds,
-            supplyItemIds,
-            verifiedRegionIds);
-    }
-
-    @Override
-    public ActivityDefinition getDefinition()
-    {
-        return InfernoModule.DEFINITION;
+        super(
+            InfernoModule.DEFINITION,
+            "inferno",
+            new InfernoState(verificationDecision, nibblerNpcIds, waveNpcIds, supplyItemIds, verifiedRegionIds));
     }
 
     @Override
@@ -74,7 +59,7 @@ public final class InfernoStrategy implements ActivityStrategy
 
         state.noteActivationWave(npc);
         return new ActivityCandidate(
-            ActivityId.of("inferno-" + context.getSessionId() + "-" + npc.getTime().getGameTick()),
+            activityId(context, npc),
             ActivityType.INFERNO,
             0.93D,
             state.activationEvidence(npc),
@@ -84,15 +69,8 @@ public final class InfernoStrategy implements ActivityStrategy
     }
 
     @Override
-    public void onStart(ActivityContext context, ActivitySession session)
+    protected void onActivityEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
     {
-        state.startActivity(session.getActivityId());
-    }
-
-    @Override
-    public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
-    {
-        state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
         state.noteReusableExecutionEvent(context, session, event);
         state.flushActivationDerivedSpans();
 
@@ -183,14 +161,6 @@ public final class InfernoStrategy implements ActivityStrategy
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public ActivityReportData buildActivityData(ActivityContext context, ActivitySession session)
-    {
-        final ActivityReportData data = new ActivityReportData(session.getActivityId(), session.getActivityType(), state.snapshotAttributes());
-        state.resetForNextSession();
-        return data;
     }
 
     private void updatePassiveState(TelemetryEvent event)

@@ -23,6 +23,14 @@ TickSense targets RuneLite Plugin Hub compatibility, so production and test code
 - Array getters may remain for fixture assertions and strategy constructors, but they must return cloned arrays.
 - Unknown or unverified mechanic IDs belong in observe-only diagnostics or fixture notes until source-owned replay evidence verifies them.
 
+## Activity Extension Contract
+
+- Add new activities through an `ActivityDescriptor` exposed by an `ActivityModule`; the descriptor should define enablement, strategy creation, report builder, and explicit report mode.
+- Prefer `SimpleActivityModule` for modules that only declare descriptor metadata. Add a custom module only when it owns meaningful behavior.
+- Prefer `AbstractActivityStrategy` and `ActivityStateSupport` for full strategies so lifecycle wiring, opportunity lifecycle setup, report-data construction, and state reset stay consistent.
+- Keep activity-specific evidence handling in the strategy/state pair. Reuse common execution trackers and `OpportunityAnalysis` helpers before adding activity-local copies.
+- Keep report attributes typed at the code boundary with `ActivityReportAttributes`; only expose `Map<String, String>` for persistence and compatibility.
+
 ## Style
 
 - Avoid wildcard imports.

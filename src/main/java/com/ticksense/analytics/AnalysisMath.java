@@ -1,7 +1,6 @@
 package com.ticksense.analytics;
 
 import com.ticksense.activities.ActivityReportData;
-import com.ticksense.common.TextValues;
 import java.util.List;
 
 public final class AnalysisMath
@@ -54,11 +53,6 @@ public final class AnalysisMath
 
     public static int intAttribute(ActivityReportData activityData, String key)
     {
-        final String raw = TextValues.trimmedOrEmpty(activityData.getAttributes().get(key));
-        if (raw.isEmpty())
-        {
-            return 0;
-        }
-        return Integer.parseInt(raw);
+        return activityData.attributes().getInt(key);
     }
 }

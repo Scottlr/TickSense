@@ -1,41 +1,22 @@
 package com.ticksense.activities.araxxor;
 
 import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityModule;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.analytics.ReportBuilder;
+import com.ticksense.activities.ActivityDescriptor;
+import com.ticksense.activities.SimpleActivityModule;
 import com.ticksense.core.ActivityType;
 
-public final class AraxxorModule implements ActivityModule
+public final class AraxxorModule extends SimpleActivityModule
 {
     static final ActivityDefinition DEFINITION =
         new ActivityDefinition(ActivityType.ARAXXOR, "Araxxor", 40, 0.75D, true);
 
-    @Override
-    public ActivityDefinition definition()
+    public AraxxorModule()
     {
-        return DEFINITION;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return AraxxorVerificationDecision.current().allowsNormalStrategyEnablement()
-            && AraxxorIds.hasVerifiedRegionIds();
-    }
-
-    @Override
-    public ActivityStrategy createStrategy()
-    {
-        return new AraxxorStrategy();
-    }
-
-    @Override
-    public ReportBuilder reportBuilder()
-    {
-        return (session, activityData, opportunityMarkers) ->
-        {
-            throw new IllegalArgumentException("Araxxor reports remain disabled until verification is complete");
-        };
+        super(ActivityDescriptor.reportsDisabled(
+            DEFINITION,
+            () -> AraxxorVerificationDecision.current().allowsNormalStrategyEnablement()
+                && AraxxorIds.hasVerifiedRegionIds(),
+            AraxxorStrategy::new,
+            "Araxxor reports remain disabled until verification is complete"));
     }
 }

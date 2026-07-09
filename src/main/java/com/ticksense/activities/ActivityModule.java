@@ -11,4 +11,14 @@ public interface ActivityModule
     ActivityStrategy createStrategy();
 
     ReportBuilder reportBuilder();
+
+    default ActivityDescriptor descriptor()
+    {
+        return new ActivityDescriptor(
+            definition(),
+            this::isEnabled,
+            this::createStrategy,
+            reportBuilder(),
+            ActivityReportMode.ENABLED);
+    }
 }

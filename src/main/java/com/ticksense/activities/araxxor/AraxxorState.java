@@ -1,6 +1,7 @@
 package com.ticksense.activities.araxxor;
 
 import com.ticksense.activities.ActivityContext;
+import com.ticksense.activities.ActivityStateSupport;
 import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.activities.execution.CommonExecutionTrackers;
 import com.ticksense.activities.execution.ExecutionTrackerSet;
@@ -20,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-final class AraxxorState
+final class AraxxorState implements ActivityStateSupport
 {
     private static final int BOSS_ABSENT_IDLE_TICKS = 5;
 
@@ -98,13 +99,15 @@ final class AraxxorState
         return event.getTime();
     }
 
-    void startActivity(ActivityId activityId)
+    @Override
+    public void startActivity(ActivityId activityId)
     {
         executionTracker.startActivity(activityId);
         reusableExecutionTrackers.startActivity(activityId);
     }
 
-    void ensureOpportunityLifecycle(OpportunityLifecycle opportunityLifecycle)
+    @Override
+    public void ensureOpportunityLifecycle(OpportunityLifecycle opportunityLifecycle)
     {
         executionTracker.ensureOpportunityLifecycle(opportunityLifecycle);
         reusableExecutionTrackers.ensureOpportunityLifecycle(opportunityLifecycle);
@@ -287,18 +290,21 @@ final class AraxxorState
         reusableExecutionTrackers.expireTimedOut(time);
     }
 
-    void cancelOpenOpportunities(EventTime time, String detail)
+    @Override
+    public void cancelOpenOpportunities(EventTime time, String detail)
     {
         executionTracker.cancelOpenOpportunities(time, detail);
         reusableExecutionTrackers.cancelOpenOpportunities(time, detail);
     }
 
-    Map<String, String> snapshotAttributes()
+    @Override
+    public Map<String, String> snapshotAttributes()
     {
         return executionTracker.snapshotData(verificationDecision.getStatus().name()).toAttributes();
     }
 
-    void resetForNextSession()
+    @Override
+    public void resetForNextSession()
     {
         currentRegionId = -1;
         currentInstanced = false;

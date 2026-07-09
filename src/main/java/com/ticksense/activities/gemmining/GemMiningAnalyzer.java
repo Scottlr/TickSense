@@ -11,7 +11,7 @@ import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.MetricValueMap;
-import com.ticksense.analytics.OpportunityMarkerResolver;
+import com.ticksense.analytics.OpportunityAnalysis;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
@@ -19,7 +19,6 @@ import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
-import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.FinishReason;
 import com.ticksense.core.FinishReasonType;
@@ -53,12 +52,14 @@ public final class GemMiningAnalyzer
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityReportData normalizedActivityData = Objects.requireNonNull(activityData, "activityData");
-        final List<ResolvedOpportunity> opportunities = OpportunityMarkerResolver.resolve(opportunityMarkers);
+        final List<ResolvedOpportunity> opportunities = OpportunityAnalysis.resolve(opportunityMarkers);
 
-        final List<Double> rockResponseLatencies = latenciesFor(opportunities, GemMiningState.OPPORTUNITY_RESPAWN_TO_CLICK);
-        final List<Double> movementLatencies = latenciesFor(opportunities, GemMiningState.OPPORTUNITY_MOVEMENT_TO_ROCK);
-        final int idleTicks = intAttribute(normalizedActivityData, "idleTicks");
-        final int redundantClicks = intAttribute(normalizedActivityData, "redundantClicks");
+        final List<Double> rockResponseLatencies =
+            OpportunityAnalysis.completedLatencies(opportunities, GemMiningState.OPPORTUNITY_RESPAWN_TO_CLICK);
+        final List<Double> movementLatencies =
+            OpportunityAnalysis.completedLatencies(opportunities, GemMiningState.OPPORTUNITY_MOVEMENT_TO_ROCK);
+        final int idleTicks = AnalysisMath.intAttribute(normalizedActivityData, "idleTicks");
+        final int redundantClicks = AnalysisMath.intAttribute(normalizedActivityData, "redundantClicks");
 
         final double rockResponseValue = AnalysisMath.average(rockResponseLatencies);
         final double movementLatencyValue = AnalysisMath.average(movementLatencies);
@@ -102,24 +103,11 @@ public final class GemMiningAnalyzer
         return ActivityReportAssembler.assemble(normalizedSession, activityData, "Gem Mining", reportData);
     }
 
-    private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
-    {
-        final List<Double> latencies = new ArrayList<>();
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            if (opportunityType.equals(opportunity.type()) && opportunity.completed())
-            {
-                latencies.add((double) opportunity.latencyTicks());
-            }
-        }
-        return latencies;
-    }
-
     private static List<String> buildEvidenceSummary(ActivitySession session, ActivityReportData activityData)
     {
         final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         evidence.add("Idle ticks count only verified rock-available windows; depleted-rock wait stays in the RNG caveat, not execution loss.");
-        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
+        evidence.add("Verification status: " + activityData.attributes().getText("verificationStatus"));
         return Collections.unmodifiableList(evidence);
     }
 
@@ -160,11 +148,6 @@ public final class GemMiningAnalyzer
                 ScoreBreakdown.penalty("movement", "Movement latency", movementLatencyValue * 3.0D, "Average movement-to-rock latency."),
                 ScoreBreakdown.penalty("consistency", "Cycle consistency", cycleConsistencyValue * 3.0D, "Deviation across verified mining cycles.")));
         return breakdown.getExecutionScore();
-    }
-
-    private static int intAttribute(ActivityReportData activityData, String key)
-    {
-        return AnalysisMath.intAttribute(activityData, key);
     }
 
     private static String labelFor(String opportunityType)

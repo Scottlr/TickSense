@@ -1,13 +1,8 @@
 package com.ticksense.activities.construction;
 
+import com.ticksense.activities.AbstractActivityStrategy;
 import com.ticksense.activities.ActivityCandidate;
 import com.ticksense.activities.ActivityContext;
-import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.activities.OpportunitySink;
-import com.ticksense.activities.OpportunityLifecycle;
-import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.EntityRef;
@@ -25,14 +20,11 @@ import com.ticksense.telemetry.events.WidgetTelemetryEvent;
 import java.util.Collections;
 import java.util.Optional;
 
-public final class ConstructionStrategy implements ActivityStrategy
+public final class ConstructionStrategy extends AbstractActivityStrategy<ConstructionState>
 {
-    private final ConstructionState state = new ConstructionState();
-
-    @Override
-    public ActivityDefinition getDefinition()
+    public ConstructionStrategy()
     {
-        return ConstructionModule.DEFINITION;
+        super(ConstructionModule.DEFINITION, "construction", new ConstructionState());
     }
 
     @Override
@@ -54,7 +46,7 @@ public final class ConstructionStrategy implements ActivityStrategy
         state.noteBuildClick(action.getTime(), action.getLocation());
         final double confidence = state.activationConfidenceForBuildClick(action.getLocation());
         return new ActivityCandidate(
-            ActivityId.of("construction-" + context.getSessionId() + "-" + action.getTime().getGameTick()),
+            activityId(context, action),
             ActivityType.CONSTRUCTION,
             confidence,
             state.activationEvidence(action.getLocation()),
@@ -64,15 +56,8 @@ public final class ConstructionStrategy implements ActivityStrategy
     }
 
     @Override
-    public void onStart(ActivityContext context, ActivitySession session)
+    protected void onActivityEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
     {
-        state.startActivity(session.getActivityId());
-    }
-
-    @Override
-    public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
-    {
-        state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
         state.flushActivationDerivedOpportunities();
 
         if (event instanceof RegionInstanceTelemetryEvent)
@@ -180,14 +165,6 @@ public final class ConstructionStrategy implements ActivityStrategy
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public ActivityReportData buildActivityData(ActivityContext context, ActivitySession session)
-    {
-        final ActivityReportData data = new ActivityReportData(session.getActivityId(), session.getActivityType(), state.snapshotAttributes());
-        state.resetForNextSession();
-        return data;
     }
 
     private void updatePassiveState(TelemetryEvent event)

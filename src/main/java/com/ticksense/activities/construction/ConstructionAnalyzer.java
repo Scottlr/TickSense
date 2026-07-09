@@ -11,7 +11,7 @@ import com.ticksense.analytics.MetricDefinition;
 import com.ticksense.analytics.MetricUnit;
 import com.ticksense.analytics.MetricValue;
 import com.ticksense.analytics.MetricValueMap;
-import com.ticksense.analytics.OpportunityMarkerResolver;
+import com.ticksense.analytics.OpportunityAnalysis;
 import com.ticksense.analytics.OpportunityTimelineBuilder;
 import com.ticksense.analytics.ReportMetadata;
 import com.ticksense.analytics.ResolvedOpportunity;
@@ -19,7 +19,6 @@ import com.ticksense.analytics.ScoreBreakdown;
 import com.ticksense.analytics.TickLossBreakdown;
 import com.ticksense.analytics.TickLossCategories;
 import com.ticksense.analytics.TickValueFormatter;
-import com.ticksense.common.TextValues;
 import com.ticksense.core.ActivitySession;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,12 +47,16 @@ public final class ConstructionAnalyzer
     {
         final ActivitySession normalizedSession = Objects.requireNonNull(session, "session");
         final ActivityReportData normalizedActivityData = Objects.requireNonNull(activityData, "activityData");
-        final List<ResolvedOpportunity> opportunities = reportableOpportunities(OpportunityMarkerResolver.resolve(opportunityMarkers));
+        final List<ResolvedOpportunity> opportunities = reportableOpportunities(OpportunityAnalysis.resolve(opportunityMarkers));
 
-        final List<Double> menuLatencies = latenciesFor(opportunities, ConstructionState.OPPORTUNITY_MENU_LATENCY);
-        final List<Double> cadenceLatencies = latenciesFor(opportunities, ConstructionState.OPPORTUNITY_BUILD_REMOVE_CADENCE);
-        final List<Double> bankingLatencies = latenciesFor(opportunities, ConstructionState.OPPORTUNITY_BANKING_DOWNTIME);
-        final List<Double> inventoryCycleLatencies = latenciesFor(opportunities, ConstructionState.OPPORTUNITY_INVENTORY_CYCLE);
+        final List<Double> menuLatencies =
+            OpportunityAnalysis.completedLatencies(opportunities, ConstructionState.OPPORTUNITY_MENU_LATENCY);
+        final List<Double> cadenceLatencies =
+            OpportunityAnalysis.completedLatencies(opportunities, ConstructionState.OPPORTUNITY_BUILD_REMOVE_CADENCE);
+        final List<Double> bankingLatencies =
+            OpportunityAnalysis.completedLatencies(opportunities, ConstructionState.OPPORTUNITY_BANKING_DOWNTIME);
+        final List<Double> inventoryCycleLatencies =
+            OpportunityAnalysis.completedLatencies(opportunities, ConstructionState.OPPORTUNITY_INVENTORY_CYCLE);
 
         final double menuLatencyValue = AnalysisMath.average(menuLatencies);
         final double cadenceValue = AnalysisMath.average(cadenceLatencies);
@@ -97,19 +100,6 @@ public final class ConstructionAnalyzer
         return ActivityReportAssembler.assemble(normalizedSession, activityData, "Construction", reportData);
     }
 
-    private static List<Double> latenciesFor(List<ResolvedOpportunity> opportunities, String opportunityType)
-    {
-        final List<Double> latencies = new ArrayList<>();
-        for (ResolvedOpportunity opportunity : opportunities)
-        {
-            if (opportunityType.equals(opportunity.type()) && opportunity.completed())
-            {
-                latencies.add((double) opportunity.latencyTicks());
-            }
-        }
-        return latencies;
-    }
-
     private static List<ResolvedOpportunity> reportableOpportunities(List<ResolvedOpportunity> opportunities)
     {
         if (opportunities.isEmpty())
@@ -142,8 +132,8 @@ public final class ConstructionAnalyzer
     {
         final List<String> evidence = new ArrayList<>(ReportMetadata.startEvidence(session));
         evidence.add("Observe-only Construction analytics: menu, widget, animation, inventory, XP, and bank evidence are retrospective only.");
-        evidence.add("Verification status: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("verificationStatus")));
-        evidence.add("Verified method: " + TextValues.trimmedOrEmpty(activityData.getAttributes().get("methodName")));
+        evidence.add("Verification status: " + activityData.attributes().getText("verificationStatus"));
+        evidence.add("Verified method: " + activityData.attributes().getText("methodName"));
         return Collections.unmodifiableList(evidence);
     }
 

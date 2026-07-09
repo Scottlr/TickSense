@@ -1,13 +1,8 @@
 package com.ticksense.activities.araxxor;
 
+import com.ticksense.activities.AbstractActivityStrategy;
 import com.ticksense.activities.ActivityCandidate;
 import com.ticksense.activities.ActivityContext;
-import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.activities.OpportunitySink;
-import com.ticksense.activities.OpportunityLifecycle;
-import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
 import com.ticksense.core.FinishReason;
@@ -21,10 +16,8 @@ import com.ticksense.telemetry.events.RegionInstanceTelemetryEvent;
 import java.util.Collections;
 import java.util.Optional;
 
-public final class AraxxorStrategy implements ActivityStrategy
+public final class AraxxorStrategy extends AbstractActivityStrategy<AraxxorState>
 {
-    private final AraxxorState state;
-
     public AraxxorStrategy()
     {
         this(
@@ -40,17 +33,10 @@ public final class AraxxorStrategy implements ActivityStrategy
         int[] spiderNpcIds,
         int[] verifiedRegionIds)
     {
-        this.state = new AraxxorState(
-            verificationDecision,
-            araxxorNpcIds,
-            spiderNpcIds,
-            verifiedRegionIds);
-    }
-
-    @Override
-    public ActivityDefinition getDefinition()
-    {
-        return AraxxorModule.DEFINITION;
+        super(
+            AraxxorModule.DEFINITION,
+            "araxxor",
+            new AraxxorState(verificationDecision, araxxorNpcIds, spiderNpcIds, verifiedRegionIds));
     }
 
     @Override
@@ -71,7 +57,7 @@ public final class AraxxorStrategy implements ActivityStrategy
 
         state.noteActivationInteraction(interaction);
         return new ActivityCandidate(
-            ActivityId.of("araxxor-" + context.getSessionId() + "-" + interaction.getTime().getGameTick()),
+            activityId(context, interaction),
             ActivityType.ARAXXOR,
             0.93D,
             state.activationEvidence(interaction),
@@ -81,15 +67,8 @@ public final class AraxxorStrategy implements ActivityStrategy
     }
 
     @Override
-    public void onStart(ActivityContext context, ActivitySession session)
+    protected void onActivityEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
     {
-        state.startActivity(session.getActivityId());
-    }
-
-    @Override
-    public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
-    {
-        state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
         state.noteReusableExecutionEvent(context, session, event);
 
         if (event instanceof RegionInstanceTelemetryEvent)
@@ -193,14 +172,6 @@ public final class AraxxorStrategy implements ActivityStrategy
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public ActivityReportData buildActivityData(ActivityContext context, ActivitySession session)
-    {
-        final ActivityReportData data = new ActivityReportData(session.getActivityId(), session.getActivityType(), state.snapshotAttributes());
-        state.resetForNextSession();
-        return data;
     }
 
     private void updatePassiveState(TelemetryEvent event)

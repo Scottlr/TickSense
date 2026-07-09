@@ -1,12 +1,8 @@
 package com.ticksense.activities.gemmining;
 
+import com.ticksense.activities.AbstractActivityStrategy;
 import com.ticksense.activities.ActivityCandidate;
 import com.ticksense.activities.ActivityContext;
-import com.ticksense.activities.ActivityDefinition;
-import com.ticksense.activities.ActivityReportData;
-import com.ticksense.activities.ActivityStrategy;
-import com.ticksense.activities.OpportunitySink;
-import com.ticksense.activities.OpportunityLifecycle;
 import com.ticksense.core.ActivityId;
 import com.ticksense.core.ActivitySession;
 import com.ticksense.core.ActivityType;
@@ -25,14 +21,11 @@ import com.ticksense.telemetry.events.StatChangedTelemetryEvent;
 import java.util.Collections;
 import java.util.Optional;
 
-public final class GemMiningStrategy implements ActivityStrategy
+public final class GemMiningStrategy extends AbstractActivityStrategy<GemMiningState>
 {
-    private final GemMiningState state = new GemMiningState();
-
-    @Override
-    public ActivityDefinition getDefinition()
+    public GemMiningStrategy()
     {
-        return GemMiningModule.DEFINITION;
+        super(GemMiningModule.DEFINITION, "gem-mining", new GemMiningState());
     }
 
     @Override
@@ -67,15 +60,8 @@ public final class GemMiningStrategy implements ActivityStrategy
     }
 
     @Override
-    public void onStart(ActivityContext context, ActivitySession session)
+    protected void onActivityEvent(ActivityContext context, ActivitySession session, TelemetryEvent event)
     {
-        state.startActivity(session.getActivityId());
-    }
-
-    @Override
-    public void onEvent(ActivityContext context, ActivitySession session, TelemetryEvent event, OpportunitySink sink)
-    {
-        state.ensureOpportunityLifecycle(new OpportunityLifecycle(sink));
         state.noteReusableExecutionEvent(context, session, event);
         state.expireTimedOut(event.getTime());
         if (state.availableRock() != null)
@@ -176,14 +162,6 @@ public final class GemMiningStrategy implements ActivityStrategy
         return Optional.empty();
     }
 
-    @Override
-    public ActivityReportData buildActivityData(ActivityContext context, ActivitySession session)
-    {
-        final ActivityReportData data = new ActivityReportData(session.getActivityId(), session.getActivityType(), state.snapshotAttributes());
-        state.resetForNextSession();
-        return data;
-    }
-
     private ActivityCandidate passiveCandidate(TelemetryEvent event)
     {
         if (state.hasVerifiedRegion() && state.availableRock() != null)
@@ -261,8 +239,4 @@ public final class GemMiningStrategy implements ActivityStrategy
         return false;
     }
 
-    private static ActivityId activityId(ActivityContext context, TelemetryEvent event)
-    {
-        return ActivityId.of("gem-mining-" + context.getSessionId() + "-" + event.getTime().getGameTick());
-    }
 }

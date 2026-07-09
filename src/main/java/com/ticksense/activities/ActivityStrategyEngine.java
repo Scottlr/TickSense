@@ -179,7 +179,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
     private boolean sameArbitrationRank(CandidateEvaluation left, CandidateEvaluation right)
     {
         return Double.compare(left.candidate.getConfidence(), right.candidate.getConfidence()) == 0
-            && left.strategy.getDefinition().getPriority() == right.strategy.getDefinition().getPriority()
+            && left.strategy.getDefinition().getArbitrationPriority() == right.strategy.getDefinition().getArbitrationPriority()
             && left.strategy.getDefinition().isBossActivity() == right.strategy.getDefinition().isBossActivity();
     }
 
@@ -373,7 +373,7 @@ public final class ActivityStrategyEngine implements TelemetrySink
         return Comparator
             .comparingDouble((CandidateEvaluation evaluation) -> evaluation.candidate.getConfidence()).reversed()
             .thenComparing(Comparator.comparingInt(
-                (CandidateEvaluation evaluation) -> evaluation.strategy.getDefinition().getPriority()).reversed())
+                (CandidateEvaluation evaluation) -> evaluation.strategy.getDefinition().getArbitrationPriority()).reversed())
             .thenComparing(Comparator.comparing(
                 (CandidateEvaluation evaluation) -> evaluation.strategy.getDefinition().isBossActivity()).reversed())
             .thenComparing(evaluation -> evaluation.strategy.getDefinition().getDisplayName())

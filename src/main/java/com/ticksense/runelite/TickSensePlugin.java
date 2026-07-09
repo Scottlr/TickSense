@@ -192,6 +192,10 @@ public class TickSensePlugin extends Plugin
             navButton = null;
         }
 
+        if (panel != null)
+        {
+            panel.shutdown();
+        }
         panel = null;
         log.debug("TickSense stopped");
     }

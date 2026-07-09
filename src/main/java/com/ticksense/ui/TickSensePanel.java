@@ -30,6 +30,7 @@ import javax.swing.JTextArea;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
@@ -52,10 +53,12 @@ public class TickSensePanel extends PluginPanel
     private final TickSenseConfig config;
     private final ReportListPanel reportListPanel;
     private final ActivityReportPanel activityReportPanel;
+    private final CurrentActivityPanel currentActivityPanel;
     private final DeveloperDiagnosticsPanel developerDiagnosticsPanel;
     private final TrendsPanel trendsPanel;
     private final JTabbedPane tabs;
     private final Component developerDiagnosticsTab;
+    private final Timer currentActivityRefreshTimer;
     private ReportSummary selectedSummary;
     private List<ReportSummary> lastLowConfidenceReports = new ArrayList<>();
 
@@ -100,6 +103,7 @@ public class TickSensePanel extends PluginPanel
         reportListPanel = new ReportListPanel();
         reportListPanel.onSelectionChanged(this::loadReport);
         activityReportPanel = new ActivityReportPanel();
+        currentActivityPanel = new CurrentActivityPanel(this::activeSession, this::activityDiagnostics);
         developerDiagnosticsPanel = new DeveloperDiagnosticsPanel(this::buildDeveloperDiagnosticsText, this::exportSelectedBundle);
         developerDiagnosticsPanel.setExportEnabled(false);
         trendsPanel = new TrendsPanel();
@@ -111,15 +115,25 @@ public class TickSensePanel extends PluginPanel
         developerDiagnosticsTab = developerDiagnosticsPanel;
         setDiagnosticsTabEnabled(config.debugActivityDiagnostics());
         add(tabs, BorderLayout.CENTER);
+
+        currentActivityRefreshTimer = new Timer(1000, event -> currentActivityPanel.refresh());
+        currentActivityRefreshTimer.setRepeats(true);
     }
 
     public void initialize()
     {
         refreshReports();
+        currentActivityPanel.refresh();
+        currentActivityRefreshTimer.start();
         if (reportRepository instanceof NotifyingReportRepository)
         {
             ((NotifyingReportRepository) reportRepository).addSaveListener(() -> SwingUtilities.invokeLater(this::refreshReports));
         }
+    }
+
+    public void shutdown()
+    {
+        currentActivityRefreshTimer.stop();
     }
 
     public void refreshReports()
@@ -179,6 +193,7 @@ public class TickSensePanel extends PluginPanel
 
         final JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+        panel.add(currentActivityPanel, BorderLayout.NORTH);
         panel.add(splitPane, BorderLayout.CENTER);
         return panel;
     }
@@ -557,6 +572,24 @@ public class TickSensePanel extends PluginPanel
     private void showErrorMessage(String title, String message)
     {
         showMessage(title, message, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private Optional<com.ticksense.core.ActivitySession> activeSession()
+    {
+        if (services == null)
+        {
+            return Optional.empty();
+        }
+        return services.getStrategyEngine().getActiveSession();
+    }
+
+    private List<com.ticksense.activities.ActivityDiagnostic> activityDiagnostics()
+    {
+        if (services == null)
+        {
+            return java.util.Collections.emptyList();
+        }
+        return services.getStrategyEngine().getDiagnostics();
     }
 
     private void showMessage(String title, String message, int messageType)
